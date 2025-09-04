@@ -1,0 +1,50 @@
+# System Files
+**/.DS_Store/
+**/__MACOSX/
+Thumbs.db
+
+**/dist
+**/node_modules
+**/.env.local
+
+# Dutch election data files
+**/EML_bestanden_TK2021/
+**/EML_bestanden_TK2023/
+**/**.eml.xml
+
+# IDE - Intellij
+**/.idea/
+*.iml
+*.ipr
+*.iws
+**/target/
+**/out/
+**/dist/
+*.lock
+
+# IDE - VSCode
+**/.vscode/
+*.code-workspace
+
+# data files excluded from git
+**/data-files/
+**/downloads/
+
+# Log file
+*.log
+
+### Java ###
+# Compiled class file
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# MS-office files
+~$*.*
