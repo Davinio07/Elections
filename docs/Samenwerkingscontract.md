@@ -31,7 +31,7 @@ Zarko
 
 Wie is wanneer Scrum Master? 
 
-Om de twee weken zullen we wisselen van Scrum Master op alfabetische volgorde. 
+Om de drie weken, dus elke sprint, zullen we wisselen van Scrum Master op alfabetische volgorde. 
 
 
 Wie heeft/hebben welke verantwoordelijkheid voor het tot stand komen en monitoren van de sprintplanning? 
