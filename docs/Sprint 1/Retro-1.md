@@ -78,6 +78,20 @@ Keep a closer eye on your planning, and try to ask for feedback from the team mo
 
 #### Personal Reflections  
 
+### Baran
+
+During Sprint 1 I took an active role in the team when it came to discussing the project and and how we would make our designs.  
+
+**As a TOP I received:**
+“You bring positive energy, you are a real go-getter.”
+I am glad this was noticed, because I think keeping momentum and motivation high is important for the whole team. I will continue to focus on keeping the team motivated and contributing actively.
+
+**As a TIP I received:**
+“Keep a closer eye on your planning, and try to ask for feedback from the team more often.”
+I recognize this and I want to improve on it. For the next sprint, I will pay more attention to sticking to the planning and regularly ask the team for feedback on my work so I can adjust earlier if needed.
+
+---
+
 ### Davinio  
 
 During Sprint 1 I worked a lot on preparing the design and planning Sprint 2. Together with my team I made a Figma design that was approved, and we started writing the User Stories that still need approval from our PO. Based on my work in Sprint 1, I also received feedback from my team (see “Feedback for Team Members”).  
