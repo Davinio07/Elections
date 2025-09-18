@@ -15,11 +15,11 @@ Doe de retrospective m.b.v. een van de manieren op https://www.funretrospectives
 
 | Well | Not Well | New Ideas |
 |-------|----------|-------------|
-| Iedereen was goed bereikbaar en reageerde snel in de groepschat | Soms praten we langs elkaar heen waardoor afspraken onduidelijk zijn | Aan het begin van elke meeting een korte samenvatting van wat eerder is afgesproken |
-| We hebben elkaar geholpen als iemand vastliep | Niet iedereen neemt altijd evenveel initiatief om ideeën te delen | Een vaste rolverdeling tijdens meetings (leider, notulist, tijdsbewaker) |
-| Taken zijn redelijk eerlijk verdeeld | Deadlines zijn niet altijd duidelijk afgesproken of nagekomen | Aan het einde van elke meeting duidelijke to-do’s met wie verantwoordelijk is |
-| Er was een positieve en respectvolle sfeer | Soms wordt er te veel tegelijk besproken waardoor het chaotisch wordt | Gebruik maken van een vaste agenda en onderwerpen per meeting beperken |
-| Iedereen stond open voor feedback | Soms wordt feedback te snel afgehandeld zonder echt te bespreken | Feedbackmomenten structureel inplannen aan het einde van een sprint |
+| Everyone was easily reachable and responded quickly in the group chat | Sometimes we talk past each other, which makes agreements unclear | At the start of each meeting, give a short summary of what was agreed before |
+| We helped each other whenever someone got stuck | Not everyone always takes the same level of initiative to share ideas | Assign fixed roles during meetings (leader, note-taker, timekeeper) |
+| Tasks were divided fairly | Deadlines were not always clearly agreed upon or met | At the end of each meeting, define clear to-do’s with responsible persons |
+| There was a positive and respectful atmosphere | Sometimes too many things are discussed at once, which makes it chaotic | Use a fixed agenda and limit the number of topics per meeting |
+| Everyone was open to feedback | Sometimes feedback is handled too quickly without proper discussion | Plan structured feedback moments at the end of each sprint |
 
 
 ## Aandeel teamleden
@@ -51,30 +51,30 @@ pie
 #### Tops
 
 ## Suleyman:
-We kunnen op je bouwen, je brengt een fijne sfeer  
+We can count on you, you bring a positive atmosphere
 
 ## Zarko:
-Je werkt efficiënt, je wilt graag helpen  
+You work efficiently, you are eager to help
 
 ## Davinio:
-Je bent er altijd en laat motivatie zien  
+You are always there and show motivation
 
 ## Baran:
-Je hebt een positieve energie, je bent een echte doorzetter  
+You bring positive energy, you are a real go-getter
 
 ### Tips
 
 ## Suleyman:
-Je kan wat vaker actief zijn naast school, je zou de projecten beter kunnen inlezen zodat je beter weet wat we moeten doen  
+You could be more active outside of school, and read the projects more carefully so you know better what needs to be done
 
 ## Zarko:
-Probeer je ideeën vaker te delen, je kunt je communicatie nog duidelijker maken  
+Try to share your ideas more often, and make your communication clearer
 
 ## Davinio:
-Let wat meer op details bij je werk, probeer soms ook rust te nemen zodat je scherp blijft  
+Pay more attention to details in your work, and try to take breaks so you stay sharp
 
 ## Baran:
-Je zou je planning iets beter kunnen bewaken, probeer ook vaker feedback te vragen aan het team  
+Keep a closer eye on your planning, and try to ask for feedback from the team more often
 
 ##### Eigen reflectie
 
