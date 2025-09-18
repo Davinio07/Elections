@@ -89,11 +89,19 @@ Je zou je planning iets beter kunnen bewaken, probeer ook vaker feedback te vrag
 
 ##### Eigen reflectie
 
-Davinio 
-
+Davinio:
 Tijdens sprint 1 heb ik veel gewerkt aan het voorbereiden van de design, en het plannen van Sprint 2. Ik heb met mijn team een Figma design gemaakt die goedgekeurd was, en we zijn begonnen aan het opstellen van de UserStories die nog goedgekeurd moeten worden door onze PO. Aan de hand van mijn werk in sprint 1 heb ik ook feedback ontvangen van mijn team (zie "Feedback voor teamleden"). Als TOP heb ik gekregen: "Je bent er altijd en laat motivatie zien". Ik ben blij dat ik in de korte sprint dit heb kunnen laten zien. Ik zal op deze manier doorgaan in de komende sprints. Als TIP heb ik gekregen:"Let wat meer op details bij je werk, probeer soms ook rust te nemen zodat je scherp blijft". Ik heb op dit gereflecteerd, en heb besloten dat ik vanaf de komende sprint meer op de details ga letten, en ook niet te snel werk waardoor ik fouten verminder. 
 
+Zarko:
+Mijn ontwikkeldoel is om mijn communicatie en het delen van ideeën te verbeteren. Ik merk dat ik vaak efficiënt werk en anderen graag help, maar dat ik mijn eigen gedachten en voorstellen soms te weinig uitspreek.  
 
+**Concreet ga ik hier in de komende sprint aan werken door:**
+- Minimaal één keer per week een idee of suggestie actief te delen tijdens het teamoverleg.  
+- Mijn updates en voortgang duidelijk te communiceren in onze groepschat.  
+- Aan het einde van elke week te vragen of mijn uitleg duidelijk genoeg was, zodat ik daar feedback op kan krijgen.  
+
+**SMART doel:**  
+Aan het einde van deze sprint wil ik aantoonbaar minstens vier keer actief mijn ideeën hebben gedeeld in het teamoverleg en teruggekoppeld hebben gekregen dat mijn communicatie duidelijker is geworden. 
 
 ->>>>> DLO, upload per persoon op de DLO een doc. 
 
