@@ -36,11 +36,11 @@ Doe de retrospective m.b.v. een van de manieren op https://www.funretrospectives
 ```mermaid
 pie 
     title Storypoints per Teamlid   
-    "Teamlid 1" : 23
-    "Teamlid 2" : 12
-    "Teamlid 3" : 5
-    "Teamlid 4" : 7
-    "Teamlid 5" : 9
+    "Teamlid 1" : 0
+    "Teamlid 2" : 0
+    "Teamlid 3" : 0
+    "Teamlid 4" : 0
+    "Teamlid 5" : 0
 ```
 
 // Geef onder de pie chart een korte toelichting: wat valt op?  Kunnen jullie de verschillen verklaren?
