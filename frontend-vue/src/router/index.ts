@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AdminDashboard from '@/features/admin/views/AdminDashboard.vue';
+import AdminDashboard from '@/features/admin/view/AdminDashboard.vue';
+import ScaledElectionResults from "@/features/admin/view/ScaledElectionResults.vue";
 
 const routes = [
   {
@@ -7,12 +8,11 @@ const routes = [
     name: 'AdminDashboard',
     component: AdminDashboard,
   },
-  // Hier kunnen je teamgenoten later hun routes toevoegen
-  // {
-  //   path: '/elections',
-  //   name: 'ElectionResults',
-  //   component: () => import('@/features/elections/views/ElectionResults.vue')
-  // }
+  {
+    path: '/ScaledElectionResults',
+    name: 'ScaledElectionResults',
+    component: ScaledElectionResults,
+  },
 ];
 
 const router = createRouter({

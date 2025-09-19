@@ -1,4 +1,3 @@
-// Deze functie roept ons /api/admin/ping endpoint aan
 export async function pingBackend(): Promise<string> {
     try {
         const response = await fetch('http://localhost:8080/api/admin/ping'); // Let op: pas poort aan

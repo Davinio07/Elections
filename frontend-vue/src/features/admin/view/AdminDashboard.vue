@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { pingBackend } from '../services/admin-api';
+import { pingBackend } from '@/features/admin/service/admin-api';
 
 const backendMessage = ref<string>('');
 
