@@ -13,7 +13,6 @@
 </template>
 
 <style>
-/* Algemene stijlen voor je app */
 nav {
   padding: 1rem;
   background-color: #f1f5f9;
