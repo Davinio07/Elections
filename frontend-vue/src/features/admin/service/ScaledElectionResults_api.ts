@@ -1,7 +1,9 @@
 export async function ScaledElectionResults(): Promise<string> {
   try {
     const url = 'http://localhost:8080/api/ScaledElectionResults/Result'.trim();
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      credentials: "include"
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
