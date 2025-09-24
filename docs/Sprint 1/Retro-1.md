@@ -9,8 +9,7 @@
 | Everyone was open to feedback | Sometimes feedback is handled too quickly without proper discussion | Plan checkup moments at the end of each sprint before delivering the work |
 
 
-## Aandeel teamleden
-
+## Proportion team members
 ```mermaid
 pie 
     title Storypoints per Teamlid   
@@ -21,9 +20,9 @@ pie
     "Teamlid 5" : 0
 ```
 
-## Feedback voor teamleden
+## Feedback for team members
 
-### Feedback teamlid
+### Feedback team member
 
 #### Tops
 
