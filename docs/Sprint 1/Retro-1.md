@@ -62,6 +62,9 @@ You are always there and show motivation
 ## Baran:
 You bring positive energy, you are a real go-getter
 
+## Matin:
+You show strong technical insight and deliver reliable work
+
 ### Tips
 
 ## Suleyman:
@@ -75,6 +78,9 @@ Pay more attention to details in your work, and try to take breaks so you stay s
 
 ## Baran:
 Keep a closer eye on your planning, and try to ask for feedback from the team more often
+
+## Matin:
+Try to communicate your progress more often, so the team knows what you are working on
 
 #### Personal Reflections  
 
@@ -133,4 +139,18 @@ It is nice to hear that this is the effect I have on others I would like to keep
 **As a TIP I received:**
 “You could be more active outside of school, and read the projects more carefully so you know better what needs to be done”
 I have noticed this myself and want to try to get more invloved into the discusions that happen in the chat outside of school.
+
+---
+
+### Matin
+
+During Sprint 1 I mainly worked on the technical setup of the project and helped with writing and reviewing code.  
+
+**As a TOP I received:**  
+“You show strong technical insight and deliver reliable work.”  
+I am happy this was noticed, because I always try to make sure the project has a good base and works well. I will keep focusing on delivering quality and helping my teammates.  
+
+**As a TIP I received:**  
+“Try to communicate your progress more often, so the team knows what you are working on.”  
+I agree with this and want to improve. Next sprint I will share more updates in the group chat and give short reports during meetings, so everyone knows what I am doing and we can work together better.  
 
