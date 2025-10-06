@@ -1,3 +1,5 @@
+package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml;
+
 import java.util.Map;
 
 /**

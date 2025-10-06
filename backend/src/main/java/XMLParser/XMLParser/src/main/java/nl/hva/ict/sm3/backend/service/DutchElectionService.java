@@ -1,10 +1,10 @@
 package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.service;
 
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.Election;
-import nl.hva.ict.sm3.backend.model.*;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.*;
 import PathUtils;
-import nl.hva.ict.sm3.backend.utils.xml.*;
-import nl.hva.ict.sm3.backend.utils.xml.transformers.*;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.*;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.transformers.*;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 

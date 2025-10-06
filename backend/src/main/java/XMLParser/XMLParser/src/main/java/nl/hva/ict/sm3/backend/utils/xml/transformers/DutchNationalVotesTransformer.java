@@ -1,5 +1,7 @@
-import Election;
-import nl.hva.ict.sm3.backend.utils.xml.VotesTransformer;
+package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.transformers;
+
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.Election;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.VotesTransformer;
 
 import java.util.Map;
 

@@ -8,6 +8,7 @@ public class Candidate {
     private String locality;
 
 
+
     public Candidate(String id) {
         this.id = id;
     }

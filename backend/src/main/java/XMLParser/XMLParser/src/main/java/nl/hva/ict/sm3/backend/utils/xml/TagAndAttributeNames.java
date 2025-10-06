@@ -1,3 +1,5 @@
+package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml;
+
 /**
  * Definitions of all the known tags and their attributes.
  */

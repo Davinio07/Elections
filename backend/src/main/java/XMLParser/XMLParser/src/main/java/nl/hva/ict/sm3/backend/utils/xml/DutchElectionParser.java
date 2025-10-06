@@ -1,4 +1,6 @@
-import nl.hva.ict.sm3.backend.utils.PathUtils;
+package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml;
+
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.PathUtils;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
