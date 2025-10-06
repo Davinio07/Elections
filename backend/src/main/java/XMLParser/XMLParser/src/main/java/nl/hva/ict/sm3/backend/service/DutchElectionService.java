@@ -2,7 +2,7 @@ package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.service;
 
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.Election;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.*;
-import PathUtils;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.PathUtils;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.*;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.transformers.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,7 @@ public class DutchElectionService {
         DutchElectionParser electionParser = new DutchElectionParser(
                 new DutchDefinitionTransformer(election),
                 new DutchCandidateTransformer(election),
+                new DutchRegionTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
                 new DutchConstituencyVotesTransformer(election),
@@ -42,6 +43,7 @@ public class DutchElectionService {
             // Do what ever you like to do
             System.out.println("Dutch Election results: " + election);
             // Now is also the time to send the election information to a database for example.
+            System.out.println("Regions: " + election.getRegions());
 
             return election;
         } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException | SAXException e) {

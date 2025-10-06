@@ -1,6 +1,7 @@
 package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml;
 
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.PathUtils;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.transformers.DutchRegionTransformer;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,21 +41,24 @@ public class DutchElectionParser {
     private final VotesTransformer nationalVotesTransformer;
     private final VotesTransformer constituencyVotesTransformer;
     private final VotesTransformer municipalityVotesTransformer;
+    private final DutchRegionTransformer regionTransformer;
+
 
     /**
      * Creates a new instance that will use the provided transformers for transforming the data into the
      * application specific data model.
-     * @param definitionTransformer the transformer that will be called while processing the structure file.
-     * @param candidateTransformer the transformer that will be called while processing the candidate lists files.
-     * @param resultTransformer the transformer that will be called while processing the result file.
-     * @param nationalVotesTransformer the transformer that will be called while processing the national votes file.
+     *
+     * @param definitionTransformer        the transformer that will be called while processing the structure file.
+     * @param candidateTransformer         the transformer that will be called while processing the candidate lists files.
+     * @param resultTransformer            the transformer that will be called while processing the result file.
+     * @param nationalVotesTransformer     the transformer that will be called while processing the national votes file.
      * @param constituencyVotesTransformer the transformer that will be called while processing the constituency votes files.
      * @param municipalityVotesTransformer the transformer that will be called while processing the municipality votes files.
      */
     // TODO See the DutchElectionService for some refactoring hints for this constructor.
     public DutchElectionParser(DefinitionTransformer definitionTransformer,
                                CandidateTransformer candidateTransformer,
-                               VotesTransformer resultTransformer,
+                               DutchRegionTransformer dutchRegionTransformer, VotesTransformer resultTransformer,
                                VotesTransformer nationalVotesTransformer,
                                VotesTransformer constituencyVotesTransformer,
                                VotesTransformer municipalityVotesTransformer) {
@@ -64,6 +68,7 @@ public class DutchElectionParser {
         this.nationalVotesTransformer = nationalVotesTransformer;
         this.constituencyVotesTransformer = constituencyVotesTransformer;
         this.municipalityVotesTransformer = municipalityVotesTransformer;
+        this.regionTransformer = regionTransformer;
     }
 
     /**
@@ -80,6 +85,8 @@ public class DutchElectionParser {
         // TODO replace with proper usage of a logging framework
         System.out.printf("Loading election data from %s\n", folderName);
         parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId), new EMLHandler(definitionTransformer));
+
+        parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId), new EMLHandler(regionTransformer));
 
         parseFiles(folderName, "Kandidatenlijsten_%s".formatted(electionId), new EMLHandler(candidateTransformer));
 

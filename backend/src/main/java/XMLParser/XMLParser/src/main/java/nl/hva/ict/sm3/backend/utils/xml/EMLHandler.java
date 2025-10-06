@@ -2,6 +2,8 @@ package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.RegionTransformer;
+
 
 import java.io.File;
 import java.util.*;
@@ -36,10 +38,14 @@ import java.util.*;
 public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
     // The tag-name is used for the key and the value is just the value of the tag, if any
     private static final Set<String> tagsWithoutAttributes = new HashSet<>();
+
     // The attributes will be combined with the tag-name and serve as the key for the map containing all the data.
     private static final Map<String, Set<String>> tagsWithAttributes = new HashMap<>();
     // Temporary storage of characters like tag values and whitespace between tags.
     private final StringBuilder text = new StringBuilder();
+
+    private RegionTransformer regionTransformer;
+
     // Holds the information found throughout the XML files as key-value pairs.
     private Map<String, String> electionData = new HashMap<>();
     // When processing repeating tags the current state of electionData is being preserved on this stack, and a copy is
@@ -155,6 +161,16 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      */
     public EMLHandler(CandidateTransformer candidateTransformer) {
         this.candidateTransformer = candidateTransformer;
+    }
+
+
+    /**
+     * Creates an EML Handler that can process region data.
+     *
+     * @param regionTransformer the <code>RegionTransformer</code> that handles the transformation of region data.
+     */
+    public EMLHandler(RegionTransformer regionTransformer) {
+        this.regionTransformer = regionTransformer;
     }
 
     /**
@@ -275,11 +291,18 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
         switch (localName) {
             case REGION:
                 if (registerRegion) {
-                    definitionTransformer.registerRegion(electionData);
+                    if (regionTransformer != null) {
+                        // Call your own region transformer (for Region data)
+                        regionTransformer.registerRegion(electionData);
+                    } else if (definitionTransformer != null) {
+                        // Fall back to default definitionTransformer if used
+                        definitionTransformer.registerRegion(electionData);
+                    }
                     registerRegion = false;
                 }
                 electionData = savedElectionData.pop();
                 break;
+
             case REGISTERED_PARTY:
                 definitionTransformer.registerParty(electionData);
                 electionData = savedElectionData.pop();
