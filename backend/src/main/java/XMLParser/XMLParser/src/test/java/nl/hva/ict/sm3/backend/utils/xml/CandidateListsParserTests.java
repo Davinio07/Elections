@@ -1,3 +1,5 @@
+package XMLParser.XMLParser.src.test.java.nl.hva.ict.sm3.backend.utils.xml;
+
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 

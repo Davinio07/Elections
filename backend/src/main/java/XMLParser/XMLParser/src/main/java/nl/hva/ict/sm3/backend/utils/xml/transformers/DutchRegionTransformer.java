@@ -15,7 +15,6 @@ public class DutchRegionTransformer implements RegionTransformer {
 
     @Override
     public void registerRegion(Map<String, String> electionData) {
-        // Create a new Region object
         Region region = new Region(
                 electionData.get("RegionNumber"),
                 electionData.get("RegionName"),
@@ -23,7 +22,6 @@ public class DutchRegionTransformer implements RegionTransformer {
                 electionData.get("SuperiorRegionCategory")
         );
 
-        // Add it to the election
         election.addRegion(region);
 
         System.out.println("Registered region: " + region);

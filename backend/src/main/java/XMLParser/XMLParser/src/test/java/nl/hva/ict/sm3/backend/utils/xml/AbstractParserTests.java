@@ -1,5 +1,9 @@
 package XMLParser.XMLParser.src.test.java.nl.hva.ict.sm3.backend.utils.xml;
 
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.CandidateTransformer;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.DefinitionTransformer;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.DutchElectionParser;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.VotesTransformer;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.*;
