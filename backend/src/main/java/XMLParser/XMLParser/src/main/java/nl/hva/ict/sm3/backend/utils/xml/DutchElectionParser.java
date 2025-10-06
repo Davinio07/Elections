@@ -68,7 +68,7 @@ public class DutchElectionParser {
         this.nationalVotesTransformer = nationalVotesTransformer;
         this.constituencyVotesTransformer = constituencyVotesTransformer;
         this.municipalityVotesTransformer = municipalityVotesTransformer;
-        this.regionTransformer = regionTransformer;
+        this.regionTransformer = dutchRegionTransformer;
     }
 
     /**
