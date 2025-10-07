@@ -148,9 +148,20 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      * @param definitionTransformer the <code>DefinitionTransformer</code> that handles the transformation of the
      *                             provided data into the data model.
      */
-    public EMLHandler(DefinitionTransformer definitionTransformer) {
+    public EMLHandler(
+            DefinitionTransformer definitionTransformer,
+            CandidateTransformer candidateTransformer,
+            RegionTransformer regionTransformer,
+            VotesTransformer votesTransformer,
+            VotesTransformer nationalVotesTransformer,
+            VotesTransformer constituencyVotesTransformer,
+            VotesTransformer municipalityVotesTransformer) {
         this.definitionTransformer = definitionTransformer;
+        this.candidateTransformer = candidateTransformer;
+        this.regionTransformer = regionTransformer;
+        this.votesTransformer = votesTransformer;
     }
+
 
     /**
      * Creates an EML Handler that can process candidates list files. For each candidate that it finds it
@@ -161,6 +172,15 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      */
     public EMLHandler(CandidateTransformer candidateTransformer) {
         this.candidateTransformer = candidateTransformer;
+    }
+
+    /**
+     * Creates an EML Handler that can process the election definition files.
+     *
+     * @param definitionTransformer the DefinitionTransformer that handles structural election data.
+     */
+    public EMLHandler(DefinitionTransformer definitionTransformer) {
+        this.definitionTransformer = definitionTransformer;
     }
 
 

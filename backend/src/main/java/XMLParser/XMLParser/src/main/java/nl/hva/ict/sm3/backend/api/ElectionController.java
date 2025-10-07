@@ -6,6 +6,7 @@ import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.service.DutchEle
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,11 +53,17 @@ public class ElectionController {
     @GetMapping("{electionId}/regions")
     public List<Region> getRegions(@PathVariable String electionId,
                                    @RequestParam(required = false) String folderName) {
-        Election election = (folderName == null)
-                ? electionService.readResults(electionId, electionId)
-                : electionService.readResults(electionId, folderName);
+        try {
+            Election election = (folderName == null)
+                    ? electionService.readResults(electionId, electionId)
+                    : electionService.readResults(electionId, folderName);
 
-        return election.getRegions();
+            return election.getRegions();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
+
 
 }
