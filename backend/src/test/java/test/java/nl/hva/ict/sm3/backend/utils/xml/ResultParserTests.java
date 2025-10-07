@@ -17,7 +17,7 @@ class ResultParserTests extends AbstractParserTests {
         List<Map<String, String>> expectedDataList  = new LinkedList<>();
         createExpectedDataList(expectedDataList, "Resultaat_TK2023-Partial.eml.xml");
 
-        electionProcessor.parseResults("TK2023", nl.hva.ict.sm3.backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/Result")));
+        electionProcessor.parseResults("TK2023", XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/Result")));
 
         compareMaps(expectedDataList, transformer.data);
         Set<Integer> usedResults = new HashSet<>();

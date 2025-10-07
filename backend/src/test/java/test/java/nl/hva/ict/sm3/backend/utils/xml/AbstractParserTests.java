@@ -4,6 +4,7 @@ import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.Candid
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.DefinitionTransformer;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.DutchElectionParser;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.VotesTransformer;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.utils.xml.transformers.DutchRegionTransformer;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.*;
@@ -76,13 +77,20 @@ abstract class AbstractParserTests {
         transformer = new TestTransformer();
 
         electionProcessor = new DutchElectionParser(
-                transformer,
-                transformer,
-                transformer,
-                transformer,
-                transformer,
-                transformer
+                transformer,  // DefinitionTransformer
+                transformer,  // CandidateTransformer
+                new DutchRegionTransformer(null) { // or a minimal stub
+                    @Override
+                    public void registerRegion(Map<String, String> electionData) {
+                        transformer.registerRegion(electionData);
+                    }
+                },
+                transformer,  // VotesTransformer
+                transformer,  // VotesTransformer
+                transformer,  // VotesTransformer
+                transformer   // VotesTransformer
         );
+
     }
 
     // Helper for debugging.
