@@ -7,11 +7,6 @@ Thumbs.db
 **/node_modules
 **/.env.local
 
-# Dutch election data files
-**/EML_bestanden_TK2021/
-**/EML_bestanden_TK2023/
-**/**.eml.xml
-
 # IDE - Intellij
 **/.idea/
 *.iml
