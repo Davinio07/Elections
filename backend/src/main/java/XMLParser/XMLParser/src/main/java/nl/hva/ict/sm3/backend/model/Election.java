@@ -32,12 +32,4 @@ public class Election {
     public void addCandidate(Candidate candidate) {
         candidates.add(candidate);
     }
-
-    @Override
-    public String toString() {
-        return "Election{" +
-                "id='" + id + '\'' +
-                ", candidates=" + candidates +
-                '}';
-    }
 }

@@ -25,14 +25,4 @@ public class Region {
 
     public String getSuperiorCategory() { return superiorCategory; }
     public void setSuperiorCategory(String superiorCategory) { this.superiorCategory = superiorCategory; }
-
-    @Override
-    public String toString() {
-        return "Region{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", category='" + category + '\'' +
-                ", superiorCategory='" + superiorCategory + '\'' +
-                '}';
-    }
 }

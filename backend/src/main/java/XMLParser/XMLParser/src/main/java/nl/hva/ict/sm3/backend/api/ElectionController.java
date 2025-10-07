@@ -1,8 +1,12 @@
 package XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.api;
 
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.Election;
+import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.model.Region;
 import XMLParser.XMLParser.src.main.java.nl.hva.ict.sm3.backend.service.DutchElectionService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
@@ -11,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("elections")
 public class ElectionController {
     private final DutchElectionService electionService;
+    private List<Region> regions = new ArrayList<>();
+
 
     public ElectionController(DutchElectionService electionService) {
         this.electionService = electionService;
@@ -32,5 +38,25 @@ public class ElectionController {
         } else {
             return electionService.readResults(electionId, folderName);
         }
+
+
     }
+    public void addRegion(Region region) {
+        this.regions.add(region);
+    }
+
+    public List<Region> getRegions() {
+        return regions;
+    }
+
+    @GetMapping("{electionId}/regions")
+    public List<Region> getRegions(@PathVariable String electionId,
+                                   @RequestParam(required = false) String folderName) {
+        Election election = (folderName == null)
+                ? electionService.readResults(electionId, electionId)
+                : electionService.readResults(electionId, folderName);
+
+        return election.getRegions();
+    }
+
 }
