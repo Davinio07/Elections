@@ -5,7 +5,8 @@
         <router-link to="/admin">Ga naar Admin</router-link>
         <router-link to="/ScaledElectionResults">Ga naar de provinciale verkiezingsresultaten</router-link>
         <router-link to="/NationalElectionResults">Ga naar de landelijke verkiezingsresultaten</router-link>
-        </nav>
+        <router-link to="/candidates">Ga naar Kandidaten</router-link>
+      </nav>
     </header>
     <main>
       <router-view />

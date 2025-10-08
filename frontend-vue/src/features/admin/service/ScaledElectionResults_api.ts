@@ -29,3 +29,18 @@ export async function getProvinces(electionId: string): Promise<any[]> {
   }
 }
 
+export async function getCandidates(electionId: string, folderName?: string): Promise<any[]> {
+  try {
+    const base = `http://localhost:8080/api/elections/${encodeURIComponent(electionId)}/candidates`;
+    const url = folderName ? `${base}?folderName=${encodeURIComponent(folderName)}` : base;
+    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    return [];
+  }
+}
+
+
