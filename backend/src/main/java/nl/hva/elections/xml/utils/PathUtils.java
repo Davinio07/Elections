@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * A helper-class used for traversing a directory structure which contains the Dutch election data.
  */
-public class PathUtils {
+public class xPathUtils {
 
     /**
      * Starting from @{code sourceLocation} searches the folder and any folder contained in it for files with the

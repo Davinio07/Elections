@@ -54,22 +54,9 @@ public class ElectionController {
     public List<Region> getRegions(@PathVariable String electionId,
                                    @RequestParam(required = false) String folderName) {
         try {
-            // --- Start of Change ---
-            // If no folderName is provided via URL parameter, use the correct default.
-            String effectiveFolderName = (folderName == null) ? "TK2023_HvA_UvA" : folderName;
-
-            // For the specific case of the TK2023 election, we ensure the correct folder is used.
-            if ("TK2023".equals(electionId)) {
-                effectiveFolderName = "TK2023_HvA_UvA";
-            }
-
-            Election election = electionService.readResults(electionId, effectiveFolderName);
-            // --- End of Change ---
-
-            if (election == null) {
-                // This case should now be less likely, but it's good practice to keep the check.
-                return Collections.emptyList();
-            }
+            Election election = (folderName == null)
+                    ? electionService.readResults(electionId, electionId)
+                    : electionService.readResults(electionId, folderName);
 
             return election.getRegions();
         } catch (Exception e) {
@@ -77,6 +64,4 @@ public class ElectionController {
             return Collections.emptyList();
         }
     }
-
-
 }
