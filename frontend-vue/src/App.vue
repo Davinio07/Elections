@@ -3,7 +3,8 @@
     <header>
       <nav>
         <router-link to="/admin">Ga naar Admin</router-link>
-        <router-link to="/ScaledElectionResults">ga naar Scaled election results</router-link>
+        <router-link to="/ScaledElectionResults">Ga naar de provinciale verkiezingsresultaten</router-link>
+        <router-link to="/NationalElectionResults">Ga naar de landelijke verkiezingsresultaten</router-link>
         </nav>
     </header>
     <main>

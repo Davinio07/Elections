@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AdminDashboard from '@/features/admin/view/AdminDashboard.vue';
 import ScaledElectionResults from "@/features/admin/view/ScaledElectionResults.vue";
+import NationalElectionResults from "@/features/admin/view/NationalElectionResults.vue";
 
 const routes = [
   {
@@ -13,6 +14,11 @@ const routes = [
     name: 'ScaledElectionResults',
     component: ScaledElectionResults,
   },
+  {
+    path: '/NationalElectionResults',
+    name: 'NationalElectionResults',
+    component: NationalElectionResults,
+  }
 ];
 
 const router = createRouter({
