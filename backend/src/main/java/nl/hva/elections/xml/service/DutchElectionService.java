@@ -1,12 +1,15 @@
 package nl.hva.elections.xml.service;
 
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.DutchElectionParser;
 import nl.hva.elections.xml.utils.xml.transformers.*;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -23,8 +26,6 @@ public class DutchElectionService {
         System.out.println("Processing files...");
 
         Election election = new Election(electionId);
-        // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
-        //  And refactoring the constructor while your at it is also a good idea.
         DutchElectionParser electionParser = new DutchElectionParser(
                 new DutchDefinitionTransformer(election),
                 new DutchCandidateTransformer(election),
@@ -36,26 +37,29 @@ public class DutchElectionService {
         );
 
         try {
-            // Assuming the election data is somewhere on the class-path it should be found.
-            // Please note that you can also specify an absolute path to the folder!
             String resourcePath = PathUtils.getResourcePath("/%s".formatted(folderName));
 
-            // Check if the resource path is found. If not, throw an exception.
             if (resourcePath == null) {
                 throw new IOException("Resource folder not found in classpath: " + folderName);
             }
 
             electionParser.parseResults(electionId, resourcePath);
 
-            // Do what ever you like to do
-            System.out.println("Dutch Election results: " + election);
-            // Now is also the time to send the election information to a database for example.
-            System.out.println("Regions: " + election.getRegions());
+            // Debug output
+            System.out.println("All regions: " + election.getRegions());
 
             return election;
         } catch (IOException | XMLStreamException | ParserConfigurationException | SAXException e) {
-            // Throw a runtime exception with a clear message to be handled by the controller advice or error handler.
             throw new RuntimeException("Failed to process the election results for electionId: " + electionId, e);
         }
     }
+
+    // Only real KIESKRINGs
+    public List<Region> getKieskringen(Election election) {
+        return election.getRegions().stream()
+                .filter(r -> "KIESKRING".equals(r.getCategory()))
+                .collect(Collectors.toList());
+    }
+
+
 }

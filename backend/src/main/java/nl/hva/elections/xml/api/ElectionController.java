@@ -64,4 +64,16 @@ public class ElectionController {
             return Collections.emptyList();
         }
     }
+
+    @GetMapping("{electionId}/regions/kieskringen")
+    public List<Region> getKieskringen(@PathVariable String electionId,
+                                       @RequestParam(required = false) String folderName) {
+        Election election = (folderName == null)
+                ? electionService.readResults(electionId, electionId)
+                : electionService.readResults(electionId, folderName);
+
+        return electionService.getKieskringen(election);
+    }
+
+
 }

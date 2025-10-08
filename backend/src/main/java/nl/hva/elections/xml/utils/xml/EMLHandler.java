@@ -309,18 +309,19 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
         // restored.
         switch (localName) {
             case REGION:
-                if (registerRegion) {
+                // Only register if it's KIESKRING or STAAT
+                String category = electionData.get("Region-RegionCategory");
+                if ((category != null) && ("KIESKRING".equals(category) || "STAAT".equals(category))) {
                     if (regionTransformer != null) {
-                        // Call your own region transformer (for Region data)
                         regionTransformer.registerRegion(electionData);
                     } else if (definitionTransformer != null) {
-                        // Fall back to default definitionTransformer if used
                         definitionTransformer.registerRegion(electionData);
                     }
-                    registerRegion = false;
                 }
                 electionData = savedElectionData.pop();
                 break;
+
+
 
             case REGISTERED_PARTY:
                 definitionTransformer.registerParty(electionData);

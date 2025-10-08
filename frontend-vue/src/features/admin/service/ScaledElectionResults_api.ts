@@ -17,7 +17,7 @@ export async function ScaledElectionResults(): Promise<string> {
 
 export async function getProvinces(electionId: string): Promise<any[]> {
   try {
-    const url = `http://localhost:8080/api/elections/${electionId}/regions`;
+    const url = `http://localhost:8080/api/elections/${electionId}/regions/kieskringen`;
     const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

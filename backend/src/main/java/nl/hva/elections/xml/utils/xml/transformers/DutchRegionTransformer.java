@@ -15,15 +15,17 @@ public class DutchRegionTransformer implements RegionTransformer {
 
     @Override
     public void registerRegion(Map<String, String> electionData) {
-        Region region = new Region(
-                electionData.get("RegionNumber"),
-                electionData.get("RegionName"),
-                electionData.get("RegionCategory"),
-                electionData.get("SuperiorRegionCategory")
-        );
+        String id = electionData.get("Region-RegionNumber");
+        String name = electionData.getOrDefault("RegionName", "");
+        String category = electionData.get("Region-RegionCategory");
+        String superiorCategory = electionData.get("Region-SuperiorRegionCategory");
+
+        Region region = new Region(id, name, category, superiorCategory);
 
         election.addRegion(region);
 
+        // Debug output
         System.out.println("Registered region: " + region);
     }
+
 }
