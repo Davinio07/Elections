@@ -1,5 +1,6 @@
 package nl.hva.elections.xml.api;
 
+import nl.hva.elections.xml.model.Candidate;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.model.NationalResult;
@@ -82,5 +83,20 @@ public class ElectionController {
     public ResponseEntity<List<NationalResult>> getNationalResults(@PathVariable String electionId) {
         List<NationalResult> results = electionService.getNationalResults(electionId);
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("{electionId}/candidates")
+    public List<Candidate> getCandidates(@PathVariable String electionId,
+                                         @RequestParam(required = false) String folderName) {
+        try {
+            String effectiveFolderName = (folderName == null) ? "TK2023_HvA_UvA" : folderName;
+            if ("TK2023".equals(electionId)) effectiveFolderName = "TK2023_HvA_UvA";
+
+            Election election = electionService.readResults(electionId, effectiveFolderName);
+            return (election == null) ? Collections.emptyList() : election.getCandidates();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 }
