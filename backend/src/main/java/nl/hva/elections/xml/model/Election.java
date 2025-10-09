@@ -9,8 +9,10 @@ public class Election {
     private final List<Region> regions = new ArrayList<>();
     private final List<NationalResult> nationalResults = new ArrayList<>();
     private final List<PoliticalParty> politicalParties = new ArrayList<>();
-    private final List<MunicipalityResult> municipalityResults = new ArrayList<>();
 
+    // START OF FIX: Add a List for MunicipalityResult objects
+    private final List<MunicipalityResult> municipalityResults = new ArrayList<>();
+    // END OF FIX
 
     public Election(String id) {
         this.id = id;
@@ -40,14 +42,12 @@ public class Election {
         return nationalResults;
     }
 
+    public void addNationalResult(NationalResult result) {
+        nationalResults.add(result);
+    }
 
     public List<PoliticalParty> getPoliticalParties() {
         return politicalParties;
-    }
-    public void addNationalResult(NationalResult result) { nationalResults.add(result);}
-
-    public List<MunicipalityResult> getMunicipalityResults() {
-        return municipalityResults;
     }
 
     public void addPoliticalParty(PoliticalParty party) {
@@ -55,8 +55,14 @@ public class Election {
             politicalParties.add(party);
         }
     }
-}
+
     public void addMunicipalityResult(MunicipalityResult result) {
-        municipalityResults.add(result);
+        this.municipalityResults.add(result);
     }
+
+
+    public List<MunicipalityResult> getMunicipalityResults() {
+        return municipalityResults;
+    }
+    // END OF FIX
 }

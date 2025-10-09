@@ -7,7 +7,6 @@ import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
 
@@ -26,7 +25,6 @@ import java.util.List;
 public class ElectionController {
     private final DutchElectionService electionService;
     private List<Region> regions = new ArrayList<>();
-
 
     public ElectionController(DutchElectionService electionService) {
         this.electionService = electionService;
@@ -54,7 +52,6 @@ public class ElectionController {
         }
     }
 
-
     // ===================================================================================
     // ALLE ORIGINELE METHODES ZIJN HIERONDER BEHOUDEN
     // ===================================================================================
@@ -63,9 +60,10 @@ public class ElectionController {
      * Processes the result for a specific election.
      * @param electionId the id of the election, e.g. the value of the Id attribute from the ElectionIdentifier tag.
      * @param folderName the name of the folder that contains the XML result files. If none is provided the value from
-     *                   the electionId is used.
-     * @return Election if the results have been processed successfully. Please be sure yoy don't output all the data!
-     * Just the general data about the election should be sent back to the front-end!<br/>
+     *                   the electionId is used.
+     * @return Election if the results have been processed successfully. Please be sure you don't output all the data!
+     * Just the general data about the election should be sent back to the front-end!
+
      * <i>If you want to return something else please feel free to do so!</i>
      */
     @PostMapping("{electionId}")
@@ -77,7 +75,6 @@ public class ElectionController {
         }
     }
 
-    }
     public void addRegion(Region region) {
         this.regions.add(region);
     }
@@ -117,6 +114,20 @@ public class ElectionController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("{electionId}/candidates")
+    public List<Candidate> getCandidates(@PathVariable String electionId,
+                                         @RequestParam(required = false) String folderName) {
+        try {
+            Election election = (folderName == null)
+                    ? electionService.readResults(electionId, electionId)
+                    : electionService.readResults(electionId, folderName);
+            return (election == null) ? Collections.emptyList() : election.getCandidates();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
     /**
      * Get all political parties for a specific election.
      *
@@ -150,20 +161,6 @@ public class ElectionController {
         }
     }
 
-    @GetMapping("{electionId}/candidates")
-    public List<Candidate> getCandidates(@PathVariable String electionId,
-                                         @RequestParam(required = false) String folderName) {
-        try {
-            Election election = (folderName == null)
-                    ? electionService.readResults(electionId, electionId)
-                    : electionService.readResults(electionId, folderName);
-            return (election == null) ? Collections.emptyList() : election.getCandidates();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
-}
     /**
      * Get a specific political party by its name.
      *
