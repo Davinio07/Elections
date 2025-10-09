@@ -8,7 +8,7 @@ public class Election {
     private final List<Candidate> candidates = new ArrayList<>();
     private final List<Region> regions = new ArrayList<>();
     private final List<NationalResult> nationalResults = new ArrayList<>();
-
+    private final List<PoliticalParty> politicalParties = new ArrayList<>();
 
     public Election(String id) {
         this.id = id;
@@ -38,5 +38,17 @@ public class Election {
         return nationalResults;
     }
 
-    public void addNationalResult(NationalResult result) { nationalResults.add(result);}
+    public void addNationalResult(NationalResult result) {
+        nationalResults.add(result);
+    }
+
+    public List<PoliticalParty> getPoliticalParties() {
+        return politicalParties;
+    }
+
+    public void addPoliticalParty(PoliticalParty party) {
+        if (party != null) {
+            politicalParties.add(party);
+        }
+    }
 }

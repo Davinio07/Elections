@@ -4,7 +4,7 @@ interface PoliticalParty {
   registeredAppellation: string;
 }
 
-const API_BASE_URL = 'http://localhost:8081/api/elections';
+const API_BASE_URL = 'http://localhost:8080/api/elections';
 
 // Official party colors based on Dutch political parties
 export const partyColors: Record<string, string> = {
