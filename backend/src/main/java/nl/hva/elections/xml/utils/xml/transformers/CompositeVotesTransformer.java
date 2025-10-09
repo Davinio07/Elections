@@ -4,8 +4,8 @@ import nl.hva.elections.xml.utils.xml.VotesTransformer;
 import java.util.Map;
 
 /**
- * A special transformer that wraps two other transformers.
- * This allows data from a single file to be processed by multiple transformers at once.
+ * This special transformer can send data to two other transformers at the same time.
+ * This is useful if a single file needs to be processed by multiple transformers.
  */
 public class CompositeVotesTransformer implements VotesTransformer {
 

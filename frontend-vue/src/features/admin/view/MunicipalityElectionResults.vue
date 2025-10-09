@@ -47,40 +47,49 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 /**
- * Fetches results for the currently selected municipality and updates the UI.
+ * A function to get the results for the municipality that is currently selected.
+ * We only run this function if a municipality has been selected.
  */
 async function fetchResultsForSelectedMunicipality() {
   if (!selectedMunicipality.value) return;
 
   loading.value = true;
-  error.value = null;
+  error.value = null; // Clear any old errors
   try {
+    // Call the API function to get the results for this municipality
     results.value = await getResultsForMunicipality(selectedMunicipality.value);
   } catch (err) {
-    error.value = `Fout bij het ophalen van de uitslagen for ${selectedMunicipality.value}.`;
+    // If there is an error, show a message and clear the results
+    error.value = `Fout bij het ophalen van de uitslagen voor ${selectedMunicipality.value}.`;
     console.error(err);
-    results.value = []; // Clear old results on error
+    results.value = [];
   } finally {
+    // When the data is loaded (or failed), stop the loading spinner
     loading.value = false;
   }
 }
 
 /**
- * On component mount, fetch the list of all municipalities.
- * If successful, select the first one and fetch its results.
+ * This runs when the component first appears on the screen.
+ * It gets the list of all municipalities.
  */
 onMounted(async () => {
   try {
-    municipalityNames.value = await getMunicipalityNames();
-    if (municipalityNames.value.length > 0) {
-      // Automatically select the first municipality and load its data
-      selectedMunicipality.value = municipalityNames.value[0];
+    // Get the list of names from the API
+    const names = await getMunicipalityNames();
+    municipalityNames.value = names;
+
+    // If we got names back, automatically select the first one
+    if (names.length > 0) {
+      selectedMunicipality.value = names[0];
+      // Then fetch the results for this first municipality
       await fetchResultsForSelectedMunicipality();
     } else {
-      // If no municipalities are found, stop loading and show a message.
+      // If there are no names, we stop loading
       loading.value = false;
     }
   } catch (err) {
+    // If getting the names fails, we show an error and stop loading
     error.value = 'Fout bij het ophalen van de lijst met gemeenten.';
     console.error(err);
     loading.value = false;

@@ -31,10 +31,6 @@ public class ElectionController {
         this.electionService = electionService;
     }
 
-    // ===================================================================================
-    // NIEUWE METHODE VOOR DE FRONTEND (MINIMALE TOEVOEGING)
-    // ===================================================================================
-
     /**
      * Haalt alle verkiezingsdata in één keer op.
      * Dit is de endpoint die je frontend gebruikt.
@@ -53,43 +49,48 @@ public class ElectionController {
         }
     }
 
-    /**
-     * Gets all unique municipality names for the election.
-     * Used for the search dropdown in the frontend.
-     * @return A response entity containing a list of municipality names.
+/**
+     * Get a list of all unique municipality names.
+     * This is useful for a dropdown menu on the website.
+     * @return A list of municipality names.
      */
     @GetMapping("/municipalities/names")
     public ResponseEntity<List<String>> getMunicipalityNames() {
         try {
-            Election election = electionService.loadAllElectionData();
-            List<String> names = electionService.getMunicipalityNames(election);
-            return ResponseEntity.ok(names);
+            // First, get all the election data
+            Election electionData = electionService.loadAllElectionData();
+            // Then, ask the service to get the names from that data
+            List<String> namesList = electionService.getMunicipalityNames(electionData);
+            // Send back the list of names with a 'success' status
+            return ResponseEntity.ok(namesList);
         } catch (Exception e) {
+            // If something goes wrong, print the error and send a 'server error' status
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }
-
+    
     /**
-     * Gets the election results for a specific municipality.
-     * @param municipalityName The name of the municipality from the URL path.
-     * @return A response entity containing a list of results for that municipality.
+     * Get the election results for one specific municipality.
+     * We get the name of the municipality from the URL path.
+     * @param municipalityName The name of the city, like "Amsterdam".
+     * @return A list of results for that specific city.
      */
     @GetMapping("/municipalities/{municipalityName}")
     public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
         try {
-            Election election = electionService.loadAllElectionData();
-            List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
-            return ResponseEntity.ok(results);
+            // Get all election data from our service
+            Election electionData = electionService.loadAllElectionData();
+            // Ask the service to find the results for the municipality we want
+            List<MunicipalityResult> municipalityResults = electionService.getResultsForMunicipality(electionData, municipalityName);
+            // Send back the results list with a 'success' status
+            return ResponseEntity.ok(municipalityResults);
         } catch (Exception e) {
+            // If there's an error, print it and send a 'server error' status
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }
-
-    // ===================================================================================
-    // ALLE ORIGINELE METHODES ZIJN HIERONDER BEHOUDEN
-    // ===================================================================================
 
     /**
      * Processes the result for a specific election.

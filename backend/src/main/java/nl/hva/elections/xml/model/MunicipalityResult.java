@@ -2,6 +2,10 @@ package nl.hva.elections.xml.model;
 
 import java.util.Objects;
 
+/**
+ * This class holds the voting results for one party in one municipality.
+ * It's a simple object to store and pass data.
+ */
 public class MunicipalityResult {
 
     private String municipalityName;
@@ -14,7 +18,7 @@ public class MunicipalityResult {
         this.validVotes = validVotes;
     }
 
-    // Getters en setters blijven hetzelfde...
+    // Getters and setters for the data fields
 
     public String getMunicipalityName() {
         return municipalityName;
