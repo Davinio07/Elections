@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { getCandidates } from '@/features/admin/service/ScaledElectionResults_api.ts';
 
 interface Candidate {
@@ -7,21 +7,26 @@ interface Candidate {
   firstName?: string | null;
   lastName?: string | null;
   initials?: string | null;
-  prefix?: string | null;       // e.g. "van", "de"
+  prefix?: string | null;
   gender?: string | null;
-  locality?: string | null;     // residence
+  locality?: string | null;
   listNumber?: string | null;
   listName?: string | null;
-  numberOnList?: string | null; // position on list
+  numberOnList?: string | null;
 }
 
-const electionId = ref('TK2023');
-const folderName = ref<string | undefined>('TK2023_HvA_UvA');
-
+const electionId = ref<'TK2023' | 'TK2024'>('TK2023');
 const loading = ref(false);
 const error = ref('');
 const candidates = ref<Candidate[]>([]);
-const search = ref('');
+
+// If your backend needs specific folder names per election, map them here.
+// If not needed, just return undefined to omit the param.
+function folderFor(eid: string): string | undefined {
+  // Example: return 'tk2023' if your folder is lowercase; else return undefined.
+  // return eid; // <- use this if your folder name equals electionId
+  return undefined;
+}
 
 function displayName(c: Candidate): string {
   const firstOrInitials = (c.firstName?.trim() || c.initials?.trim() || '').trim();
@@ -31,35 +36,33 @@ function displayName(c: Candidate): string {
   return name || c.id || 'Onbekende kandidaat';
 }
 
-const filtered = computed(() => {
-  const q = search.value.toLowerCase().trim();
-  if (!q) return candidates.value;
-  return candidates.value.filter(c =>
-    [
-      displayName(c),
-      c.listName ?? '',
-      c.locality ?? '',
-      c.gender ?? '',
-      c.listNumber ?? '',
-      c.numberOnList ?? '',
-    ].some(v => v.toLowerCase().includes(q))
-  );
-});
+function candidateKey(c: Candidate, i: number): string {
+  const parts = [
+    c.id ?? '',
+    c.listNumber ?? '',
+    c.numberOnList ?? '',
+    c.lastName ?? '',
+    c.firstName ?? ''
+  ].filter(Boolean);
+  return parts.length ? parts.join('|') : `idx-${i}`;
+}
 
 async function load() {
   loading.value = true;
   error.value = '';
   candidates.value = [];
   try {
-    candidates.value = await getCandidates(electionId.value, folderName.value);
-    if (!candidates.value.length) {
-      error.value = 'Geen kandidaten gevonden.';
-    }
+    candidates.value = await getCandidates(electionId.value, folderFor(electionId.value));
+    if (!candidates.value.length) error.value = 'Geen kandidaten gevonden.';
   } catch (e) {
     error.value = 'Fout bij het ophalen van kandidaten.';
   } finally {
     loading.value = false;
   }
+}
+
+function onElectionChange() {
+  load();
 }
 
 onMounted(load);
@@ -70,12 +73,14 @@ onMounted(load);
     <header class="bar">
       <h1>Kandidaten</h1>
       <div class="controls">
-        <input v-model="electionId" placeholder="Election ID (bv. TK2023)" />
-        <input v-model="folderName" placeholder="Folder name (optioneel)" />
+        <label>
+          Verkiezing:
+          <select v-model="electionId" @change="onElectionChange">
+            <option value="TK2023">TK2023</option>
+            <option value="TK2024">TK2024</option>
+          </select>
+        </label>
         <button @click="load" :disabled="loading">Ophalen</button>
-      </div>
-      <div class="search">
-        <input v-model="search" placeholder="Zoek op naam, partij, woonplaats..." />
       </div>
     </header>
 
@@ -83,7 +88,7 @@ onMounted(load);
     <div v-else-if="error" class="state error">{{ error }}</div>
 
     <div v-else class="grid">
-      <article v-for="c in filtered" :key="c.id || displayName(c)" class="card">
+      <article v-for="(c, i) in candidates" :key="candidateKey(c, i)" class="card">
         <div class="avatar" aria-hidden="true">
           {{ (displayName(c).charAt(0) || '?').toUpperCase() }}
         </div>
@@ -107,22 +112,16 @@ onMounted(load);
 .page { display: grid; gap: 1rem; padding: 1rem; }
 .bar { display: grid; gap: .75rem; }
 .controls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
-.controls input {
+.controls select, .controls button {
   padding: .5rem .6rem; border: 1px solid #cbd5e1; border-radius: .5rem;
 }
 .controls button {
-  padding: .55rem .9rem; border: 1px solid #0f172a; background: #0f172a; color: white;
-  border-radius: .5rem; cursor: pointer;
+  border: 1px solid #0f172a; background: #0f172a; color: white; cursor: pointer;
 }
 .controls button[disabled] { opacity: .6; cursor: not-allowed; }
-.search input {
-  width: min(520px, 100%); padding: .5rem .6rem; border: 1px solid #cbd5e1; border-radius: .5rem;
-}
 .state { padding: 1rem; color: #334155; }
 .state.error { color: #b91c1c; }
-.grid {
-  display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-}
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
 .card {
   display: grid; gap: .5rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .8rem;
   background: white; box-shadow: 0 1px 2px rgba(0,0,0,.03);
