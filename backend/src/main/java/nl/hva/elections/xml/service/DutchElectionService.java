@@ -1,6 +1,7 @@
 package nl.hva.elections.xml.service;
 
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.utils.PathUtils;
@@ -12,6 +13,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,9 +29,6 @@ public class DutchElectionService {
     private static final String ELECTION_ID = "TK2023";
     private static final String ELECTION_DATA_FOLDER = "/TK2023_HvA_UvA";
 
-    // ===================================================================================
-    // NIEUWE METHODE VOOR DE FRONTEND (MINIMALE TOEVOEGING)
-    // ===================================================================================
 
     /**
      * Loads and parses all election data from the resources folder.
@@ -72,9 +72,6 @@ public class DutchElectionService {
     }
 
 
-    // ===================================================================================
-    // ALLE ORIGINELE METHODES ZIJN HIERONDER BEHOUDEN
-    // ===================================================================================
 
     public Election readResults(String electionId, String folderName) {
         System.out.println("Processing files...");
@@ -127,5 +124,45 @@ public class DutchElectionService {
     public List<NationalResult> getNationalResults(String electionId) {
         Election election = readResults(electionId, electionId);
         return election.getNationalResults();
+    }
+
+    /**
+     * Gets a unique and sorted list of all municipality names.
+     * This is used to populate the search dropdown in the frontend.
+     * @param election The fully loaded election object.
+     * @return A list of strings, where each string is a unique municipality name.
+     */
+    public List<String> getMunicipalityNames(Election election) {
+        return election.getMunicipalityResults().stream()
+                .map(MunicipalityResult::getMunicipalityName)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * This method finds the election results for a specific municipality.
+     * @param election The object that holds all the election data.
+     * @param municipalityName The name of the municipality we are looking for.
+     * @return A list of results for that municipality, sorted by votes.
+     */
+    public List<MunicipalityResult> getResultsForMunicipality(Election election, String municipalityName) {
+        // Create an empty list to hold our results
+        List<MunicipalityResult> foundResults = new ArrayList<>();
+        
+        // Loop through all municipality results in the election data
+        for (MunicipalityResult result : election.getMunicipalityResults()) {
+            // Check if the municipality name is the one we want (ignoring case)
+            if (result.getMunicipalityName().equalsIgnoreCase(municipalityName)) {
+                // If it is, add it to our new list
+                foundResults.add(result);
+            }
+        }
+        
+        // Sort the list of results based on the number of valid votes
+        foundResults.sort(Comparator.comparing(MunicipalityResult::getValidVotes).reversed());
+        
+        // Return the sorted list
+        return foundResults;
     }
 }

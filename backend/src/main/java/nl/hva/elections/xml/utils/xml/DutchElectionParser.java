@@ -1,6 +1,7 @@
 package nl.hva.elections.xml.utils.xml;
 
 import nl.hva.elections.xml.utils.PathUtils;
+import nl.hva.elections.xml.utils.xml.transformers.CompositeVotesTransformer;
 import nl.hva.elections.xml.utils.xml.transformers.DutchRegionTransformer;
 import org.xml.sax.SAXException;
 
@@ -82,27 +83,19 @@ public class DutchElectionParser {
      * @throws XMLStreamException when a file has not the expected format.
      */
     public void parseResults(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
-        // TODO replace with proper usage of a logging framework
         System.out.printf("Loading election data from %s\n", folderName);
-        parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId),
-                new EMLHandler(
-                        definitionTransformer,
-                        candidateTransformer,
-                        regionTransformer,
-                        resultTransformer,
-                        nationalVotesTransformer,
-                        constituencyVotesTransformer,
-                        municipalityVotesTransformer
-                )
-        );
 
-
+        // Parse definition and candidate files separately as they use different transformers.
+        parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId), new EMLHandler(definitionTransformer));
         parseFiles(folderName, "Kandidatenlijsten_%s".formatted(electionId), new EMLHandler(candidateTransformer));
-
         parseFiles(folderName, "Resultaat_%s".formatted(electionId), new EMLHandler(resultTransformer));
-        parseFiles(folderName, "Totaaltelling_%s".formatted(electionId), new EMLHandler(nationalVotesTransformer));
+
+        // Create a composite transformer that sends Totaaltelling data to BOTH national and municipality transformers.
+        VotesTransformer compositeTransformer = new CompositeVotesTransformer(nationalVotesTransformer, municipalityVotesTransformer);
+        parseFiles(folderName, "Totaaltelling_%s".formatted(electionId), new EMLHandler(compositeTransformer));
+
+        // Parse the kieskring files.
         parseFiles(folderName, "Telling_%s_kieskring".formatted(electionId), new EMLHandler(constituencyVotesTransformer));
-        parseFiles(folderName, "Telling_%s_gemeente".formatted(electionId), new EMLHandler(municipalityVotesTransformer));
     }
 
     private void parseFiles(String folderName, String fileFilter, EMLHandler emlHandler) throws IOException, ParserConfigurationException, SAXException {

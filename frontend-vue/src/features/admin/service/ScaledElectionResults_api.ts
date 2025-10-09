@@ -15,6 +15,7 @@ export async function ScaledElectionResults(): Promise<string> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getProvinces(electionId: string): Promise<any[]> {
   try {
     const url = `http://localhost:8080/api/elections/${electionId}/regions/kieskringen`;
@@ -29,6 +30,7 @@ export async function getProvinces(electionId: string): Promise<any[]> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getCandidates(electionId: string, folderName?: string): Promise<any[]> {
   try {
     const base = `http://localhost:8080/api/elections/${encodeURIComponent(electionId)}/candidates`;

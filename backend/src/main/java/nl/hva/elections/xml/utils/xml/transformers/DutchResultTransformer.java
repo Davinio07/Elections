@@ -34,6 +34,6 @@ public class DutchResultTransformer implements VotesTransformer {
 
     @Override
     public void registerMetadata(boolean aggregated, Map<String, String> electionData) {
-        throw new IllegalStateException("There is no implementation on purpose.");
+        // throw new IllegalStateException("There is no implementation on purpose.");
     }
 }

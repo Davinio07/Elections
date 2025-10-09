@@ -7,15 +7,15 @@ import nl.hva.elections.xml.utils.xml.VotesTransformer;
 import java.util.Map;
 
 /**
- * Transforms municipality-level voting data from the XML files into the application's data model.
+ * This class handles municipality-level votes from XML files.
+ * It takes the data and puts it into our data model.
  */
 public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     private final Election election;
 
     /**
-     * Creates a new transformer for handling the votes at the municipality level. It expects an instance of
-     * Election that can be used for storing the results.
-     * @param election the election in which the votes wil be stored.
+     * Creates a new transformer. It needs an 'Election' object to store the votes in.
+     * @param election The main election object where we store all results.
      */
     public DutchMunicipalityVotesTransformer(Election election) {
         this.election = election;
@@ -23,26 +23,38 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
-        // Haal de benodigde data uit de map. De gemeentenaam zit in "ReportingUnitIdentifier".
+        // We only want non-aggregated data, which is the municipality data.
+        // The aggregated data is for national or constituency votes.
+        if (aggregated) {
+            return;
+        }
+
+        // Get the information we need from the electionData map
         String municipalityName = electionData.get("ReportingUnitIdentifier");
         String partyName = electionData.get("RegisteredName");
         String votesString = electionData.get("ValidVotes");
-        
-        // Converteer het aantal stemmen naar een integer
-        int totalVotes = votesString != null ? Integer.parseInt(votesString) : 0;
 
-        // Maak een nieuw MunicipalityResult object aan en voeg het toe aan de lijst
-        MunicipalityResult result = new MunicipalityResult(municipalityName, partyName, totalVotes);
-        election.addMunicipalityResult(result);
+        // Make sure we have the info we need before we try to save it
+        if (municipalityName != null && !municipalityName.isBlank() && partyName != null) {
+            // Convert the votes from a string to a number. If it's not a number, use 0.
+            int totalVotes = 0;
+            if (votesString != null) {
+                 totalVotes = Integer.parseInt(votesString);
+            }
+
+            // Create a new MunicipalityResult object with the data
+            MunicipalityResult result = new MunicipalityResult(municipalityName, partyName, totalVotes);
+            // Add the new result to our main Election object
+            election.addMunicipalityResult(result);
+        }
     }
 
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
-        // Deze methode kan leeg blijven als je geen kandidaat-specifieke data op gemeenteniveau nodig hebt.
+        // This is not needed for this feature
     }
-
     @Override
     public void registerMetadata(boolean aggregated, Map<String, String> electionData) {
-        // Deze methode kan leeg blijven als je geen metadata op gemeenteniveau nodig hebt.
+        // This is not needed for this feature
     }
 }
