@@ -1,13 +1,13 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.utils.xml.VotesTransformer;
 
 import java.util.Map;
 
 /**
- * Just prints to content of electionData to the standard output.>br/>
- * <b>This class needs heavy modification!</b>
+ * Transforms municipality-level voting data from the XML files into the application's data model.
  */
 public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     private final Election election;
@@ -23,17 +23,26 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s party votes: %s\n", aggregated ? "Municipality" : "Polling station", electionData);
+        // Haal de benodigde data uit de map. De gemeentenaam zit in "ReportingUnitIdentifier".
+        String municipalityName = electionData.get("ReportingUnitIdentifier");
+        String partyName = electionData.get("RegisteredName");
+        String votesString = electionData.get("ValidVotes");
+        
+        // Converteer het aantal stemmen naar een integer
+        int totalVotes = votesString != null ? Integer.parseInt(votesString) : 0;
+
+        // Maak een nieuw MunicipalityResult object aan en voeg het toe aan de lijst
+        MunicipalityResult result = new MunicipalityResult(municipalityName, partyName, totalVotes);
+        election.addMunicipalityResult(result);
     }
 
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s candidate votes: %s\n", aggregated ? "Municipality" : "Polling station", electionData);
+        // Deze methode kan leeg blijven als je geen kandidaat-specifieke data op gemeenteniveau nodig hebt.
     }
 
     @Override
     public void registerMetadata(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s meta data: %s\n", aggregated ? "Municipality" : "Polling station", electionData);
+        // Deze methode kan leeg blijven als je geen metadata op gemeenteniveau nodig hebt.
     }
-
 }

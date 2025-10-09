@@ -9,11 +9,11 @@ import nl.hva.elections.xml.utils.xml.transformers.*;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A demo service for demonstrating how an EML-XML parser can be used inside a backend application.<br/>
@@ -22,6 +22,59 @@ import java.io.IOException;
  */
 @Service
 public class DutchElectionService {
+
+    private static final String ELECTION_ID = "TK2023";
+    private static final String ELECTION_DATA_FOLDER = "/TK2023_HvA_UvA";
+
+    // ===================================================================================
+    // NIEUWE METHODE VOOR DE FRONTEND (MINIMALE TOEVOEGING)
+    // ===================================================================================
+
+    /**
+     * Loads and parses all election data from the resources folder.
+     * This method is used by the frontend to get all data at once.
+     */
+    public Election loadAllElectionData() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        Election election = new Election(ELECTION_ID);
+
+        // Instantiate all the required transformers
+        DutchDefinitionTransformer definitionTransformer = new DutchDefinitionTransformer(election);
+        DutchCandidateTransformer candidateTransformer = new DutchCandidateTransformer(election);
+        DutchRegionTransformer regionTransformer = new DutchRegionTransformer(election);
+        DutchNationalVotesTransformer nationalVotesTransformer = new DutchNationalVotesTransformer(election);
+        DutchConstituencyVotesTransformer constituencyVotesTransformer = new DutchConstituencyVotesTransformer(election);
+        DutchMunicipalityVotesTransformer municipalityVotesTransformer = new DutchMunicipalityVotesTransformer(election);
+        DutchResultTransformer resultTransformer = new DutchResultTransformer(election);
+
+        // Create the parser with all the transformers in the correct order
+        DutchElectionParser parser = new DutchElectionParser(
+                definitionTransformer,
+                candidateTransformer,
+                regionTransformer,
+                resultTransformer,
+                nationalVotesTransformer,
+                constituencyVotesTransformer,
+                municipalityVotesTransformer
+        );
+
+        // Use PathUtils to find the root folder of the election data
+        String resourcePath = PathUtils.getResourcePath(ELECTION_DATA_FOLDER);
+
+        // Let the parser handle finding and parsing all the files
+        if (resourcePath != null) {
+            parser.parseResults(ELECTION_ID, resourcePath);
+        } else {
+            throw new IOException("Resource folder not found in classpath: " + ELECTION_DATA_FOLDER);
+        }
+
+
+        return election;
+    }
+
+
+    // ===================================================================================
+    // ALLE ORIGINELE METHODES ZIJN HIERONDER BEHOUDEN
+    // ===================================================================================
 
     public Election readResults(String electionId, String folderName) {
         System.out.println("Processing files...");

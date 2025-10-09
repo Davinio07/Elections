@@ -8,6 +8,7 @@ public class Election {
     private final List<Candidate> candidates = new ArrayList<>();
     private final List<Region> regions = new ArrayList<>();
     private final List<NationalResult> nationalResults = new ArrayList<>();
+    private final List<MunicipalityResult> municipalityResults = new ArrayList<>();
 
 
     public Election(String id) {
@@ -39,4 +40,12 @@ public class Election {
     }
 
     public void addNationalResult(NationalResult result) { nationalResults.add(result);}
+
+    public List<MunicipalityResult> getMunicipalityResults() {
+        return municipalityResults;
+    }
+
+    public void addMunicipalityResult(MunicipalityResult result) {
+        municipalityResults.add(result);
+    }
 }

@@ -24,17 +24,19 @@ public class DutchCandidateTransformer implements CandidateTransformer {
 
     @Override
     public void registerCandidate(Map<String, String> electionData) {
-        Candidate candidate = new Candidate(electionData.get("ContestIdentifier"));
+        // Prefer CandidateIdentifier if present; fall back to ContestIdentifier
+        String id = electionData.getOrDefault("CandidateIdentifier",
+                electionData.getOrDefault("ContestIdentifier", ""));
+
+        Candidate candidate = new Candidate(id);
         candidate.setFirstName(electionData.get("FirstName"));
         candidate.setLastName(electionData.get("LastName"));
         candidate.setGender(electionData.get("Gender"));
         candidate.setLocality(electionData.get("LocalityName"));
 
+        election.addCandidate(candidate);
 
-
-
-
-
-        System.out.println("Registering candidate: " + electionData);
+        System.out.println("Registered candidate: " + candidate.getId());
     }
+
 }
