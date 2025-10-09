@@ -255,4 +255,21 @@ public class ElectionController {
             return ResponseEntity.ok(Collections.emptyList());
         }
     }
+
+    /**
+     * Gets all unique municipality names for the election
+     * Used for the search dropdown in the frontend
+     * @return A response entity containing a list of municipality names
+     */
+    @GetMapping("/municipalities/names")
+    public ResponseEntity<List<String>> getMunicipalityNames() {
+        try {
+            Election election = electionService.loadAllElectionData();
+            List<String> names = electionService.getMunicipalityNames(election);
+            return ResponseEntity.ok(names);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
