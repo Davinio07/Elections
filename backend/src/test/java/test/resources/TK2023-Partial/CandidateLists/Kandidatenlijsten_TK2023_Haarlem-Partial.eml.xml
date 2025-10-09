@@ -1,0 +1,108 @@
+<EML Id="230b" SchemaVersion="5" xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0">
+	<TransactionId>1</TransactionId>
+	<ManagingAuthority>
+		<AuthorityIdentifier Id="CSB">De Kiesraad</AuthorityIdentifier>
+		<AuthorityAddress/>
+	</ManagingAuthority>
+	<IssueDate>2023-10-13</IssueDate>
+	<kr:CreationDateTime>2023-10-13T17:59:22.402</kr:CreationDateTime>
+	<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+	<CandidateList>
+		<Election>
+			<ElectionIdentifier Id="TK2023">
+				<ElectionName>Tweede Kamer der Staten-Generaal 2023</ElectionName>
+				<ElectionCategory>TK</ElectionCategory>
+				<kr:ElectionSubcategory>TK</kr:ElectionSubcategory>
+				<kr:ElectionDate>2023-11-22</kr:ElectionDate>
+				<kr:NominationDate>2023-10-09</kr:NominationDate>
+			</ElectionIdentifier>
+
+			<Contest>
+				<ContestIdentifier Id="10">
+					<ContestName>Haarlem</ContestName>
+				</ContestIdentifier>
+
+				<Affiliation>
+					<AffiliationIdentifier Id="1">
+						<RegisteredName>VVD</RegisteredName>
+					</AffiliationIdentifier>
+					<Type>stel gelijkluidende lijsten</Type>
+					<kr:ListData BelongsToSet="1" PublicationLanguage="nl" PublishGender="true"/>
+
+					<Candidate>
+						<CandidateIdentifier Id="1"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">D.</xnl:NameLine>
+								<xnl:FirstName>Dilan</xnl:FirstName>
+								<xnl:LastName>Yeşilgöz</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<Gender>female</Gender>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Amsterdam</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Candidate>
+						<CandidateIdentifier Id="2"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">S.T.M.</xnl:NameLine>
+								<xnl:FirstName>Sophie</xnl:FirstName>
+								<xnl:LastName>Hermans</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<Gender>female</Gender>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Vreeland</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+				</Affiliation>
+
+				<Affiliation>
+					<AffiliationIdentifier Id="2">
+						<RegisteredName>D66</RegisteredName>
+					</AffiliationIdentifier>
+					<Type>stel gelijkluidende lijsten</Type>
+					<kr:ListData BelongsToSet="1" PublicationLanguage="nl" PublishGender="false"/>
+
+					<Candidate>
+						<CandidateIdentifier Id="1"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">R.A.A.</xnl:NameLine>
+								<xnl:FirstName>Rob</xnl:FirstName>
+								<xnl:LastName>Jetten</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Ubbergen</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Candidate>
+						<CandidateIdentifier Id="2"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">J.M.</xnl:NameLine>
+								<xnl:FirstName>Jan</xnl:FirstName>
+								<xnl:LastName>Paternotte</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Leiderdorp</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+				</Affiliation>
+
+			</Contest>
+		</Election>
+	</CandidateList>
+</EML>

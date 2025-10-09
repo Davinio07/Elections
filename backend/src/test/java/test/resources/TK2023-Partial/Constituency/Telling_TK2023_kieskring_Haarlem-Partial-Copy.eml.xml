@@ -1,0 +1,197 @@
+<EML Id="510c" SchemaVersion="5" xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0">
+	<TransactionId>1</TransactionId>
+	<ManagingAuthority>
+		<AuthorityIdentifier Id="HSB10">Haarlem</AuthorityIdentifier>
+		<AuthorityAddress/>
+	</ManagingAuthority>
+	<kr:CreationDateTime>2023-11-30T16:47:36.336</kr:CreationDateTime>
+	<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+	<Count>
+		<EventIdentifier/>
+		<Election>
+			<ElectionIdentifier Id="TK2023">
+				<ElectionName>Tweede Kamer der Staten-Generaal 2023</ElectionName>
+				<ElectionCategory>TK</ElectionCategory>
+				<kr:ElectionSubcategory>TK</kr:ElectionSubcategory>
+				<kr:ElectionDate>2023-11-22</kr:ElectionDate>
+			</ElectionIdentifier>
+			<Contests>
+
+				<Contest>
+
+					<ContestIdentifier Id="10">
+						<ContestName>Haarlem</ContestName>
+					</ContestIdentifier>
+					<TotalVotes>
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>116494</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>101086</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>4557</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>48721</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>32733</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>1635</ValidVotes>
+						</Selection>
+
+						<Cast>714664</Cast>
+						<TotalCounted>563110</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">1379</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">967</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">51387</UncountedVotes>
+						<UncountedVotes ReasonCode="geldige kiezerspassen">1979</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">146</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">385</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">16</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">6</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">475</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">23</UncountedVotes>
+					</TotalVotes>
+
+					<ReportingUnitVotes>
+						<ReportingUnitIdentifier Id="HSB10::0358">Aalsmeer</ReportingUnitIdentifier>
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>4898</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>4412</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>168</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>1307</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>870</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>55</ValidVotes>
+						</Selection>
+
+						<Cast>23647</Cast>
+						<TotalCounted>19537</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">35</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">30</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">1790</UncountedVotes>
+						<UncountedVotes ReasonCode="geldige kiezerspassen">52</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">2</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">13</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">15</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">0</UncountedVotes>
+					</ReportingUnitVotes>
+
+                    <ReportingUnitVotes>
+				    	<ReportingUnitIdentifier Id="HSB10::0362">Amstelveen</ReportingUnitIdentifier>
+
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>10338</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>9015</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>338</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>4391</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1"/>
+							</Candidate>
+							<ValidVotes>2905</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2"/>
+							</Candidate>
+							<ValidVotes>178</ValidVotes>
+						</Selection>
+
+						<Cast>58073</Cast>
+						<TotalCounted>45305</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">149</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">92</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">4191</UncountedVotes>
+						<UncountedVotes ReasonCode="geldige kiezerspassen">148</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">24</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">65</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">86</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">0</UncountedVotes>
+					</ReportingUnitVotes>
+                </Contest>
+
+			</Contests>
+		</Election>
+	</Count>
+</EML>

@@ -1,0 +1,199 @@
+<EML Id="510d" SchemaVersion="5" xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0">
+	<TransactionId>1</TransactionId>
+	<ManagingAuthority>
+		<AuthorityIdentifier Id="CSB">De Kiesraad</AuthorityIdentifier>
+		<AuthorityAddress/>
+	</ManagingAuthority>
+	<kr:CreationDateTime>2023-12-03T14:20:55.204</kr:CreationDateTime>
+	<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+	<Count>
+		<EventIdentifier/>
+		<Election>
+			<ElectionIdentifier Id="TK2023">
+				<ElectionName>Tweede Kamer der Staten-Generaal 2023</ElectionName>
+				<ElectionCategory>TK</ElectionCategory>
+				<kr:ElectionSubcategory>TK</kr:ElectionSubcategory>
+				<kr:ElectionDate>2023-11-22</kr:ElectionDate>
+			</ElectionIdentifier>
+			<Contests>
+
+				<Contest>
+					<ContestIdentifier Id="alle"/>
+					<TotalVotes>
+
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>1589519</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier ShortCode="YeşilgözD"/>
+							</Candidate>
+							<ValidVotes>1356883</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier ShortCode="HermansSTM"/>
+							</Candidate>
+							<ValidVotes>62320</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>656292</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier ShortCode="JettenRAA"/>
+							</Candidate>
+							<ValidVotes>437371</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier ShortCode="PaternotteJM"/>
+							</Candidate>
+							<ValidVotes>19645</ValidVotes>
+						</Selection>
+
+						<Cast>13473750</Cast>
+						<TotalCounted>10432726</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">22822</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">19655</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">996512</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">3038</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">5647</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">636</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">167</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">269</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">4971</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">2229</UncountedVotes>
+						<UncountedVotes ReasonCode="kwijtgeraakte stembiljetten">0</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel briefstembiljetten">27</UncountedVotes>
+						<UncountedVotes ReasonCode="geen briefstembiljetten">122</UncountedVotes>
+					</TotalVotes>
+
+					<ReportingUnitVotes>
+						<ReportingUnitIdentifier Id="HSB1">Kieskring Groningen</ReportingUnitIdentifier>
+
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>36092</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1" ShortCode="YeşilgözD"/>
+							</Candidate>
+							<ValidVotes>28698</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2" ShortCode="HermansSTM"/>
+							</Candidate>
+							<ValidVotes>1169</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>20899</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1" ShortCode="JettenRAA"/>
+							</Candidate>
+							<ValidVotes>11083</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2" ShortCode="PaternotteJM"/>
+							</Candidate>
+							<ValidVotes>430</ValidVotes>
+						</Selection>
+
+						<Cast>467390</Cast>
+						<TotalCounted>365627</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">682</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">779</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">29726</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">80</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">131</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">36</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">60</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">21</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">134</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">8</UncountedVotes>
+					</ReportingUnitVotes>
+
+					<ReportingUnitVotes>
+						<ReportingUnitIdentifier Id="HSB2">Kieskring Leeuwarden</ReportingUnitIdentifier>
+
+						<Selection>
+							<AffiliationIdentifier Id="1">
+								<RegisteredName>VVD</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>47098</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1" ShortCode="YeşilgözD"/>
+							</Candidate>
+							<ValidVotes>39603</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2" ShortCode="HermansSTM"/>
+							</Candidate>
+							<ValidVotes>1465</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<AffiliationIdentifier Id="2">
+								<RegisteredName>D66</RegisteredName>
+							</AffiliationIdentifier>
+							<ValidVotes>18249</ValidVotes>
+						</Selection>
+
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="1" ShortCode="JettenRAA"/>
+							</Candidate>
+							<ValidVotes>11945</ValidVotes>
+						</Selection>
+						<Selection>
+							<Candidate>
+								<CandidateIdentifier Id="2" ShortCode="PaternotteJM"/>
+							</Candidate>
+							<ValidVotes>459</ValidVotes>
+						</Selection>
+
+						<Cast>520759</Cast>
+						<TotalCounted>419599</TotalCounted>
+						<RejectedVotes ReasonCode="ongeldig">673</RejectedVotes>
+						<RejectedVotes ReasonCode="blanco">849</RejectedVotes>
+						<UncountedVotes ReasonCode="geldige volmachtbewijzen">35377</UncountedVotes>
+						<UncountedVotes ReasonCode="meer getelde stembiljetten">98</UncountedVotes>
+						<UncountedVotes ReasonCode="minder getelde stembiljetten">122</UncountedVotes>
+						<UncountedVotes ReasonCode="meegenomen stembiljetten">29</UncountedVotes>
+						<UncountedVotes ReasonCode="te weinig uitgereikte stembiljetten">15</UncountedVotes>
+						<UncountedVotes ReasonCode="te veel uitgereikte stembiljetten">17</UncountedVotes>
+						<UncountedVotes ReasonCode="geen verklaring">98</UncountedVotes>
+						<UncountedVotes ReasonCode="andere verklaring">42</UncountedVotes>
+					</ReportingUnitVotes>
+
+				</Contest>
+			</Contests>
+		</Election>
+	</Count>
+</EML>

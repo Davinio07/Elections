@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<EML xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:kr="http://www.kiesraad.nl/extensions" Id="110a" SchemaVersion="5">
+    <TransactionId>1</TransactionId>
+    <IssueDate>2023-10-13</IssueDate>
+    <kr:CreationDateTime>2023-10-13T17:59:22.402</kr:CreationDateTime>
+    <ElectionEvent>
+        <EventIdentifier/>
+        <Election>
+            <ElectionIdentifier Id="TK2023">
+                <ElectionName>Tweede Kamer der Staten-Generaal 2023</ElectionName>
+                <ElectionCategory>TK</ElectionCategory>
+                <kr:ElectionSubcategory>TK</kr:ElectionSubcategory>
+                <kr:ElectionDate>2023-11-22</kr:ElectionDate>
+                <kr:NominationDate>2023-10-09</kr:NominationDate>
+            </ElectionIdentifier>
+            <Contest>
+                <ContestIdentifier Id="alle"/>
+                <VotingMethod>SPV</VotingMethod>
+                <MaxVotes></MaxVotes>
+            </Contest>
+            <kr:NumberOfSeats>150</kr:NumberOfSeats>
+            <kr:PreferenceThreshold>25</kr:PreferenceThreshold>
+
+            <kr:ElectionTree>
+                <kr:Region RegionCategory="STAAT">
+                    <kr:RegionName>Nederland</kr:RegionName>
+                </kr:Region>
+                <kr:Region RegionNumber="1" RegionCategory="KIESKRING" SuperiorRegionCategory="STAAT">
+                    <kr:RegionName>Groningen</kr:RegionName>
+                    <kr:Committee CommitteeCategory="HSB"/>
+                </kr:Region>
+                <kr:Region RegionNumber="2" RegionCategory="KIESKRING" SuperiorRegionCategory="STAAT">
+                    <kr:RegionName>Leeuwarden</kr:RegionName>
+                    <kr:Committee CommitteeCategory="HSB"/>
+                </kr:Region>
+
+                <kr:Region RegionNumber="12" RegionCategory="KIESKRING" SuperiorRegionCategory="STAAT">
+                    <kr:RegionName>'s-Gravenhage</kr:RegionName>
+                    <kr:Committee CommitteeCategory="CSB" CommitteeName="De Kiesraad"/>
+                    <kr:Committee CommitteeCategory="HSB" AcceptCentralSubmissions="true"/>
+                </kr:Region>
+
+                <kr:Region RegionNumber="14" RegionCategory="GEMEENTE" SuperiorRegionNumber="1" SuperiorRegionCategory="KIESKRING">
+                    <kr:RegionName>Groningen</kr:RegionName>
+                </kr:Region>
+                <kr:Region RegionNumber="37" RegionCategory="GEMEENTE" SuperiorRegionNumber="1" SuperiorRegionCategory="KIESKRING">
+                    <kr:RegionName>Stadskanaal</kr:RegionName>
+                </kr:Region>
+                <kr:Region RegionNumber="47" RegionCategory="GEMEENTE" SuperiorRegionNumber="1" SuperiorRegionCategory="KIESKRING">
+                    <kr:RegionName>Veendam</kr:RegionName>
+                </kr:Region>
+                <kr:Region RegionNumber="765" RegionCategory="GEMEENTE" SuperiorRegionNumber="1" SuperiorRegionCategory="KIESKRING">
+                    <kr:RegionName>Pekela</kr:RegionName>
+                </kr:Region>
+            </kr:ElectionTree>
+
+            <kr:RegisteredParties>
+                <kr:RegisteredParty>
+                    <kr:RegisteredAppellation>VVD</kr:RegisteredAppellation>
+                </kr:RegisteredParty>
+                <kr:RegisteredParty>
+                    <kr:RegisteredAppellation>D66</kr:RegisteredAppellation>
+                </kr:RegisteredParty>
+            </kr:RegisteredParties>
+
+        </Election>
+    </ElectionEvent>
+</EML>

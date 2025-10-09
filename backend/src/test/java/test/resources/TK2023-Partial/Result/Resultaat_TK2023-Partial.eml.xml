@@ -1,0 +1,123 @@
+<EML Id="520" SchemaVersion="5" xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0">
+	<TransactionId>1</TransactionId>
+	<ManagingAuthority>
+		<AuthorityIdentifier Id="CSB">De Kiesraad</AuthorityIdentifier>
+		<AuthorityAddress/>
+	</ManagingAuthority>
+	<kr:CreationDateTime>2023-12-03T14:22:26.741</kr:CreationDateTime>
+	<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+	<Result>
+		<Election>
+			<ElectionIdentifier Id="TK2023">
+				<ElectionName>Tweede Kamer der Staten-Generaal 2023</ElectionName>
+				<ElectionCategory>TK</ElectionCategory>
+				<kr:ElectionSubcategory>TK</kr:ElectionSubcategory>
+				<kr:ElectionDate>2023-11-22</kr:ElectionDate>
+			</ElectionIdentifier>
+
+			<Contest>
+				<ContestIdentifier Id="alle"/>
+
+				<Selection>
+					<AffiliationIdentifier Id="1">
+						<RegisteredName>VVD</RegisteredName>
+					</AffiliationIdentifier>
+					<Elected>yes</Elected>
+				</Selection>
+
+				<Selection>
+					<Candidate>
+						<CandidateIdentifier Id="1" ShortCode="YeşilgözD"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">D.</xnl:NameLine>
+								<xnl:FirstName>Dilan</xnl:FirstName>
+								<xnl:NamePrefix/>
+								<xnl:LastName>Yeşilgöz</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<Gender>female</Gender>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Amsterdam</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Ranking>1</Ranking>
+					<Elected>yes</Elected>
+				</Selection>
+				<Selection>
+					<Candidate>
+						<CandidateIdentifier Id="2" ShortCode="HermansSTM"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">S.T.M.</xnl:NameLine>
+								<xnl:FirstName>Sophie</xnl:FirstName>
+								<xnl:NamePrefix/>
+								<xnl:LastName>Hermans</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<Gender>female</Gender>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Vreeland</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Ranking>1</Ranking>
+					<Elected>yes</Elected>
+				</Selection>
+
+				<Selection>
+					<AffiliationIdentifier Id="2">
+						<RegisteredName>D66</RegisteredName>
+					</AffiliationIdentifier>
+					<Elected>yes</Elected>
+				</Selection>
+
+				<Selection>
+					<Candidate>
+						<CandidateIdentifier Id="1" ShortCode="JettenRAA"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">R.A.A.</xnl:NameLine>
+								<xnl:FirstName>Rob</xnl:FirstName>
+								<xnl:NamePrefix/>
+								<xnl:LastName>Jetten</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Ubbergen</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Ranking>1</Ranking>
+					<Elected>yes</Elected>
+				</Selection>
+				<Selection>
+					<Candidate>
+						<CandidateIdentifier Id="2" ShortCode="PodtA"/>
+						<CandidateFullName>
+							<xnl:PersonName>
+								<xnl:NameLine NameType="Initials">A.</xnl:NameLine>
+								<xnl:FirstName>Anne-Marijke</xnl:FirstName>
+								<xnl:NamePrefix/>
+								<xnl:LastName>Podt</xnl:LastName>
+							</xnl:PersonName>
+						</CandidateFullName>
+						<QualifyingAddress>
+							<xal:Locality>
+								<xal:LocalityName>Utrecht</xal:LocalityName>
+							</xal:Locality>
+						</QualifyingAddress>
+					</Candidate>
+					<Ranking>1</Ranking>
+					<Elected>yes</Elected>
+				</Selection>
+
+			</Contest>
+
+		</Election>
+	</Result>
+</EML>
