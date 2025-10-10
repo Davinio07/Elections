@@ -30,10 +30,11 @@ export async function getProvinces(electionId: string): Promise<any[]> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getCandidates(electionId: string, folderName?: string): Promise<any[]> {
   try {
-    const base = `http://localhost:8080/api/elections/${electionId}/candidates`;
-    const url = folderName ? `${base}?folderName=${folderName}` : base;
+    const base = `http://localhost:8080/api/elections/${encodeURIComponent(electionId)}/candidates`;
+    const url = folderName ? `${base}?folderName=${encodeURIComponent(folderName)}` : base;
     const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
