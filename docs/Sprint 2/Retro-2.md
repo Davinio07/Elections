@@ -83,6 +83,7 @@ As a TIP I received:"Appear on time" I recognize that appearing on time is impor
 
 SMART Learning Goal:
 By the end of the next sprint (in two weeks), I will update the sprint board at least twice per week and check the group chat daily to ensure consistent communication and transparency about my progress. I will also make sure to be on time for every meeting to strengthen my reliability within the team.
+
 ---
 
 ### Matin
