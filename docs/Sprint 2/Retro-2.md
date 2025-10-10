@@ -7,7 +7,7 @@
 ### Tops
 
 #### Suleyman:
-
+You deliver reliable work.
 
 #### Zarko:
 You're an excellent motivator and very encouraging.
@@ -49,7 +49,7 @@ Stick closer to the planning to avoid stress and last-minute conflicts. Start on
 
 ---
 
-# Sprint Reflection – Zarko
+### Sprint Reflection – Zarko
 
 During this sprint, I received positive feedback that I was very motivating and brought a lot of energy to the team. I’m glad that my enthusiasm helped to keep team morale high and encouraged collaboration. I believe maintaining a positive attitude within the group is one of my strengths, as it helps us stay productive and engaged, especially when facing challenges.  
 
