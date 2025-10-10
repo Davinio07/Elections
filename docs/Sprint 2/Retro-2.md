@@ -2,6 +2,17 @@
 
 ![Requirements](./images/plusDelta.png)
 
+## Proportion team members
+```mermaid
+pie 
+    title Storypoints per Teamlid   
+    "Teamlid 1" : 0
+    "Teamlid 2" : 0
+    "Teamlid 3" : 0
+    "Teamlid 4" : 0
+    "Teamlid 5" : 0
+```
+
 ## Feedback for team members
 
 ### Tops
@@ -16,21 +27,21 @@ You're an excellent motivator and very encouraging.
 You often take the reins.
 
 #### Baran:
-
+You often offered to do open tasks.
 
 #### Matin:
-
+You communicated a lot more with the team this sprint.
 
 ### Tips
 
 #### Suleyman:
-
+Appear on time.
 
 #### Zarko:
 Stick closer to the planning to avoid stress and last-minute conflicts. Start on the work sooner.
 
 #### Davinio:
-
+Give the team updates on your progress more frequently.
 
 #### Baran:
 

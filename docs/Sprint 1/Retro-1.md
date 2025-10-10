@@ -8,6 +8,16 @@
 | There was a positive and respectful atmosphere | Sometimes too many things are discussed at once, which makes it chaotic | Use a fixed agenda and limit the number of topics per meeting |
 | Everyone was open to feedback | Sometimes feedback is handled too quickly without proper discussion | Plan checkup moments at the end of each sprint before delivering the work |
 
+## Proportion team members
+```mermaid
+pie 
+    title Storypoints per Teamlid   
+    "Teamlid 1" : 0
+    "Teamlid 2" : 0
+    "Teamlid 3" : 0
+    "Teamlid 4" : 0
+    "Teamlid 5" : 0
+```
 
 ## Feedback for team members
 
