@@ -75,7 +75,14 @@ By doing this, I aim to maintain my motivating presence in the team while becomi
 ---
 
 ### Suleyman
+The tip recieved last sprint was that I should be more active on communicating outside of school. I think I greatly improved in this area and replied more often to messages in the groupchat. An area I could improve on is the work process since I didn't update the sprintboard often enough.\
 
+As a TOP I received:"You deliver reliable work" It is good to hear the work I produce is considerd reliable. I would like to keep this going and improve it nexr sprint by delivering work faster.
+
+As a TIP I received:"Appear on time" I recognize that appearing on time is important for team collaboration and planning, so I will make sure to arrive on time for meetings and work sessions.
+
+SMART Learning Goal:
+By the end of the next sprint (in two weeks), I will update the sprint board at least twice per week and check the group chat daily to ensure consistent communication and transparency about my progress. I will also make sure to be on time for every meeting to strengthen my reliability within the team.
 ---
 
 ### Matin
