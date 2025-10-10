@@ -1,137 +1,165 @@
-<template>
-  <div>
-    <h1>Gemeentelijke Uitslagen</h1>
-
-    <div class="search-container" v-if="municipalityNames.length > 0">
-      <label for="municipality-select">Kies een gemeente:</label>
-      <select id="municipality-select" v-model="selectedMunicipality" @change="fetchResultsForSelectedMunicipality">
-        <option v-for="name in municipalityNames" :key="name" :value="name">
-          {{ name }}
-        </option>
-      </select>
-    </div>
-
-    <p v-if="loading">Resultaten worden geladen...</p>
-    <div v-if="error" class="error">
-      {{ error }}
-    </div>
-
-    <table v-if="results.length > 0" class="results-table">
-      <thead>
-      <tr>
-        <th>Partij</th>
-        <th>Aantal Stemmen</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="(result, index) in results" :key="index">
-        <td>{{ result.partyName }}</td>
-        <td>{{ result.validVotes.toLocaleString() }}</td>
-      </tr>
-      </tbody>
-    </table>
-    <p v-if="!loading && results.length === 0 && !error">
-      Selecteer een gemeente om de resultaten te zien.
-    </p>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getMunicipalityNames, getResultsForMunicipality, type MunicipalityResult } from '../service/MunicipalityElectionResults_api';
+import { getMunicipalityNames } from '../service/MunicipalityElectionResults_api';
 
-const results = ref<MunicipalityResult[]>([]);
-const municipalityNames = ref<string[]>([]);
-const selectedMunicipality = ref<string | null>(null);
+const municipalities = ref<string[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-/**
- * A function to get the results for the municipality that is currently selected.
- * We only run this function if a municipality has been selected.
- */
-async function fetchResultsForSelectedMunicipality() {
-  if (!selectedMunicipality.value) return;
-
-  loading.value = true;
-  error.value = null; // Clear any old errors
-  try {
-    // Call the API function to get the results for this municipality
-    results.value = await getResultsForMunicipality(selectedMunicipality.value);
-  } catch (err) {
-    // If there is an error, show a message and clear the results
-    error.value = `Fout bij het ophalen van de uitslagen voor ${selectedMunicipality.value}.`;
-    console.error(err);
-    results.value = [];
-  } finally {
-    // When the data is loaded (or failed), stop the loading spinner
-    loading.value = false;
-  }
+function goToMunicipalityDetails(municipalityName: string) {
+  // Dit is de logica voor de klikfunctionaliteit.
+  alert(`De detailpagina voor de gemeente ${municipalityName} komt binnenkort.`);
 }
 
-/**
- * This runs when the component first appears on the screen.
- * It gets the list of all municipalities.
- */
 onMounted(async () => {
   try {
-    // Get the list of names from the API
-    const names = await getMunicipalityNames();
-    municipalityNames.value = names;
-
-    // If we got names back, automatically select the first one
-    if (names.length > 0) {
-      selectedMunicipality.value = names[0];
-      // Then fetch the results for this first municipality
-      await fetchResultsForSelectedMunicipality();
-    } else {
-      // If there are no names, we stop loading
-      loading.value = false;
-    }
+    municipalities.value = await getMunicipalityNames();
   } catch (err) {
-    // If getting the names fails, we show an error and stop loading
     error.value = 'Fout bij het ophalen van de lijst met gemeenten.';
     console.error(err);
+  } finally {
     loading.value = false;
   }
 });
 </script>
 
+<template>
+  <div class="municipality-view">
+    <h1>Gemeentelijke Uitslagen</h1>
+    <p class="subtitle">Klik op een gemeente om de uitslagen te bekijken.</p>
+
+    <div v-if="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Lijst van gemeenten wordt geladen...</p>
+    </div>
+    <div v-else-if="error" class="error">
+      {{ error }}
+    </div>
+    <div v-else class="municipality-grid">
+      <div
+        v-for="municipality in municipalities"
+        :key="municipality"
+        class="municipality-card"
+        @click="() => goToMunicipalityDetails(municipality)"
+      >
+        <div class="municipality-icon">{{ municipality.charAt(0) }}</div>
+        <h3 class="municipality-name">{{ municipality }}</h3>
+      </div>
+    </div>
+    <p v-if="!loading && municipalities.length === 0 && !error">
+      Geen gemeenten gevonden.
+    </p>
+  </div>
+</template>
+
 <style scoped>
-.results-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
+.municipality-view {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-.results-table th, .results-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+h1 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+  font-size: 2.5rem;
 }
 
-.results-table th {
-  background-color: #f2f2f2;
-  text-align: left;
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading p {
+  color: #6b7280;
+  font-size: 1.125rem;
 }
 
 .error {
-  color: red;
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 8px;
+  margin: 2rem;
+}
+
+.municipality-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.municipality-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.municipality-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+}
+
+.municipality-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.search-container {
-  margin-bottom: 1rem;
-}
-
-.search-container label {
-  margin-right: 0.5rem;
-  font-weight: bold;
-}
-
-.search-container select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  min-width: 250px;
+.municipality-name {
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+  line-height: 1.4;
+  word-wrap: break-word;
 }
 </style>

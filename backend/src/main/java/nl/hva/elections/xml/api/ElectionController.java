@@ -49,7 +49,7 @@ public class ElectionController {
         }
     }
 
-/**
+    /**
      * Get a list of all unique municipality names.
      * This is useful for a dropdown menu on the website.
      * @return A list of municipality names.
@@ -69,7 +69,7 @@ public class ElectionController {
             return ResponseEntity.status(500).build();
         }
     }
-    
+
     /**
      * Get the election results for one specific municipality.
      * We get the name of the municipality from the URL path.
@@ -142,6 +142,22 @@ public class ElectionController {
                 : electionService.readResults(electionId, folderName);
 
         return electionService.getKieskringen(election);
+    }
+
+    /**
+     * Get a list of all municipalities (gemeenten).
+     * @param electionId The election identifier.
+     * @param folderName Optional folder name.
+     * @return A list of regions with the category 'GEMEENTE'.
+     */
+    @GetMapping("{electionId}/regions/gemeenten")
+    public List<Region> getGemeenten(@PathVariable String electionId,
+                                     @RequestParam(required = false) String folderName) {
+        Election election = (folderName == null)
+                ? electionService.readResults(electionId, electionId)
+                : electionService.readResults(electionId, folderName);
+
+        return electionService.getGemeenten(election);
     }
 
     @GetMapping("{electionId}/national")

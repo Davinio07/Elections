@@ -44,5 +44,3 @@ export async function getCandidates(electionId: string, folderName?: string): Pr
     return [];
   }
 }
-
-

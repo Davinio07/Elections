@@ -39,7 +39,7 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
             // Convert the votes from a string to a number. If it's not a number, use 0.
             int totalVotes = 0;
             if (votesString != null) {
-                 totalVotes = Integer.parseInt(votesString);
+                totalVotes = Integer.parseInt(votesString);
             }
 
             // Create a new MunicipalityResult object with the data

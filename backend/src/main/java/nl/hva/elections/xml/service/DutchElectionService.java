@@ -121,6 +121,17 @@ public class DutchElectionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets a list of all municipalities from the election data.
+     * @param election The fully loaded election object.
+     * @return A list of Region objects filtered to only include municipalities.
+     */
+    public List<Region> getGemeenten(Election election) {
+        return election.getRegions().stream()
+                .filter(r -> "GEMEENTE".equals(r.getCategory()))
+                .collect(Collectors.toList());
+    }
+
     public List<NationalResult> getNationalResults(String electionId) {
         Election election = readResults(electionId, electionId);
         return election.getNationalResults();
@@ -149,7 +160,7 @@ public class DutchElectionService {
     public List<MunicipalityResult> getResultsForMunicipality(Election election, String municipalityName) {
         // Create an empty list to hold our results
         List<MunicipalityResult> foundResults = new ArrayList<>();
-        
+
         // Loop through all municipality results in the election data
         for (MunicipalityResult result : election.getMunicipalityResults()) {
             // Check if the municipality name is the one we want (ignoring case)
@@ -158,10 +169,10 @@ public class DutchElectionService {
                 foundResults.add(result);
             }
         }
-        
+
         // Sort the list of results based on the number of valid votes
         foundResults.sort(Comparator.comparing(MunicipalityResult::getValidVotes).reversed());
-        
+
         // Return the sorted list
         return foundResults;
     }
