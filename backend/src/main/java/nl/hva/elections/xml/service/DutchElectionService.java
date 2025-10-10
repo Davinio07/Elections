@@ -124,6 +124,14 @@ public class DutchElectionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves the list of national election results for a given election ID.
+     * This method reads the election data from storage using {@link #readResults(String, String)}
+     * and returns the list of {@link NationalResult} objects contained in it.
+     *
+     * @param electionId the ID of the election to retrieve results for
+     * @return a list of {@link NationalResult} objects for the specified election
+     */
     public List<NationalResult> getNationalResults(String electionId) {
         Election election = readResults(electionId, electionId);
         return election.getNationalResults();

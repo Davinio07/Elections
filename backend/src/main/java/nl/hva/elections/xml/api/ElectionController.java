@@ -108,6 +108,14 @@ public class ElectionController {
         return electionService.getKieskringen(election);
     }
 
+    /**
+     * Handles HTTP GET requests for retrieving national election results by election ID.
+     * This endpoint returns a list of {@link NationalResult} objects representing
+     * the total number of valid votes per party at the national level.
+     *
+     * @param electionId the unique ID of the election to fetch results for
+     * @return a {@link ResponseEntity} containing a list of {@link NationalResult} objects
+     */
     @GetMapping("{electionId}/national")
     public ResponseEntity<List<NationalResult>> getNationalResults(@PathVariable String electionId) {
         List<NationalResult> results = electionService.getNationalResults(electionId);
