@@ -1,4 +1,4 @@
-# Retrospective sprint 1
+# Retrospective sprint 2
 
 ![Requirements](./images/plusDelta.png)
 
@@ -45,6 +45,7 @@ Give the team updates on your progress more frequently.
 
 #### Baran:
 
+Make sure to balance taking initiative with communicating your workload to the team.
 
 #### Matin:
 Stick closer to the planning to avoid stress and last-minute conflicts. Start on the work sooner.
@@ -124,3 +125,16 @@ By the end of the next sprint (in two weeks), I will update the sprint board at 
 ---
 
 ### Matin
+
+During **Sprint 2**, I made a conscious effort to improve my communication with the team, both during work sessions and in our group chat. I wanted to make sure that everyone was aware of my progress and that I stayed aligned with the sprint goals. I also took on more initiative in helping others when possible, which made me feel more involved in the group dynamic.
+
+**As a TOP I received:**
+“You communicated a lot more with the team this sprint.”
+I’m happy to hear that this improvement was noticed, since communication has been one of my main focus points. It helped our collaboration feel smoother and made task coordination easier.
+
+**As a TIP I received:**
+“Stick closer to the planning to avoid stress and last-minute conflicts. Start on the work sooner.”
+I completely agree with this feedback. Sometimes I start tasks later than planned, which can cause some unnecessary time pressure.
+
+**Reflection:**
+In Sprint 2, I worked hard on improving how I interact and coordinate with the team, which resulted in better teamwork and fewer misunderstandings. For the next sprint, I want to take that same focus and apply it to my personal time management. By starting tasks earlier and updating my progress more consistently, I can reduce last-minute stress and help the team stay on schedule. My goal is to stay just as communicative, but more structured in execution.
