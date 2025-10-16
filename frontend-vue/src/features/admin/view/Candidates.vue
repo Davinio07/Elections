@@ -20,11 +20,7 @@ const loading = ref(false);
 const error = ref('');
 const candidates = ref<Candidate[]>([]);
 
-// If your backend needs specific folder names per election, map them here.
-// If not needed, just return undefined to omit the param.
-function folderFor(eid: string): string | undefined {
-  // Example: return 'tk2023' if your folder is lowercase; else return undefined.
-  // return eid; // <- use this if your folder name equals electionId
+function folderFor(): string | undefined {
   return undefined;
 }
 
@@ -52,7 +48,7 @@ async function load() {
   error.value = '';
   candidates.value = [];
   try {
-    candidates.value = await getCandidates(electionId.value, folderFor(electionId.value));
+    candidates.value = await getCandidates(electionId.value, folderFor());
     if (!candidates.value.length) error.value = 'Geen kandidaten gevonden.';
   } catch (e) {
     error.value = 'Fout bij het ophalen van kandidaten.';

@@ -27,7 +27,7 @@ function selectRegion(region: Region) {
 </script>
 
 <template>
-  <h1>Regio's van de verkiezing</h1>
+  <h1>Provinciale Verkiezingen (Kieskringen)</h1>
 
   <div class="buttons">
     <button @click="() => fetchRegions('TK2023')">Verkiezingen 2023</button>

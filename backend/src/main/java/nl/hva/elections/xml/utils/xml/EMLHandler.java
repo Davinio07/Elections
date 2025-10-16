@@ -11,9 +11,9 @@ import java.util.*;
  * This <code>EMLHandler</code> is a SAX2 event handler that is being called by a SAX2 parser while it is
  * processing an EML-XML file. It supports three different file types.
  * <ul>
- *     <li>A file containing the structure or hierarchy of the election</li>
- *     <li>A file containing the candidates lists</li>
- *     <li>A file containing the results from polling stations, municipalities, constituencies and the national level </li>
+ * <li>A file containing the structure or hierarchy of the election</li>
+ * <li>A file containing the candidates lists</li>
+ * <li>A file containing the results from polling stations, municipalities, constituencies and the national level </li>
  * </ul>
  * Depending on the exact tag that is being processed one of the registerXxx methods from one of the transformers is
  * being called.
@@ -115,14 +115,20 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
         tagsWithoutAttributes.add(REPORTING_UNIT_VOTES);
         tagsWithoutAttributes.add(RESULT);
         tagsWithoutAttributes.add(SELECTION);
+        tagsWithoutAttributes.add(SCHEMA_LOCATION);
+        tagsWithoutAttributes.add(SCHEMA_VERSION);
+        tagsWithoutAttributes.add(SHORT_CODE);
+        tagsWithoutAttributes.add(SUPERIOR_REGION_CATEGORY);
+        tagsWithoutAttributes.add(SUPERIOR_REGION_NUMBER);
         tagsWithoutAttributes.add(TOTAL_VOTES);
         tagsWithoutAttributes.add(TOTAL_COUNTED);
         tagsWithoutAttributes.add(TRANSACTION_ID);
         tagsWithoutAttributes.add(TYPE);
+        tagsWithoutAttributes.add(NAME_TYPE);
+        tagsWithoutAttributes.add(UNCOUNTED_VOTES);
         tagsWithoutAttributes.add(VALID_VOTES);
         tagsWithoutAttributes.add(VOTING_METHOD);
-        // These attributes of these tags are handled and are combined with the tag name to form the actual key
-        // for the electionData map.
+        // These are the actual keys used for these specific tags
         tagsWithAttributes.put(AFFILIATION_IDENTIFIER, Set.of(ID));
         tagsWithAttributes.put(AUTHORITY_IDENTIFIER, Set.of(ID));
         tagsWithAttributes.put(CANDIDATE_IDENTIFIER, Set.of(SHORT_CODE, ID));
@@ -145,20 +151,20 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      * Creates an EML Handler that can process the structure file.
      *
      * @param definitionTransformer the <code>DefinitionTransformer</code> that handles the transformation of the
-     *                             provided data into the data model.
+     * provided data into the data model.
      */
     public EMLHandler(
             DefinitionTransformer definitionTransformer,
             CandidateTransformer candidateTransformer,
             RegionTransformer regionTransformer,
-            VotesTransformer votesTransformer,
+            VotesTransformer resultTransformer,
             VotesTransformer nationalVotesTransformer,
             VotesTransformer constituencyVotesTransformer,
             VotesTransformer municipalityVotesTransformer) {
         this.definitionTransformer = definitionTransformer;
         this.candidateTransformer = candidateTransformer;
         this.regionTransformer = regionTransformer;
-        this.votesTransformer = votesTransformer;
+        this.votesTransformer = resultTransformer;
     }
 
 
@@ -167,7 +173,7 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      * calls the <code>registerCandidate</code> on the provided <code>candidateTransformer</code>.
      *
      * @param candidateTransformer the <code>CandidateTransformer</code> that handles the transformation of the
-     *                             provided data into the data model.
+     * provided data into the data model.
      */
     public EMLHandler(CandidateTransformer candidateTransformer) {
         this.candidateTransformer = candidateTransformer;
@@ -198,7 +204,7 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
      * <code>VotesTransformer</code>.
      *
      * @param votesTransformer the <code>VotesTransformer</code> that handles the transformation of the
-     *                             provided data into the data model.
+     * provided data into the data model.
      */
     public EMLHandler(VotesTransformer votesTransformer) {
         aggregated = true;
@@ -309,9 +315,9 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
         // restored.
         switch (localName) {
             case REGION:
-                // Only register if it's KIESKRING or STAAT
+                // We willen alle gemeentes, kieskringen en de staat registreren.
                 String category = electionData.get("Region-RegionCategory");
-                if ((category != null) && ("KIESKRING".equals(category) || "STAAT".equals(category))) {
+                if (category != null && ("KIESKRING".equals(category) || "STAAT".equals(category) || "GEMEENTE".equals(category))) {
                     if (regionTransformer != null) {
                         regionTransformer.registerRegion(electionData);
                     } else if (definitionTransformer != null) {
@@ -320,9 +326,6 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
                 }
                 electionData = savedElectionData.pop();
                 break;
-
-
-
             case REGISTERED_PARTY:
                 definitionTransformer.registerParty(electionData);
                 electionData = savedElectionData.pop();

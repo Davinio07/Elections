@@ -1,6 +1,6 @@
 export async function pingBackend(): Promise<string> {
     try {
-        const response = await fetch('http://localhost:8080/api/admin/ping'); // Let op: pas poort aan
+        const response = await fetch('http://localhost:8080/api/admin/ping');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

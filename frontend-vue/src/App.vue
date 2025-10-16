@@ -10,6 +10,7 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">ga naar partijen</router-link>
           <router-link to="/ScaledElectionResults">Provinciaal</router-link>
+          <router-link to="/kieskring-details">Kieskring Details</router-link>
         </nav>
       </div>
     </header>
@@ -17,7 +18,13 @@
       <router-view />
     </main>
   </div>
+  <div class="p-8 bg-gray-900 min-h-screen flex items-center justify-center">
+    <h1 class="text-4xl font-bold text-white bg-blue-600 px-6 py-3 rounded-lg shadow-lg">
+      🚀 Tailwind is Working!
+    </h1>
+  </div>
 </template>
+
 
 <style>
 /* Globale Stylin voor je hele applicatie */
