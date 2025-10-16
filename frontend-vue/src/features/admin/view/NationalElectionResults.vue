@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { getNationalResults, getNationalSeats } from '@/features/admin/service/NationalElectionResults_api.ts'
-import { Bar } from 'vue-chartjs' // <-- Aangepast van Pie naar Bar
+import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   Title,
   Tooltip,
   Legend,
-  BarElement, // <-- Toegevoegd
-  CategoryScale, // X-as (categorieën)
-  LinearScale,   // Y-as (waarden) <-- Toegevoegd
-  type TooltipItem,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  type TooltipItem, type ChartOptions,
 } from 'chart.js'
 
-// Registreer de juiste Chart.js componenten voor een Bar Chart
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 // Changed interfaces to types to potentially bypass parsing issues in some environments
@@ -92,7 +91,7 @@ const chartData = computed(() => {
     datasets: [
       {
         label: 'Stempercentage',
-        data: percentages, // De data voor de lengte van de staven
+        data: percentages,
         backgroundColor: partyColors,
         borderColor: '#ffffff',
         borderWidth: 1,
@@ -104,13 +103,13 @@ const chartData = computed(() => {
 })
 
 // Chart options - Customized for a Horizontal Bar Chart
-const chartOptions = {
+const chartOptions: ChartOptions<'bar'> = {
   responsive: true,
   maintainAspectRatio: false,
-  indexAxis: 'y' as const, // <-- Zeer BELANGRIJK: Maakt het een horizontaal staafdiagram
+  indexAxis: 'y' as const,
   plugins: {
     legend: {
-      display: false, // Legenda is overbodig bij een staafdiagram met 41 unieke kleuren
+      display: false,
     },
     title: {
       display: true,
@@ -123,7 +122,6 @@ const chartOptions = {
       callbacks: {
         // Custom label to display both percentage and seats. Context is now strongly typed.
         label: function(context: TooltipItem<'bar'>) {
-          // De dataset is nu type 'bar', maar we gebruiken nog steeds de seatsData property
           const dataset = context.dataset as unknown as { votesData: number[], seatsData: number[] };
           const votes = dataset.votesData[context.dataIndex];
           const seats = dataset.seatsData[context.dataIndex];
@@ -139,26 +137,26 @@ const chartOptions = {
         },
         // Title callback context is an array of TooltipItems
         title: function(context: TooltipItem<'bar'>[]) {
-          return context[0].label; // Party Name
+          return context[0].label;
         }
       }
     }
   },
   scales: {
-    x: { // De X-as toont nu de percentages
+    x: {
       stacked: false,
       title: {
         display: true,
         text: 'Stempercentage (%)'
       },
       ticks: {
-        // Zorgt ervoor dat percentages als zodanig worden weergegeven in de as
-        callback: function(value: any) {
+        //
+        callback: function(value) {
           return value + '%';
         }
       }
     },
-    y: { // De Y-as toont nu de partijnamen
+    y: {
       stacked: false
     }
   }
