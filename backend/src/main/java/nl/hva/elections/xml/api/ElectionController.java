@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
@@ -307,4 +308,20 @@ public class ElectionController {
             return ResponseEntity.ok(Collections.emptyList());
         }
     }
+
+    /**
+     * This is a web API endpoint that shows the final seat allocation for a specific election.
+     *
+     * @param electionId The unique identifier for the election, passed in the URL path.
+     * @return A {@code ResponseEntity} containing a map where the key is the party name
+     * and the value is the number of seats allocated. It returns an HTTP 200 (OK)
+     * status on successful retrieval and calculation.
+     */
+    @GetMapping("{electionId}/seats")
+    public ResponseEntity<Map<String, Integer>> getSeats(@PathVariable String electionId) {
+        List<NationalResult> results = electionService.getNationalResults(electionId);
+        Map<String, Integer> seats = electionService.calculateSeats(results, 150);
+        return ResponseEntity.ok(seats);
+    }
+
 }

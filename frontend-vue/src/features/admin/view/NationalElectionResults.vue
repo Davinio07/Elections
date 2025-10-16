@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
-import { getNationalResults } from '@/features/admin/service/NationalElectionResults_api.ts'
+import { computed, ref } from 'vue'
+import { getNationalResults, getNationalSeats } from '@/features/admin/service/NationalElectionResults_api.ts'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -20,16 +20,24 @@ interface NationalResult {
   validVotes: number
 }
 
+interface NationalSeats {
+  [partyName: string]: number
+}
+
 const nationalResults = ref<NationalResult[]>([])
+const nationalSeats = ref<NationalSeats>({})
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-async function fetchNationalResults(electionId: string) {
+async function fetchElectionData(electionId: string) {
   loading.value = true
   error.value = null
   nationalResults.value = []
+  nationalSeats.value = {}
+
   try {
-    nationalResults.value = await getNationalResults(electionId) as NationalResult[];
+    nationalResults.value = await getNationalResults(electionId) as NationalResult[]
+    nationalSeats.value = await getNationalSeats(electionId) as NationalSeats
   } catch (err) {
     error.value = (err instanceof Error) ? err.message : 'Er is een fout opgetreden.'
   } finally {
@@ -38,18 +46,28 @@ async function fetchNationalResults(electionId: string) {
 }
 
 // Chart configuration
-const chartData = computed(() => ({
-  labels: nationalResults.value.map(r => r.partyName),
-  datasets: [
-    {
-      label: 'Aantal geldige stemmen',
-      data: nationalResults.value.map(r => r.validVotes),
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1,
-    }
-  ]
-}))
+const chartData = computed(() => {
+  const labels = nationalResults.value.map(r => r.partyName)
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Aantal geldige stemmen',
+        data: nationalResults.value.map(r => r.validVotes),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Aantal zetels',
+        data: labels.map(party => nationalSeats.value[party] || 0),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      }
+    ]
+  }
+})
 
 const chartOptions = {
   responsive: true,
@@ -57,11 +75,11 @@ const chartOptions = {
     legend: { position: 'top' as const },
     title: {
       display: true,
-      text: 'Nationale verkiezingsresultaten per partij'
+      text: 'Nationale verkiezingsresultaten: stemmen en zetels'
     }
   },
   scales: {
-    x: { ticks: { color: '#333' } },
+    x: { stacked: false, ticks: { color: '#333' } },
     y: { beginAtZero: true }
   }
 }
@@ -71,10 +89,10 @@ const chartOptions = {
   <h1 class="text-xl font-semibold mb-4">Nationale verkiezingsresultaten</h1>
 
   <div class="mb-4 flex gap-2">
-    <button @click="() => fetchNationalResults('TK2021')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+    <button @click="() => fetchElectionData('TK2021')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
       TK2021
     </button>
-    <button @click="() => fetchNationalResults('TK2023')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+    <button @click="() => fetchElectionData('TK2023')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
       TK2023
     </button>
   </div>
