@@ -56,4 +56,26 @@ public class UserService {
         // 3. Als alles oké is, sla de nieuwe gebruiker op.
         return userRepository.save(user);
     }
+
+    /**
+     * Authenticates a user based on their username and password.
+     * @param username The user's username.
+     * @param password The user's plain text password.
+     * @return The User object if authentication is successful.
+     * @throws RuntimeException if authentication fails.
+     */
+    public User authenticate(String username, String password) {
+        // Find the user by their username. If not found, throw an exception.
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+
+        // IMPORTANT: This is a temporary, UNSAFE password check.
+        // In a real application, you would use a password encoder to compare hashed passwords.
+        // For this school project, a simple string comparison is acceptable for now.
+        if (!user.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid username or password");
+        }
+
+        return user;
+    }
 }
