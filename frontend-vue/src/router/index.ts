@@ -7,6 +7,7 @@ import NationalElectionResults from "@/features/admin/view/NationalElectionResul
 import Candidates from '@/features/admin/view/Candidates.vue';
 import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElectionResults.vue';
 import Registration from '@/features/admin/view/UserRegistration.vue';
+import UserLogin from '@/features/admin/view/UserLogin.vue';
 
 const routes = [
   {
@@ -14,6 +15,11 @@ const routes = [
     name: 'Registration',
     component: Registration,
   },
+  {
+  path: '/login',
+  name: 'UserLogin',
+  component: UserLogin,
+ },
   {
     path: '/admin',
     name: 'AdminDashboard',
