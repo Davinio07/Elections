@@ -2,6 +2,7 @@ package nl.hva.elections.xml.api;
 
 import nl.hva.elections.xml.model.Candidate;
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.model.MunicipalityResult;
@@ -305,6 +306,40 @@ public class ElectionController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok(Collections.emptyList());
+        }
+    }
+
+    /**
+     * Gets all unique municipality names for the election
+     * Used for the search dropdown in the frontend
+     * @return A response entity containing a list of municipality names
+     */
+    @GetMapping("/municipalities/names")
+    public ResponseEntity<List<String>> getMunicipalityNames() {
+        try {
+            Election election = electionService.loadAllElectionData();
+            List<String> names = electionService.getMunicipalityNames(election);
+            return ResponseEntity.ok(names);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * Gets the election results for a specific municipality.
+     * @param municipalityName The name of the municipality from the URL path.
+     * @return A response entity containing a list of results for that municipality.
+     */
+    @GetMapping("/municipalities/{municipalityName}")
+    public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
+        try {
+            Election election = electionService.loadAllElectionData();
+            List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
 }
