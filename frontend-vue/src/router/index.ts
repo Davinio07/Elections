@@ -6,8 +6,14 @@ import PartiesView from '@/features/admin/view/PartiesView.vue';
 import NationalElectionResults from "@/features/admin/view/NationalElectionResults.vue";
 import Candidates from '@/features/admin/view/Candidates.vue';
 import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElectionResults.vue';
+import Registration from '@/features/admin/view/UserRegistration.vue';
 
 const routes = [
+  {
+    path: '/register',
+    name: 'Registration',
+    component: Registration,
+  },
   {
     path: '/admin',
     name: 'AdminDashboard',

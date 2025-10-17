@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -152,28 +153,15 @@ public class DutchElectionService {
     }
 
     /**
-     * This method finds the election results for a specific municipality.
-     * @param election The object that holds all the election data.
-     * @param municipalityName The name of the municipality we are looking for.
-     * @return A list of results for that municipality, sorted by votes.
+     * Filters the election results for a single, specific municipality.
+     * @param election The fully loaded election object.
+     * @param municipalityName The name of the municipality to filter by.
+     * @return A list of MunicipalityResult objects, only for the requested municipality.
      */
     public List<MunicipalityResult> getResultsForMunicipality(Election election, String municipalityName) {
-        // Create an empty list to hold our results
-        List<MunicipalityResult> foundResults = new ArrayList<>();
-
-        // Loop through all municipality results in the election data
-        for (MunicipalityResult result : election.getMunicipalityResults()) {
-            // Check if the municipality name is the one we want (ignoring case)
-            if (result.getMunicipalityName().equalsIgnoreCase(municipalityName)) {
-                // If it is, add it to our new list
-                foundResults.add(result);
-            }
-        }
-
-        // Sort the list of results based on the number of valid votes
-        foundResults.sort(Comparator.comparing(MunicipalityResult::getValidVotes).reversed());
-
-        // Return the sorted list
-        return foundResults;
+        return election.getMunicipalityResults().stream()
+                .filter(result -> result.getMunicipalityName().equalsIgnoreCase(municipalityName))
+                .sorted(Comparator.comparing(MunicipalityResult::getValidVotes).reversed())
+                .collect(Collectors.toList());
     }
 }

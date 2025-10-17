@@ -17,6 +17,7 @@ onMounted(async () => {
   } catch (err) {
     error.value = 'Fout bij het ophalen van de lijst met gemeenten.';
     console.error(err);
+  } finally {
     loading.value = false;
   }
 });
@@ -160,21 +161,5 @@ h1 {
   color: #1f2937;
   line-height: 1.4;
   word-wrap: break-word;
-}
-
-.search-container {
-  margin-bottom: 1rem;
-}
-
-.search-container label {
-  margin-right: 0.5rem;
-  font-weight: bold;
-}
-
-.search-container select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  min-width: 250px;
 }
 </style>

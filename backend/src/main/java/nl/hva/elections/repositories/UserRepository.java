@@ -4,15 +4,18 @@ import nl.hva.elections.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * Repository interface for User data.
  * By extending JpaRepository, we get a bunch of CRUD (Create, Read, Update, Delete)
  * methods for free, like save(), findById(), findAll(), etc.
- *
- * Spring will automatically implement this interface for us at runtime.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // We can add custom query methods here later if we need them.
-    // For example: User findByUsername(String username);
+
+    // Methoden om te zoeken naar een gebruiker op basis van de gebruikersnaam of het e-mailadres.
+    // Optional betekent dat het resultaat een gebruiker kan bevatten, of leeg kan zijn.
+    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 }

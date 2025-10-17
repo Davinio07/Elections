@@ -36,14 +36,24 @@ public class UserService {
     }
 
     /**
-     * Creates and saves a new user.
-     * In a real app, we would add logic here like checking for duplicate usernames
-     * or encrypting the password before saving.
+     * Creates and saves a new user after validating the data.
+     * It checks if the username or email is already in use.
      * @param user The User object to save.
      * @return The saved User object, now with an ID.
+     * @throws IllegalStateException if the username or email is already taken.
      */
     public User createUser(User user) {
-        // actual good logic would go here. For now, we just save it directly.
+        // 1. Controleer of de gebruikersnaam al in gebruik is.
+        userRepository.findByUsername(user.getUsername()).ifPresent(u -> {
+            throw new IllegalStateException("Gebruikersnaam is al in gebruik");
+        });
+
+        // 2. Controleer of het e-mailadres al in gebruik is.
+        userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
+            throw new IllegalStateException("E-mailadres is al in gebruik");
+        });
+
+        // 3. Als alles oké is, sla de nieuwe gebruiker op.
         return userRepository.save(user);
     }
 }
