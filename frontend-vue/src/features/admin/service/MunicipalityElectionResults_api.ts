@@ -46,18 +46,3 @@ export async function getMunicipalityNames(): Promise<string[]> {
         throw error;
     }
 }
-
-/**
- * Gets a list of all the municipality names.
- * @returns A promise that gives us an array of names.
- */
-export async function getMunicipalityNames(): Promise<string[]> {
-    try {
-        const response = await apiClient<string[]>('/elections/municipalities/names');
-        return response;
-    } catch (error) {
-        // Show an error message if the call fails
-        console.error('API Error when fetching municipality names:', error);
-        throw error;
-    }
-}
