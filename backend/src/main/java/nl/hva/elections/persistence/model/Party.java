@@ -2,6 +2,8 @@ package nl.hva.elections.persistence.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Party {
     @Id
@@ -11,8 +13,8 @@ public class Party {
 
     @Column(unique = true, nullable = false)
     private String name;
-    private String logo_url;
-    private Number national_seats;
+    private String logoUrl;
+    private Number nationalSeats;
 
     // This links to the Candidate class
     // "mappedBy" tells JPA that the 'party' field in the Candidate class owns this relationship
@@ -29,4 +31,30 @@ public class Party {
         this.nationalSeats = nationalSeats;
     }
 
+    // --- Getters and Setters ---
+
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+    public Number getNationalSeats() {
+        return nationalSeats;
+    }
+    public void setNationalSeats(Number nationalSeats) {
+        this.nationalSeats = nationalSeats;
+    }
 }
