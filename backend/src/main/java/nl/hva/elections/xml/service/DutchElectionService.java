@@ -13,8 +13,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -163,5 +162,41 @@ public class DutchElectionService {
                 .filter(result -> result.getMunicipalityName().equalsIgnoreCase(municipalityName))
                 .sorted(Comparator.comparing(MunicipalityResult::getValidVotes).reversed())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * This function calculates seat distribution in an election using the D'Hondt method.
+     *
+     * @param results    A list of {@code NationalResult} objects, where each object contains
+     * the party's name and its total number of valid votes.
+     * @param totalSeats The total number of seats to be allocated.
+     * @return A {@code Map<String, Integer>} where the keys are the party names and the
+     * values are the number of seats allocated to each party.
+     */
+    public Map<String, Integer> calculateSeats(List<NationalResult> results, int totalSeats) {
+        Map<String, Integer> seats = new HashMap<>();
+        Map<String, Integer> voteCounts = results.stream()
+                .collect(Collectors.toMap(NationalResult::getPartyName, NationalResult::getValidVotes));
+
+        for (String party : voteCounts.keySet()) {
+            seats.put(party, 0); // initialize seats
+        }
+
+        for (int i = 0; i < totalSeats; i++) {
+            String maxParty = null;
+            double maxValue = -1;
+            for (String party : voteCounts.keySet()) {
+                int votes = voteCounts.get(party);
+                int allocatedSeats = seats.get(party);
+                double value = votes / (allocatedSeats + 1.0); // D’Hondt formula
+                if (value > maxValue) {
+                    maxValue = value;
+                    maxParty = party;
+                }
+            }
+            seats.put(maxParty, seats.get(maxParty) + 1);
+        }
+
+        return seats;
     }
 }
