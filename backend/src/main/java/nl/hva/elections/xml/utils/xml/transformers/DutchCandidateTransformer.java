@@ -34,6 +34,22 @@ public class DutchCandidateTransformer implements CandidateTransformer {
         candidate.setGender(electionData.get("Gender"));
         candidate.setLocality(electionData.get("LocalityName"));
 
+        // --- FIX: Check for both RegisteredAppellation and RegisteredName ---
+        String partyName = electionData.get("RegisteredAppellation");
+        if (partyName == null || partyName.isBlank()) {
+            // Fallback to the other potential tag for party name
+            partyName = electionData.get("RegisteredName");
+        }
+        // -------------------------------------------------------------------
+
+        // Diagnostic output (keep this to ensure data is found now)
+        if (partyName == null || partyName.isBlank()) {
+            System.err.println("ERROR: Missing RegisteredAppellation/RegisteredName for candidate " + id + ".");
+        } else {
+            System.out.println("Found Party Name for candidate " + id + ": [" + partyName + "]");
+        }
+
+        candidate.setPartyName(partyName);
         election.addCandidate(candidate);
 
         System.out.println("Registered candidate: " + candidate.getId());
