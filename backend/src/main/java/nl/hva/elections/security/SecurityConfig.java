@@ -12,67 +12,71 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Main security configuration for the application.
- * This is where we disable default security and configure our own rules.
+ * @class SecurityConfig
+ * @description The main configuration for all security-related stuff.
+ * We use this to disable the default Spring login page and set up our own rules for JWT.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     /**
-     * This is the main security filter chain. It tells Spring Security how to handle requests.
+     * This is the main security filter. It's like a bouncer at a club.
+     * It checks every request and decides if it's allowed or not.
+     * @param http The HttpSecurity object from Spring to configure the rules.
+     * @return The configured security filter chain.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF protection. This is common for APIs that use tokens.
+                // Disable CSRF. Not needed for our stateless API.
                 .csrf(csrf -> csrf.disable())
-
-                // We are using JWT, so we don't need sessions.
+                // We're using tokens, so we don't need the server to remember users in a session.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Define which endpoints are public and which are protected.
+                // Here we define the access rules.
                 .authorizeHttpRequests(auth -> auth
-                        // IMPORTANT: Allow all requests to our API endpoints for now.
-                        // This lets our registration and login work without a token.
-                        // We will add more specific rules later.
+                        // We allow everyone to access our API endpoints for now.
+                        // This is important so the login and register pages work.
                         .requestMatchers("/api/**").permitAll()
-                        // Allow access to the H2 database console.
+                        // Also allow everyone to see the H2 database console.
                         .requestMatchers("/h2-console/**").permitAll()
-                        // Any other request that is not specified must be authenticated.
+                        // Any other request needs to be authenticated (we'll add this later).
                         .anyRequest().authenticated()
                 );
 
-        // Required for the H2 console to work correctly with Spring Security.
+        // This is a small fix to make the H2 console display correctly.
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
     }
-
+    
     /**
-     * Configures the password encoder bean.
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * This configures the CORS settings for the entire application.
+     * This sets up the CORS rules. It's like telling our backend bouncer:
+     * "It's okay to talk to the frontend running on localhost:5173."
+     * @return A WebMvcConfigurer with our CORS rules.
      */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                // This allows our frontend (running on localhost:5173) to
-                // make requests to our backend.
-                registry.addMapping("/api/**") // Apply this rule to all API endpoints
-                        .allowedOrigins("http://localhost:5173") // Allow requests from this origin
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these methods
-                        .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true); // Allow sending cookies/credentials
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:5173")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
+    }
+
+    /**
+     * Creates the PasswordEncoder we use for hashing passwords.
+     * By making it a @Bean, Spring knows about it and can give it to other classes,
+     * like our UserService.
+     * @return A BCrypt password encoder instance.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
