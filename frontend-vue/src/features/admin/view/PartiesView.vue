@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { partyService, getPartyColor } from '../service/partyService';
 
 interface PoliticalParty {
@@ -9,6 +9,12 @@ interface PoliticalParty {
 const parties = ref<PoliticalParty[]>([]);
 const loading = ref(true);
 const error = ref(false);
+
+// Reactive state to hold the list of parties for comparison
+const selectedParties = ref<PoliticalParty[]>([]);
+
+// Define the maximum number of parties allowed for comparison
+const MAX_PARTIES = 2;
 
 const loadParties = async () => {
   try {
@@ -27,12 +33,42 @@ const getInitials = (name: string): string => {
   if (words.length === 1) {
     return words[0].substring(0, 2).toUpperCase();
   }
+  // Try to use the first two words' initials
   return words
     .slice(0, 2)
     .map(word => word[0])
     .join('')
     .toUpperCase();
 };
+
+// Helper to check if a party is currently selected
+const isSelected = (party: PoliticalParty): boolean => {
+  return selectedParties.value.some(p => p.registeredAppellation === party.registeredAppellation);
+};
+
+// Function to add or remove a party from the selectedParties list
+const toggleParty = (party: PoliticalParty) => {
+  const index = selectedParties.value.findIndex(
+    p => p.registeredAppellation === party.registeredAppellation
+  );
+
+  if (index === -1) {
+    // Party not selected, check if max limit is reached
+    if (selectedParties.value.length < MAX_PARTIES) {
+      selectedParties.value.push(party);
+    } else {
+      // Limit reached, prevent selection and log a warning
+      console.warn(`Cannot select more than ${MAX_PARTIES} parties.`);
+      // Optionally, you could show a user-facing toast/notification here
+    }
+  } else {
+    // Party already selected, remove it (always allowed)
+    selectedParties.value.splice(index, 1);
+  }
+};
+
+// Computed property to display the count of selected parties
+const selectedPartyCount = computed(() => selectedParties.value.length);
 
 onMounted(() => {
   loadParties();
@@ -42,6 +78,7 @@ onMounted(() => {
 <template>
   <div class="parties-view">
     <h1>Politieke Partijen</h1>
+    <p class="subtitle">Select parties below to add them to your comparison list.</p>
 
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
@@ -53,14 +90,39 @@ onMounted(() => {
     </div>
 
     <div v-else>
-      <p class="party-count">{{ parties.length }} parties registered</p>
+      <div class="comparison-panel">
+        <p class="panel-title">Your Comparison List ({{ selectedPartyCount }})</p>
+        <div v-if="selectedPartyCount === 0" class="default-state">
+          Select up to **2 parties** to compare their key positions.
+        </div>
+        <div v-else class="selected-parties-list">
+          <div
+            v-for="party in selectedParties"
+            :key="party.registeredAppellation"
+            class="selected-party-button"
+            :style="{ backgroundColor: getPartyColor(party.registeredAppellation) }"
+            @click="toggleParty(party)"
+          >
+            {{ party.registeredAppellation }}
+            <span class="remove-icon">×</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="party-count">{{ parties.length }} parties registered for TK2023</p>
 
       <div class="party-grid">
         <div
           v-for="party in parties"
           :key="party.registeredAppellation"
           class="party-card"
+          :class="{
+            selected: isSelected(party),
+            // Optional: Visually indicate disabled selection if max reached
+            'selection-disabled': !isSelected(party) && selectedPartyCount >= MAX_PARTIES
+          }"
           :style="{ borderLeftColor: getPartyColor(party.registeredAppellation) }"
+          @click="toggleParty(party)"
         >
           <div
             class="party-icon"
@@ -182,6 +244,30 @@ h1 {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
+/* --- Party Card Selection Feedback --- */
+
+.party-card.selected {
+  /* Dynamic border color is set via inline style, so we use a fallback for the shadow border */
+  box-shadow: 0 0 0 3px var(--border-left-color, #10b981), 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+/* Style for unselected cards when limit is reached */
+.party-card.selection-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.party-card.selection-disabled:hover {
+  transform: none; /* Disable hover lift for disabled cards */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.party-card.selected:hover {
+  transform: scale(1.03) translateY(-4px);
+}
+
 .party-icon {
   width: 70px;
   height: 70px;
@@ -203,6 +289,66 @@ h1 {
   line-height: 1.4;
   word-wrap: break-word;
 }
+
+/* --- Comparison Panel Styles --- */
+.comparison-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.panel-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  border-bottom: 1px dashed #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.default-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.selected-parties-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.selected-party-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.selected-party-button:hover {
+  opacity: 0.85;
+}
+
+.remove-icon {
+  margin-left: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* --- Media Queries --- */
 
 @media (max-width: 1024px) {
   .party-grid {
