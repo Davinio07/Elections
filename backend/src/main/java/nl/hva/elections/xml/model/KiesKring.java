@@ -6,13 +6,13 @@ import java.util.Objects;
  * This class holds the voting results for one party in one municipality.
  * It's a simple object to store and pass data.
  */
-public class MunicipalityResult {
+public class KiesKring {
 
     private String municipalityName;
     private String partyName;
     private int validVotes;
 
-    public MunicipalityResult(String municipalityName, String partyName, int validVotes) {
+    public KiesKring(String municipalityName, String partyName, int validVotes) {
         this.municipalityName = municipalityName;
         this.partyName = partyName;
         this.validVotes = validVotes;
@@ -42,16 +42,6 @@ public class MunicipalityResult {
 
     public void setValidVotes(int validVotes) {
         this.validVotes = validVotes;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MunicipalityResult that = (MunicipalityResult) o;
-        return validVotes == that.validVotes &&
-               Objects.equals(municipalityName, that.municipalityName) &&
-               Objects.equals(partyName, that.partyName);
     }
 
     @Override
