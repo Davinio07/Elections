@@ -50,7 +50,7 @@ async function fetchElectionData(electionId: string) {
     nationalSeats.value = (seats as NationalSeats) || {}
   } catch (err) {
     // Check if err has a message property, otherwise provide a fallback
-    error.value = (err instanceof Error) ? err.message : 'Er is een onbekende fout opgetreden bij het ophalen van de data.'
+    error.value = (err instanceof Error) ? err.message : ' Er is een onbekende fout opgetreden bij het ophalen van de data.'
   } finally {
     loading.value = false
   }

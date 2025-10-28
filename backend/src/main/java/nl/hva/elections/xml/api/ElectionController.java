@@ -5,7 +5,6 @@ import nl.hva.elections.xml.model.Candidate;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
-import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.springframework.http.ResponseEntity;
@@ -290,12 +289,16 @@ public class ElectionController {
      * @return A response entity containing a list of results for that municipality.
      */
     @GetMapping("/municipalities/{municipalityName}")
-    public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
+    public ResponseEntity<List<KiesKring>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
         try {
-            Election election = electionService.loadAllElectionData();
-            List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
-            return ResponseEntity.ok(results);
+            // Get all election data from our service
+            Election electionData = electionService.loadAllElectionData();
+            // Ask the service to find the results for the municipality we want
+            List<KiesKring> municipalityResults = electionService.getResultsForMunicipality(electionData, municipalityName);
+            // Send back the results list with a 'success' status
+            return ResponseEntity.ok(municipalityResults);
         } catch (Exception e) {
+            // If there's an error, print it and send a 'server error' status
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
