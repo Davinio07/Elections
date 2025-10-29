@@ -1,30 +1,21 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { getCandidates } from '@/features/admin/service/ScaledElectionResults_api.ts';
+// FIX 1: Import the shared type, which fixes the type assignment error
+import { getCandidates, type CandidateData } from '@/features/admin/service/ScaledElectionResults_api.ts';
 
-interface Candidate {
-  id?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  initials?: string | null;
-  prefix?: string | null;
-  gender?: string | null;
-  locality?: string | null;
-  listNumber?: string | null;
-  listName?: string | null;
-  numberOnList?: string | null;
-}
+// FIX 2: Removed the old local interface definition.
 
 const electionId = ref<'TK2023' | 'TK2024'>('TK2023');
 const loading = ref(false);
 const error = ref('');
-const candidates = ref<Candidate[]>([]);
+// Use the imported type
+const candidates = ref<CandidateData[]>([]);
 
 // --- NEW: modal state ---
 const showModal = ref(false);
-const activeCandidate = ref<Candidate | null>(null);
+const activeCandidate = ref<CandidateData | null>(null); // Use the imported type
 
-function openCandidate(c: Candidate) {
+function openCandidate(c: CandidateData) { // Use the imported type
   activeCandidate.value = c;
   showModal.value = true;
   // nextTick(() => try to focus the close button) — optional
@@ -46,7 +37,8 @@ function folderFor(): string | undefined {
   return undefined;
 }
 
-function displayName(c: Candidate): string {
+function displayName(c: CandidateData): string { // Use the imported type
+                                                 // Note: The new getCandidates mapping handles splitting the name into firstName and lastName
   const firstOrInitials = (c.firstName?.trim() || c.initials?.trim() || '').trim();
   const prefix = c.prefix && c.prefix.trim() ? ` ${c.prefix.trim()}` : '';
   const last = c.lastName?.trim() || '';
@@ -54,7 +46,7 @@ function displayName(c: Candidate): string {
   return name || c.id || 'Onbekende kandidaat';
 }
 
-function candidateKey(c: Candidate, i: number): string {
+function candidateKey(c: CandidateData, i: number): string { // Use the imported type
   const parts = [
     c.id ?? '',
     c.listNumber ?? '',
@@ -70,7 +62,8 @@ async function load() {
   error.value = '';
   candidates.value = [];
   try {
-    candidates.value = await getCandidates(electionId.value, folderFor());
+    // Call without electionId/folderName as the API is now simplified
+    candidates.value = await getCandidates();
     if (!candidates.value.length) error.value = 'Geen kandidaten gevonden.';
   } catch (e) {
     error.value = 'Fout bij het ophalen van kandidaten.';
@@ -128,7 +121,6 @@ onBeforeUnmount(() => {
           <li v-if="c.id"><strong>ID:</strong> {{ c.id }}</li>
         </ul>
 
-        <!-- NEW: open modal button -->
         <div class="actions">
           <button class="linklike" @click="openCandidate(c)" aria-haspopup="dialog">
             Meer info
@@ -138,7 +130,6 @@ onBeforeUnmount(() => {
     </div>
   </section>
 
-  <!-- NEW: modal (teleported to body for stacking context) -->
   <Teleport to="body">
     <div
       v-if="showModal"
@@ -166,7 +157,6 @@ onBeforeUnmount(() => {
             <li v-if="activeCandidate?.locality"><strong>Woonplaats:</strong> {{ activeCandidate?.locality }}</li>
             <li v-if="activeCandidate?.gender"><strong>Geslacht:</strong> {{ activeCandidate?.gender }}</li>
             <li v-if="activeCandidate?.id"><strong>ID:</strong> {{ activeCandidate?.id }}</li>
-            <!-- Voeg hier eenvoudig extra velden toe zodra beschikbaar -->
           </ul>
         </div>
 
@@ -179,6 +169,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* ... (existing styles) ... */
 .page { display: grid; gap: 1rem; padding: 1rem; }
 .bar { display: grid; gap: .75rem; }
 .controls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }

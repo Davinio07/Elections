@@ -1,8 +1,8 @@
 package nl.hva.elections.persistence.model;
 
 import jakarta.persistence.*;
-
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore; // <--- ADD THIS IMPORT
 
 @Entity
 public class Party {
@@ -19,6 +19,7 @@ public class Party {
     // This links to the Candidate class
     // "mappedBy" tells JPA that the 'party' field in the Candidate class owns this relationship
     @OneToMany(mappedBy = "party")
+    @JsonIgnore // <--- ADD THIS ANNOTATION
     private List<Candidate> candidates;
 
     // A no-argument constructor is required by JPA
