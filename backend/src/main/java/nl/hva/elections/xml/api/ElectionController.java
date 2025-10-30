@@ -16,24 +16,20 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
- * All System.out.println calls are now replaced with a proper SLF4J logger.
+ * The try-catch blocks are now simplified, as all exceptions will be
+ * handled by the GlobalExceptionHandler.
  */
 @RestController
 @RequestMapping("/api/elections")
 public class ElectionController {
 
-    // I have added a logger here so we can stop using System.out.println.
-    // This is way better for production and debugging.
     private static final Logger logger = LoggerFactory.getLogger(ElectionController.class);
-
     private final DutchElectionService electionService;
-    private List<Region> regions = new ArrayList<>();
 
     public ElectionController(DutchElectionService electionService) {
         this.electionService = electionService;
@@ -41,24 +37,16 @@ public class ElectionController {
 
     /**
      * Haalt alle verkiezingsdata in één keer op.
-     * Dit is de endpoint die je frontend gebruikt.
+     * We've removed the try-catch here. If any exception occurs, our GlobalExceptionHandler
+     * will catch it and return a structured 500 error response. This keeps our controller methods clean and focused
+     * on their primary responsibility.
      */
     @GetMapping("/results")
-    public ResponseEntity<Election> getElectionResults() {
-        try {
-            logger.info("Request received to load all election data.");
-            // Roep de service aan die alle data laadt en parset
-            Election election = electionService.loadAllElectionData();
-            // Stuur de data terug met een 200 OK status
-            logger.info("Successfully loaded all election data.");
-            return ResponseEntity.ok(election);
-        } catch (IOException | XMLStreamException | ParserConfigurationException | SAXException e) {
-            // If something goes wrong, we log the error instead of just printing the stack trace.
-            // This gives us more context, like which request failed.
-            logger.error("Failed to load all election data due to an exception.", e);
-            // Stuur een 500 Internal Server Error status
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<Election> getElectionResults() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        logger.info("Request received to load all election data.");
+        Election election = electionService.loadAllElectionData();
+        logger.info("Successfully loaded all election data.");
+        return ResponseEntity.ok(election);
     }
 
     /**
@@ -81,13 +69,6 @@ public class ElectionController {
         }
     }
 
-    public void addRegion(Region region) {
-        this.regions.add(region);
-    }
-
-    public List<Region> getRegions() {
-        return regions;
-    }
 
     @GetMapping("{electionId}/regions")
     public List<Region> getRegions(@PathVariable String electionId,
@@ -100,7 +81,7 @@ public class ElectionController {
 
             return election.getRegions();
         } catch (Exception e) {
-            logger.error("Error fetching regions for electionId: {}", electionId, e);
+            logger.error("Error fetching regions for electionId: {}. Returning empty list.", electionId, e);
             return Collections.emptyList();
         }
     }
@@ -150,7 +131,7 @@ public class ElectionController {
                     : electionService.readResults(electionId, folderName);
             return (election == null) ? Collections.emptyList() : election.getCandidates();
         } catch (Exception e) {
-            logger.error("Error fetching candidates for electionId: {}", electionId, e);
+            logger.error("Error fetching candidates for electionId: {}. Returning empty list.", electionId, e);
             return Collections.emptyList();
         }
     }
@@ -174,19 +155,12 @@ public class ElectionController {
                     : electionService.readResults(electionId, folderName);
 
             List<PoliticalParty> parties = election.getPoliticalParties();
-
-            // We can use a logger for debugging too, which is cleaner than System.out.
-            // I set this to DEBUG level so it doesn't spam the console in production.
-            logger.debug("\n=== Political Parties for {} ===", electionId);
-            parties.forEach(party ->
-                    logger.debug("- {}", party.getRegisteredAppellation())
-            );
             logger.debug("Total parties: {}\n", parties.size());
 
             return ResponseEntity.ok(parties);
         } catch (Exception e) {
-            logger.error("Error fetching parties for electionId: {}", electionId, e);
-            return ResponseEntity.ok(Collections.emptyList()); // Returning empty list on error as before.
+            logger.error("Error fetching parties for electionId: {}. Returning empty list.", electionId, e);
+            return ResponseEntity.ok(Collections.emptyList());
         }
     }
 
@@ -253,7 +227,7 @@ public class ElectionController {
 
             return ResponseEntity.ok(count);
         } catch (Exception e) {
-            logger.error("Error counting parties for electionId: {}", electionId, e);
+            logger.error("Error counting parties for electionId: {}. Returning empty list.", electionId, e);
             return ResponseEntity.ok(0);
         }
     }
@@ -283,7 +257,7 @@ public class ElectionController {
 
             return ResponseEntity.ok(partyNames);
         } catch (Exception e) {
-            logger.error("Error fetching party names for electionId: {}", electionId, e);
+            logger.error("Error fetching party names for electionId: {}. Returning empty list.", electionId, e);
             return ResponseEntity.ok(Collections.emptyList());
         }
     }
@@ -294,16 +268,11 @@ public class ElectionController {
      * @return A response entity containing a list of municipality names
      */
     @GetMapping("/municipalities/names")
-    public ResponseEntity<List<String>> getMunicipalityNames() {
-        try {
-            logger.info("Fetching all municipality names.");
-            Election election = electionService.loadAllElectionData();
-            List<String> names = electionService.getMunicipalityNames(election);
-            return ResponseEntity.ok(names);
-        } catch (Exception e) {
-            logger.error("Failed to fetch municipality names.", e);
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<List<String>> getMunicipalityNames() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        logger.info("Fetching all municipality names.");
+        Election election = electionService.loadAllElectionData();
+        List<String> names = electionService.getMunicipalityNames(election);
+        return ResponseEntity.ok(names);
     }
 
     /**
@@ -312,15 +281,10 @@ public class ElectionController {
      * @return A response entity containing a list of results for that municipality.
      */
     @GetMapping("/municipalities/{municipalityName}")
-    public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
-        try {
-            logger.info("Fetching results for municipality: {}", municipalityName);
-            Election election = electionService.loadAllElectionData();
-            List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            logger.error("Failed to fetch results for municipality: {}", municipalityName, e);
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        logger.info("Fetching results for municipality: {}", municipalityName);
+        Election election = electionService.loadAllElectionData();
+        List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
+        return ResponseEntity.ok(results);
     }
 }
