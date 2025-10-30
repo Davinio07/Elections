@@ -5,9 +5,10 @@ import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
-import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.service.DutchElectionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -21,10 +22,16 @@ import java.util.List;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
+ * All System.out.println calls are now replaced with a proper SLF4J logger.
  */
 @RestController
 @RequestMapping("/api/elections")
 public class ElectionController {
+
+    // I have added a logger here so we can stop using System.out.println.
+    // This is way better for production and debugging.
+    private static final Logger logger = LoggerFactory.getLogger(ElectionController.class);
+
     private final DutchElectionService electionService;
     private List<Region> regions = new ArrayList<>();
 
@@ -39,13 +46,17 @@ public class ElectionController {
     @GetMapping("/results")
     public ResponseEntity<Election> getElectionResults() {
         try {
+            logger.info("Request received to load all election data.");
             // Roep de service aan die alle data laadt en parset
             Election election = electionService.loadAllElectionData();
             // Stuur de data terug met een 200 OK status
+            logger.info("Successfully loaded all election data.");
             return ResponseEntity.ok(election);
         } catch (IOException | XMLStreamException | ParserConfigurationException | SAXException e) {
-            // Als er iets misgaat, print de error en stuur een 500 Internal Server Error status
-            e.printStackTrace();
+            // If something goes wrong, we log the error instead of just printing the stack trace.
+            // This gives us more context, like which request failed.
+            logger.error("Failed to load all election data due to an exception.", e);
+            // Stuur een 500 Internal Server Error status
             return ResponseEntity.status(500).build();
         }
     }
@@ -62,6 +73,7 @@ public class ElectionController {
      */
     @PostMapping("{electionId}")
     public Election readResults(@PathVariable String electionId, @RequestParam(required = false) String folderName) {
+        logger.info("Reading results for electionId: {} with folderName: {}", electionId, folderName);
         if (folderName == null) {
             return electionService.readResults(electionId, electionId);
         } else {
@@ -81,13 +93,14 @@ public class ElectionController {
     public List<Region> getRegions(@PathVariable String electionId,
                                    @RequestParam(required = false) String folderName) {
         try {
+            logger.info("Fetching regions for election: {}", electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
 
             return election.getRegions();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error fetching regions for electionId: {}", electionId, e);
             return Collections.emptyList();
         }
     }
@@ -95,6 +108,7 @@ public class ElectionController {
     @GetMapping("{electionId}/regions/kieskringen")
     public List<Region> getKieskringen(@PathVariable String electionId,
                                        @RequestParam(required = false) String folderName) {
+        logger.info("Fetching kieskringen for election: {}", electionId);
         Election election = (folderName == null)
                 ? electionService.readResults(electionId, electionId)
                 : electionService.readResults(electionId, folderName);
@@ -111,6 +125,7 @@ public class ElectionController {
     @GetMapping("{electionId}/regions/gemeenten")
     public List<Region> getGemeenten(@PathVariable String electionId,
                                      @RequestParam(required = false) String folderName) {
+        logger.info("Fetching gemeenten for election: {}", electionId);
         Election election = (folderName == null)
                 ? electionService.readResults(electionId, electionId)
                 : electionService.readResults(electionId, folderName);
@@ -120,6 +135,7 @@ public class ElectionController {
 
     @GetMapping("{electionId}/national")
     public ResponseEntity<List<NationalResult>> getNationalResults(@PathVariable String electionId) {
+        logger.info("Fetching national results for election: {}", electionId);
         List<NationalResult> results = electionService.getNationalResults(electionId);
         return ResponseEntity.ok(results);
     }
@@ -128,12 +144,13 @@ public class ElectionController {
     public List<Candidate> getCandidates(@PathVariable String electionId,
                                          @RequestParam(required = false) String folderName) {
         try {
+            logger.info("Fetching candidates for election: {}", electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
             return (election == null) ? Collections.emptyList() : election.getCandidates();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error fetching candidates for electionId: {}", electionId, e);
             return Collections.emptyList();
         }
     }
@@ -151,23 +168,25 @@ public class ElectionController {
             @RequestParam(required = false) String folderName) {
 
         try {
+            logger.info("Fetching political parties for election: {}", electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
 
             List<PoliticalParty> parties = election.getPoliticalParties();
 
-            // Print to console
-            System.out.println("\n=== Political Parties for " + electionId + " ===");
+            // We can use a logger for debugging too, which is cleaner than System.out.
+            // I set this to DEBUG level so it doesn't spam the console in production.
+            logger.debug("\n=== Political Parties for {} ===", electionId);
             parties.forEach(party ->
-                    System.out.println("- " + party.getRegisteredAppellation())
+                    logger.debug("- {}", party.getRegisteredAppellation())
             );
-            System.out.println("Total parties: " + parties.size() + "\n");
+            logger.debug("Total parties: {}\n", parties.size());
 
             return ResponseEntity.ok(parties);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.ok(Collections.emptyList());
+            logger.error("Error fetching parties for electionId: {}", electionId, e);
+            return ResponseEntity.ok(Collections.emptyList()); // Returning empty list on error as before.
         }
     }
 
@@ -186,6 +205,7 @@ public class ElectionController {
             @RequestParam(required = false) String folderName) {
 
         try {
+            logger.info("Searching for party '{}' in election '{}'", partyName, electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
@@ -198,14 +218,14 @@ public class ElectionController {
                     .orElse(null);
 
             if (foundParty != null) {
-                System.out.println("Found party: " + foundParty.getRegisteredAppellation());
+                logger.info("Found party: {}", foundParty.getRegisteredAppellation());
                 return ResponseEntity.ok(foundParty);
             } else {
-                System.out.println("Party not found: " + partyName);
+                logger.warn("Party not found: {}", partyName);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error searching for party '{}' in election '{}'", partyName, electionId, e);
             return ResponseEntity.notFound().build();
         }
     }
@@ -223,16 +243,17 @@ public class ElectionController {
             @RequestParam(required = false) String folderName) {
 
         try {
+            logger.info("Counting parties for election: {}", electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
 
             int count = election.getPoliticalParties().size();
-            System.out.println("Total parties for " + electionId + ": " + count);
+            logger.info("Total parties for {}: {}", electionId, count);
 
             return ResponseEntity.ok(count);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error counting parties for electionId: {}", electionId, e);
             return ResponseEntity.ok(0);
         }
     }
@@ -251,6 +272,7 @@ public class ElectionController {
             @RequestParam(required = false) String folderName) {
 
         try {
+            logger.info("Fetching party names for election: {}", electionId);
             Election election = (folderName == null)
                     ? electionService.readResults(electionId, electionId)
                     : electionService.readResults(electionId, folderName);
@@ -261,7 +283,7 @@ public class ElectionController {
 
             return ResponseEntity.ok(partyNames);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error fetching party names for electionId: {}", electionId, e);
             return ResponseEntity.ok(Collections.emptyList());
         }
     }
@@ -274,11 +296,12 @@ public class ElectionController {
     @GetMapping("/municipalities/names")
     public ResponseEntity<List<String>> getMunicipalityNames() {
         try {
+            logger.info("Fetching all municipality names.");
             Election election = electionService.loadAllElectionData();
             List<String> names = electionService.getMunicipalityNames(election);
             return ResponseEntity.ok(names);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to fetch municipality names.", e);
             return ResponseEntity.status(500).build();
         }
     }
@@ -291,11 +314,12 @@ public class ElectionController {
     @GetMapping("/municipalities/{municipalityName}")
     public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
         try {
+            logger.info("Fetching results for municipality: {}", municipalityName);
             Election election = electionService.loadAllElectionData();
             List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
             return ResponseEntity.ok(results);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to fetch results for municipality: {}", municipalityName, e);
             return ResponseEntity.status(500).build();
         }
     }
