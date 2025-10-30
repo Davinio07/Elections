@@ -1,5 +1,7 @@
 package nl.hva.elections.xml.utils.xml;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -35,6 +37,9 @@ import java.util.*;
  * <i><b>NOTE: </b>There are some TODO's present that need fixing!</i>
  */
 public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
+    // Adding a logger. We'll use this to warn about unknown XML tags and attributes.
+    private static final Logger logger = LoggerFactory.getLogger(EMLHandler.class);
+    
     // The tag-name is used for the key and the value is just the value of the tag, if any
     private static final Set<String> tagsWithoutAttributes = new HashSet<>();
 
@@ -234,8 +239,9 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
                 }
             });
         } else if (!tagsWithoutAttributes.contains(localName)) {
-            // TODO replace with proper usage of a logging framework or exceptions
-            System.err.println("Ignoring unknown start tag: " + localName);
+            // Replaced System.err with logger.warn. It's not a critical error, but it's
+            // good to know if we're encountering unexpected tags in the XML files.
+            logger.warn("Ignoring unknown start tag: {}", localName);
         }
 
         // Post-processing
@@ -304,8 +310,8 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
                     }
             }
         } else {
-            // TODO replace with proper usage of a logging framework or exceptions
-            System.err.println("Ignoring unknown closing tag: " + localName);
+            // Same here, using logger.warn for unknown closing tags.
+            logger.warn("Ignoring unknown closing tag: {}", localName);
         }
 
         // Post-processing
@@ -360,8 +366,8 @@ public class EMLHandler extends DefaultHandler implements TagAndAttributeNames{
     private void validateAttributes(String localName, Attributes attributes, Set<String> knownAttributes) {
         for (int i = 0; i < attributes.getLength(); i++) {
             if (!knownAttributes.contains(attributes.getLocalName(i))) {
-                // TODO replace with proper usage of a logging framework or exceptions
-                System.err.printf("Tag %s has a unknown attribute: %s\n", localName, attributes.getLocalName(i));
+                // Also replaced this System.err with logger.warn.
+                logger.warn("Tag {} has an unknown attribute: {}", localName, attributes.getLocalName(i));
             }
         }
     }
