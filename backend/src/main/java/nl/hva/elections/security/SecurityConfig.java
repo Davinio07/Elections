@@ -1,13 +1,14 @@
 package nl.hva.elections.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,8 +21,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtTokenFilter jwtTokenFilter;
+
     /**
-     * This is the main security filter.
+     * Constructor to inject our custom filter.
+     * @param jwtTokenFilter Our custom filter that checks tokens.
+     */
+    @Autowired
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter) {
+        this.jwtTokenFilter = jwtTokenFilter;
+    }
+
+
+    /**
+     * This is the main security filter
      * It checks every request and decides if it's allowed or not.
      * @param http The HttpSecurity object from Spring to configure the rules.
      * @return The configured security filter chain.
@@ -31,25 +44,29 @@ public class SecurityConfig {
         http
                 // Disable CSRF. Not needed for our stateless API.
                 .csrf(csrf -> csrf.disable())
-                // We're using tokens, so we don't need the server to remember users in a session.
+                // We're using tokens, so we dont need the server to remember users in a session.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Here we define the access rules.
+                
                 .authorizeHttpRequests(auth -> auth
-                        // We allow everyone to access our API endpoints for now.
-                        // This is important so the login and register pages work.
-                        .requestMatchers("/api/**").permitAll()
-                        // Also allow everyone to see the H2 database console.
-                        .requestMatchers("/h2-console/**").permitAll()
-                        // Any other request needs to be authenticated (we'll add this later).
-                        .anyRequest().authenticated()
+                        // 1. Specifiek de routes aanwijzen die beveiligd moeten zijn.
+                        // Alleen ingelogde gebruikers mogen de userlijst zien.
+                        .requestMatchers(HttpMethod.GET, "/api/users").authenticated()
+                        // hier onder kunnen meer regels bij komen voor andere beveiligde routes,
+                        // zoals POST /api/forum/posts)
+
+                        // 2. Al het ANDERE (inclusief alle GET /api/elections/...) is PUBLIEK.
+                        .anyRequest().permitAll()
                 );
 
-        // This is a small fix to make the H2 console display correctly.
+        // Required for the H2 console to work correctly with Spring Security.
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
+
+        // Add our custom JWT filter before the default Spring Security filter that handles username/password authentication. 
+        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-    
+
     /**
      * This sets up the CORS rules.
      * @return A WebMvcConfigurer with our CORS rules.
@@ -67,15 +84,5 @@ public class SecurityConfig {
             }
         };
     }
-
-    /**
-     * Creates the PasswordEncoder we use for hashing passwords.
-     * By making it a @Bean, Spring knows about it and can give it to other classes,
-     * like our UserService.
-     * @return A BCrypt password encoder instance.
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
+
