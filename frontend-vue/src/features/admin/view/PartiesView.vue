@@ -1,31 +1,60 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { partyService, getPartyColor } from '../service/partyService';
+import { partyService, getPartyColor, type NationalResult } from '../service/partyService';
+import ComparisonChart from '../components/ComparisonChart.vue'; // Import the chart component
 
 interface PoliticalParty {
   registeredAppellation: string;
 }
 
+// --- Component State ---
 const parties = ref<PoliticalParty[]>([]);
+const nationalResults = ref<NationalResult[]>([]); // To store all vote/seat data
 const loading = ref(true);
 const error = ref(false);
 
-// Reactive state to hold the list of parties for comparison
 const selectedParties = ref<PoliticalParty[]>([]);
-
-// Define the maximum number of parties allowed for comparison
 const MAX_PARTIES = 2;
 
-const loadParties = async () => {
+// --- Data Loading ---
+const loadData = async () => {
+  loading.value = true;
+  error.value = false;
   try {
-    parties.value = await partyService.getParties('TK2023');
+    // Fetch both parties list and national results in parallel
+    const [partiesList, results] = await Promise.all([
+      partyService.getParties('TK2023'),
+      partyService.getNationalResults('TK2023')
+    ]);
+    parties.value = partiesList;
+    nationalResults.value = results;
   } catch (err) {
     error.value = true;
-    console.error('Error loading parties:', err);
+    console.error('Error loading data:', err);
   } finally {
     loading.value = false;
   }
 };
+
+onMounted(() => {
+  loadData();
+});
+
+// --- Computed Properties ---
+
+// Get the count of selected parties
+const selectedPartyCount = computed(() => selectedParties.value.length);
+
+// Get the full NationalResult data for the selected parties
+const comparisonData = computed<NationalResult[]>(() => {
+  const selectedNames = selectedParties.value.map(p => p.registeredAppellation);
+
+  return nationalResults.value
+    .filter(result => selectedNames.includes(result.partyName))
+    .sort((a, b) => b.seats - a.seats); // Sort by seats
+});
+
+// --- Helper Functions ---
 
 // Get initials from party name for the icon
 const getInitials = (name: string): string => {
@@ -33,7 +62,6 @@ const getInitials = (name: string): string => {
   if (words.length === 1) {
     return words[0].substring(0, 2).toUpperCase();
   }
-  // Try to use the first two words' initials
   return words
     .slice(0, 2)
     .map(word => word[0])
@@ -41,44 +69,33 @@ const getInitials = (name: string): string => {
     .toUpperCase();
 };
 
-// Helper to check if a party is currently selected
+// Check if a party is currently selected
 const isSelected = (party: PoliticalParty): boolean => {
   return selectedParties.value.some(p => p.registeredAppellation === party.registeredAppellation);
 };
 
-// Function to add or remove a party from the selectedParties list
+// Add or remove a party from the selectedParties list
 const toggleParty = (party: PoliticalParty) => {
   const index = selectedParties.value.findIndex(
     p => p.registeredAppellation === party.registeredAppellation
   );
 
   if (index === -1) {
-    // Party not selected, check if max limit is reached
     if (selectedParties.value.length < MAX_PARTIES) {
       selectedParties.value.push(party);
     } else {
-      // Limit reached, prevent selection and log a warning
       console.warn(`Cannot select more than ${MAX_PARTIES} parties.`);
-      // Optionally, you could show a user-facing toast/notification here
     }
   } else {
-    // Party already selected, remove it (always allowed)
     selectedParties.value.splice(index, 1);
   }
 };
-
-// Computed property to display the count of selected parties
-const selectedPartyCount = computed(() => selectedParties.value.length);
-
-onMounted(() => {
-  loadParties();
-});
 </script>
 
 <template>
   <div class="parties-view">
     <h1>Politieke Partijen</h1>
-    <p class="subtitle">Select parties below to add them to your comparison list.</p>
+    <p class="subtitle">Select up to {{ MAX_PARTIES }} parties to compare their TK2023 results.</p>
 
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
@@ -91,24 +108,25 @@ onMounted(() => {
 
     <div v-else>
       <div class="comparison-panel">
-        <p class="panel-title">Your Comparison List ({{ selectedPartyCount }})</p>
+        <p class="panel-title">Your Comparison ({{ selectedPartyCount }} / {{ MAX_PARTIES }})</p>
+
         <div v-if="selectedPartyCount === 0" class="default-state">
-          Select up to **2 parties** to compare their key positions.
+          Select two parties from the list below to compare their national results.
         </div>
-        <div v-else class="selected-parties-list">
-          <div
-            v-for="party in selectedParties"
-            :key="party.registeredAppellation"
-            class="selected-party-button"
-            :style="{ backgroundColor: getPartyColor(party.registeredAppellation) }"
-            @click="toggleParty(party)"
-          >
-            {{ party.registeredAppellation }}
-            <span class="remove-icon">×</span>
-          </div>
+
+        <div v-else class="comparison-charts-grid">
+          <ComparisonChart
+            :parties="comparisonData"
+            metric="seats"
+            title="Zetels (Seats)"
+          />
+          <ComparisonChart
+            :parties="comparisonData"
+            metric="votes"
+            title="Stemmen (Votes)"
+          />
         </div>
       </div>
-
       <p class="party-count">{{ parties.length }} parties registered for TK2023</p>
 
       <div class="party-grid">
@@ -118,7 +136,6 @@ onMounted(() => {
           class="party-card"
           :class="{
             selected: isSelected(party),
-            // Optional: Visually indicate disabled selection if max reached
             'selection-disabled': !isSelected(party) && selectedPartyCount >= MAX_PARTIES
           }"
           :style="{ borderLeftColor: getPartyColor(party.registeredAppellation) }"
@@ -298,15 +315,16 @@ h1 {
   margin-bottom: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
+  min-height: 200px; /* Give it some space */
 }
 
 .panel-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem; /* More space */
   border-bottom: 1px dashed #e5e7eb;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1rem; /* More space */
 }
 
 .default-state {
@@ -318,34 +336,10 @@ h1 {
   border-radius: 8px;
 }
 
-.selected-parties-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.selected-party-button {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  color: white;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.selected-party-button:hover {
-  opacity: 0.85;
-}
-
-.remove-icon {
-  margin-left: 0.5rem;
-  font-weight: bold;
-  font-size: 1.2rem;
-  line-height: 1;
+.comparison-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
 }
 
 /* --- Media Queries --- */
@@ -370,10 +364,10 @@ h1 {
     gap: 1rem;
   }
 
-  .party-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 1.125rem;
+  /* Stack charts on mobile */
+  .comparison-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 

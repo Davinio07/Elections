@@ -53,7 +53,7 @@ public class ElectionController {
      * Processes the result for a specific election.
      * @param electionId the id of the election, e.g. the value of the Id attribute from the ElectionIdentifier tag.
      * @param folderName the name of the folder that contains the XML result files. If none is provided the value from
-     *                   the electionId is used.
+     * the electionId is used.
      * @return Election if the results have been processed successfully. Please be sure you don't output all the data!
      * Just the general data about the election should be sent back to the front-end!
 
