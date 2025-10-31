@@ -5,10 +5,26 @@ const logger = {
   debug: (message: string, context?: object) => console.debug(`[DEBUG] ${message}`, context || ''),
 };
 
+/**
+ * Represents an HTTP-specific error that includes both a status code
+ * and status text returned from a server response.
+ *
+ * @extends Error
+ */
 class HttpError extends Error {
+  /** The numeric HTTP status code (e.g., 404, 500). */
   status: number;
+
+  /** The standard HTTP status text (e.g., "Not Found", "Internal Server Error"). */
   statusText: string;
 
+  /**
+   * Constructs a new HttpError instance.
+   *
+   * @param {string} message - A descriptive error message.
+   * @param {number} status - The HTTP status code associated with the error.
+   * @param {string} statusText - The status text associated with the error.
+   */
   constructor(message: string, status: number, statusText: string) {
     super(message);
     this.name = 'HttpError';
@@ -18,9 +34,44 @@ class HttpError extends Error {
 }
 
 /**
- * Fetches the national election results for a given election ID from the backend API.
+ * Represents a single national election result entry.
  */
-export async function getNationalResults(electionId: string): Promise<unknown> {
+export interface NationalResultDTO {
+  partyName: string;
+  validVotes: number;
+  percentage: number;
+}
+
+/**
+ * Represents the seat distribution for an election.
+ * Keys are party names, values are seat counts.
+ */
+export interface SeatCountDTO {
+  [partyName: string]: number;
+}
+
+
+/**
+ * Fetches the national election results for a given election ID from the backend API.
+ * This function makes a GET request to `/api/elections/{electionId}/national`.
+ *
+ * Returns an array of `NationalResultDTO`. If the server responds with HTTP 204 (No Content),
+ * an empty array is returned.
+ *
+ * The function includes detailed logging for debugging and handles various HTTP
+ * response statuses with meaningful error messages. In case of network errors,
+ * a generic error is thrown.
+ *
+ * @async
+ * @function getNationalResults
+ * @param {string} electionId - The unique identifier of the election whose national results should be fetched.
+ * @returns {Promise<NationalResultDTO[]>} A promise that resolves to an array of national election results.
+ *
+ * @throws {HttpError} When the response contains a known HTTP error status (4xx or 5xx).
+ * @throws {Error} When a network or unexpected fetch error occurs.
+ */
+
+export async function getNationalResults(electionId: string): Promise<NationalResultDTO[]> {
   const url = `http://localhost:8080/api/elections/${electionId}/national`;
   logger.info(`Fetching national results for election ID: ${electionId}`);
   logger.debug(`Request URL: ${url}`);
@@ -34,18 +85,16 @@ export async function getNationalResults(electionId: string): Promise<unknown> {
     // Handle successful but empty response first
     if (response.status === 204) {
       logger.info(`Request successful but no content for election ID: ${electionId}`);
-      return null; // Or return [], depending on what the consumer expects
+      return [];
     }
 
-    // Handle all other non-successful responses
+    // Handle non-successful responses
     if (!response.ok) {
       let errorMessage = 'An unexpected error occurred.';
-      // Try to parse error details from the response body if it's JSON
       try {
         const errorBody = await response.json();
         errorMessage = errorBody.message || JSON.stringify(errorBody);
       } catch (e) {
-        // Body was not JSON or was empty, use status text as a fallback
         errorMessage = response.statusText;
       }
 
@@ -87,13 +136,12 @@ export async function getNationalResults(electionId: string): Promise<unknown> {
       }
     }
 
-    // If the response is successful (2xx)
     logger.info(`Successfully retrieved results for election ID: ${electionId}`);
     return response.json();
 
   } catch (error) {
     if (error instanceof HttpError) {
-      throw error; // Re-throw custom errors to be handled by the caller
+      throw error;
     }
 
     logger.error('A network or unexpected error occurred during fetch.', { originalError: error });
@@ -102,9 +150,26 @@ export async function getNationalResults(electionId: string): Promise<unknown> {
 }
 
 /**
- * Fetches the national election seat counts for a given election ID from the backend API.
+ * Fetches the national seat counts for a given election ID from the backend API.
+ * This function makes a GET request to `/api/elections/{electionId}/seats`.
+ *
+ * Returns an object of type `SeatCountDTO`, where keys are party names and values are seat counts.
+ * If the server responds with HTTP 204 (No Content), an empty object is returned.
+ *
+ * The function provides detailed log output, distinguishes between known
+ * HTTP error statuses, and throws descriptive `HttpError` objects for better
+ * client-side handling.
+ *
+ * @async
+ * @function getNationalSeats
+ * @param {string} electionId - The unique identifier of the election whose seat counts should be fetched.
+ * @returns {Promise<SeatCountDTO>} A promise resolving to an object mapping party names to seat counts.
+ *
+ * @throws {HttpError} When the response contains a known HTTP error status (4xx or 5xx).
+ * @throws {Error} When a network or unexpected fetch error occurs.
  */
-export async function getNationalSeats(electionId: string): Promise<Record<string, number>> {
+
+export async function getNationalSeats(electionId: string): Promise<SeatCountDTO> {
   const url = `http://localhost:8080/api/elections/${electionId}/seats`;
   logger.info(`Fetching national seat counts for election ID: ${electionId}`);
   logger.debug(`Request URL: ${url}`);
@@ -112,7 +177,7 @@ export async function getNationalSeats(electionId: string): Promise<Record<strin
   try {
     const response = await fetch(url, {
       method: 'GET',
-      headers: {'Accept': 'application/json'},
+      headers: { 'Accept': 'application/json' },
     });
 
     // Handle no content
@@ -124,18 +189,16 @@ export async function getNationalSeats(electionId: string): Promise<Record<strin
     // Handle non-successful responses
     if (!response.ok) {
       let errorMessage = 'An unexpected error occurred.';
-      // Try to parse error details from the response body if it's JSON
       try {
         const errorBody = await response.json();
         errorMessage = errorBody.message || JSON.stringify(errorBody);
       } catch (e) {
-        // Body was not JSON or was empty, use status text as a fallback
         errorMessage = response.statusText;
       }
 
       switch (response.status) {
         case 400:
-          logger.warn(`Bad Request: The server could not process the seat request for ${electionId}.`, {details: errorMessage});
+          logger.warn(`Bad Request: The server could not process the seat request for ${electionId}.`, { details: errorMessage });
           throw new HttpError(`Invalid seat request: ${errorMessage}`, response.status, response.statusText);
 
         case 401:
@@ -151,7 +214,7 @@ export async function getNationalSeats(electionId: string): Promise<Record<strin
           throw new HttpError(`No election seat counts found for ID '${electionId}'.`, response.status, response.statusText);
 
         case 409:
-          logger.warn(`Conflict detected for seat data for election ID: ${electionId}.`, {details: errorMessage});
+          logger.warn(`Conflict detected for seat data for election ID: ${electionId}.`, { details: errorMessage });
           throw new HttpError(`Conflict in seat data: ${errorMessage}`, response.status, response.statusText);
 
         case 429:
@@ -162,25 +225,24 @@ export async function getNationalSeats(electionId: string): Promise<Record<strin
         case 502:
         case 503:
         case 504:
-          logger.error(`A server error occurred while fetching seats: ${response.status}`, {details: errorMessage});
+          logger.error(`A server error occurred while fetching seats: ${response.status}`, { details: errorMessage });
           throw new HttpError('The seat service is temporarily unavailable. Please try again later.', response.status, response.statusText);
 
         default:
-          logger.error(`An unhandled HTTP error occurred while fetching seats: ${response.status}`, {details: errorMessage});
+          logger.error(`An unhandled HTTP error occurred while fetching seats: ${response.status}`, { details: errorMessage });
           throw new HttpError(`An unexpected error occurred while fetching seats. Status: ${response.status}`, response.status, response.statusText);
       }
     }
 
-    // Successful response
     logger.info(`Successfully retrieved seat counts for election ID: ${electionId}`);
     return response.json();
 
   } catch (error) {
     if (error instanceof HttpError) {
-      throw error; // Re-throw custom errors
+      throw error;
     }
 
-    logger.error('A network or unexpected error occurred during fetch of seat data.', {originalError: error});
+    logger.error('A network or unexpected error occurred during fetch of seat data.', { originalError: error });
     throw new Error('Failed to connect to the server. Please check your network connection.');
   }
 }
