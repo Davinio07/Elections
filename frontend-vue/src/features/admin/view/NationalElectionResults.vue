@@ -257,7 +257,8 @@ const chartOptions: ChartOptions<'bar'> = {
       stacked: false,
       title: {
         display: true,
-        text: 'Stempercentage (%)'
+        text: 'Stempercentage (%)',
+        align: 'center'
       },
       ticks: {
         //
@@ -274,7 +275,7 @@ const chartOptions: ChartOptions<'bar'> = {
 </script>
 
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen">
+  <div class="p-6 bg-gray-200 min-h-screen">
     <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Nationale Verkiezingsresultaten</h1>
 
     <div class="mb-6 flex gap-3 items-center">
@@ -307,7 +308,7 @@ const chartOptions: ChartOptions<'bar'> = {
 
     <div v-if="nationalResults.length && !loading" class="w-full mx-auto mt-8">
       <div
-        class="flex flex-wrap justify-center items-stretch mb-8 bg-white p-6 rounded-xl shadow-2xl border border-gray-100 text-center"
+        class="flex flex-wrap justify-center items-stretch mb-8 bg-white p-6 rounded-xl border border-gray-100 text-center"
       >
         <div class="flex-1 min-w-[200px] p-4 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col justify-center items-center">
           <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Totaal Zetels</span>
@@ -334,7 +335,7 @@ const chartOptions: ChartOptions<'bar'> = {
         </div>
       </div>
 
-      <div class="w-full mx-auto bg-white p-6 rounded-xl shadow-2xl h-[1200px]">
+      <div class="w-full mx-auto bg-white p-6 rounded-xl h-[1200px]">
         <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Resultaten voor {{ selectedElection }}</h2>
         <Bar
           :data="chartData"
