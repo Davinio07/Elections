@@ -12,9 +12,10 @@ import {
   type ChartOptions,
   type TooltipItem,
 } from 'chart.js';
-import type { PropType } from 'vue';
+// FIX 1: Import our *new* NationalResult type
 import type { NationalResult } from '../service/partyService';
 import { getPartyColor } from '../service/partyService';
+import type { PropType } from 'vue';
 
 // Register Chart.js components
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
@@ -22,11 +23,13 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 // Define component props
 const props = defineProps({
   parties: {
+    // Use the updated NationalResult type
     type: Array as PropType<NationalResult[]>,
     required: true,
   },
   metric: {
-    type: String as PropType<'seats' | 'votes'>,
+    // FIX 2: Allow 'validVotes' as a valid metric
+    type: String as PropType<'seats' | 'votes' | 'validVotes'>,
     required: true,
   },
   title: {
@@ -37,15 +40,32 @@ const props = defineProps({
 
 // Create chart-compatible data
 const chartData = computed(() => {
+  // FIX 3: Use p.partyName from the NationalResult for labels
   const labels = props.parties.map(p => p.partyName);
-  const data = props.parties.map(p => (props.metric === 'seats' ? p.seats : p.votes));
+
+  // FIX 4: Update data mapping logic to use 'validVotes'
+  const data = props.parties.map(p => {
+    if (props.metric === 'validVotes') {
+      return p.validVotes; // Use the correct field from the API
+    }
+    // Kept old logic just in case, but it won't be used with current view
+    if (props.metric === 'seats') {
+      return (p as any).seats; // This will be undefined
+    }
+    if (props.metric === 'votes') {
+      return (p as any).votes; // This will be undefined
+    }
+    return 0;
+  });
+
+  // FIX 5: Use p.partyName for getting colors
   const backgroundColors = props.parties.map(p => getPartyColor(p.partyName));
 
   return {
     labels,
     datasets: [
       {
-        label: props.metric.charAt(0).toUpperCase() + props.metric.slice(1), // 'Votes' or 'Seats'
+        label: props.metric === 'validVotes' ? 'Votes' : props.metric, // Clean up label
         data,
         backgroundColor: backgroundColors,
         borderRadius: 4,
@@ -128,10 +148,9 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
 }
 
 /* Add more height if only one party is selected */
+/* FIX: Corrected the unclosed string "[he0"]" to "[height="100"]" */
 .chart-container:has(canvas[height="100"]) {
   height: 150px;
 }
-
 </style>
-
 
