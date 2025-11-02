@@ -92,11 +92,11 @@ const toggleParty = (party: PoliticalParty) => {
 <template>
   <div class="p-8 max-w-[1400px] mx-auto min-h-screen bg-gradient-to-br from-gray-50 to-gray-300">
     <h1 class="text-4xl sm:text-3xl text-2xl text-center mb-2 text-gray-900 font-bold">Politieke Partijen</h1>
-    <p class="text-center text-gray-600 text-lg mb-8">Select up to {{ MAX_PARTIES }} parties to compare their TK2023 results.</p>
+
 
     <div v-if="loading" class="text-center p-16 flex flex-col items-center gap-4">
       <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-      <p class="text-gray-600 text-lg">Loading parties...</p>
+      <p class="text-gray-600 text-lg">Partijen Laden...</p>
     </div>
 
     <div v-else-if="error" class="text-center p-8 text-xl text-red-700 bg-red-100 rounded-lg m-8">
@@ -109,14 +109,14 @@ const toggleParty = (party: PoliticalParty) => {
         <p class="text-xl font-semibold text-gray-900 mb-6 border-b border-dashed border-gray-200 pb-4">Your Comparison ({{ selectedPartyCount }} / {{ MAX_PARTIES }})</p>
 
         <div v-if="selectedPartyCount === 0" class="text-center p-8 text-gray-600 italic bg-gray-50 rounded-lg">
-          Select two parties from the list below to compare their national results.
+          Selecteer twee partijen uit de onderstaande lijst om hun nationale resultaten te vergelijken.
         </div>
 
         <div v-else class="grid grid-cols-1 gap-6 max-w-2xl mx-auto md:max-w-none">
           <ComparisonChart
             :parties="comparisonData"
             metric="validVotes"
-            title="Stemmen (Votes)"
+            title="Stemmen"
           />
         </div>
       </div>

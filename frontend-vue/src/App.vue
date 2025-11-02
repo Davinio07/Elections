@@ -8,7 +8,7 @@
           <router-link to="/municipality-results">Gemeenten</router-link>
           <router-link to="/NationalElectionResults">Landelijk</router-link>
           <router-link to="/candidates">Kandidaten</router-link>
-          <router-link to="/parties">ga naar partijen</router-link>
+          <router-link to="/parties">Partijen</router-link>
           <router-link to="/ScaledElectionResults">Provinciaal</router-link>
           <router-link to="/register">Registreer</router-link>
           <router-link to="/kieskring-details">Kieskring Details</router-link>
