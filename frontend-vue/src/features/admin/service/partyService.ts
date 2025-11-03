@@ -4,7 +4,7 @@
 export interface PoliticalParty {
   /** The officially registered name of the party. */
   registeredAppellation: string;
-  // FIX 1: Removed partyName. It's not on the API model.
+
 }
 
 /**
@@ -61,8 +61,7 @@ export const partyColors: Record<string, string> = {
  * @returns {string} The corresponding hex color code or a default gray if not found.
  */
 export const getPartyColor = (partyName: string): string => {
-  // FIX 2: Reverted to simple implementation.
-  // We pass the full "registeredAppellation" which may match a key.
+
   return partyColors[partyName] || '#6B7280'; // Default gray if not found
 };
 

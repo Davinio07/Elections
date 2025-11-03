@@ -41,12 +41,9 @@ const selectedPartyCount = computed(() => selectedParties.value.length);
 
 // Get the full NationalResult data for the selected parties
 const comparisonData = computed<NationalResult[]>(() => {
-  // FIX 3: Get the full names of selected parties
   const selectedAppellations = selectedParties.value.map(p => p.registeredAppellation);
 
-  // FIX 4: Change matching logic.
-  // We filter the results list by checking if the result's short name (e.g., "VVD")
-  // is at the start of any selected party's full name (e.g., "VVD (Partij...)").
+
   return nationalResults.value
     .filter(result => {
       return selectedAppellations.some(appName => appName.startsWith(result.partyName));
@@ -106,7 +103,7 @@ const toggleParty = (party: PoliticalParty) => {
     <div v-else>
       <!-- === COMPARISON PANEL === -->
       <div class="bg-white rounded-xl p-6 mb-8 shadow-md border border-gray-200 min-h-[200px]">
-        <p class="text-xl font-semibold text-gray-900 mb-6 border-b border-dashed border-gray-200 pb-4">Your Comparison ({{ selectedPartyCount }} / {{ MAX_PARTIES }})</p>
+        <p class="text-xl font-semibold text-gray-900 mb-6 border-b border-dashed border-gray-200 pb-4">Vergelijking ({{ selectedPartyCount }} / {{ MAX_PARTIES }})</p>
 
         <div v-if="selectedPartyCount === 0" class="text-center p-8 text-gray-600 italic bg-gray-50 rounded-lg">
           Selecteer twee partijen uit de onderstaande lijst om hun nationale resultaten te vergelijken.
@@ -122,7 +119,7 @@ const toggleParty = (party: PoliticalParty) => {
       </div>
       <!-- === END COMPARISON PANEL === -->
 
-      <p class="text-center text-gray-700 font-medium mb-6 text-base">{{ parties.length }} parties registered for TK2023</p>
+      <p class="text-center text-gray-700 font-medium mb-6 text-base">{{ parties.length }} partijen geregistreerd voor TK2023</p>
 
       <div class="grid gap-4 grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-6 md:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fadeIn">
         <div
@@ -153,7 +150,7 @@ const toggleParty = (party: PoliticalParty) => {
 </template>
 
 <style>
-/* Added back keyframes for animation, as this can't be done in Tailwind config */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
