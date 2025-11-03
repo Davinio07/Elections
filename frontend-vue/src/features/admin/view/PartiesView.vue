@@ -1,27 +1,61 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { partyService, getPartyColor } from '../service/partyService';
+import { ref, onMounted, computed } from 'vue';
+import { partyService, getPartyColor, type NationalResult, type PoliticalParty } from '../service/partyService';
+import ComparisonChart from '../components/ComparisonChart.vue';
 
-interface PoliticalParty {
-  registeredAppellation: string;
-}
-
+// --- Component State ---
 const parties = ref<PoliticalParty[]>([]);
+const nationalResults = ref<NationalResult[]>([]);
 const loading = ref(true);
 const error = ref(false);
 
-const loadParties = async () => {
+const selectedParties = ref<PoliticalParty[]>([]);
+const MAX_PARTIES = 2;
+
+// --- Data Loading ---
+const loadData = async () => {
+  loading.value = true;
+  error.value = false;
   try {
-    parties.value = await partyService.getParties('TK2023');
+    const [partiesList, results] = await Promise.all([
+      partyService.getParties('TK2023'),
+      partyService.getNationalResults('TK2023')
+    ]);
+    parties.value = partiesList;
+    nationalResults.value = results;
   } catch (err) {
     error.value = true;
-    console.error('Error loading parties:', err);
+    console.error('Error loading data:', err);
   } finally {
     loading.value = false;
   }
 };
 
-// Get initials from party name for the icon
+onMounted(() => {
+  loadData();
+});
+
+// --- Computed Properties ---
+
+const selectedPartyCount = computed(() => selectedParties.value.length);
+
+// Get the full NationalResult data for the selected parties
+const comparisonData = computed<NationalResult[]>(() => {
+  // FIX 3: Get the full names of selected parties
+  const selectedAppellations = selectedParties.value.map(p => p.registeredAppellation);
+
+  // FIX 4: Change matching logic.
+  // We filter the results list by checking if the result's short name (e.g., "VVD")
+  // is at the start of any selected party's full name (e.g., "VVD (Partij...)").
+  return nationalResults.value
+    .filter(result => {
+      return selectedAppellations.some(appName => appName.startsWith(result.partyName));
+    })
+    .sort((a, b) => b.validVotes - a.validVotes);
+});
+
+// --- Helper Functions ---
+
 const getInitials = (name: string): string => {
   const words = name.split(' ').filter(word => word.length > 0);
   if (words.length === 1) {
@@ -34,124 +68,92 @@ const getInitials = (name: string): string => {
     .toUpperCase();
 };
 
-onMounted(() => {
-  loadParties();
-});
+const isSelected = (party: PoliticalParty): boolean => {
+  return selectedParties.value.some(p => p.registeredAppellation === party.registeredAppellation);
+};
+
+const toggleParty = (party: PoliticalParty) => {
+  const index = selectedParties.value.findIndex(
+    p => p.registeredAppellation === party.registeredAppellation
+  );
+
+  if (index === -1) {
+    if (selectedParties.value.length < MAX_PARTIES) {
+      selectedParties.value.push(party);
+    } else {
+      console.warn(`Cannot select more than ${MAX_PARTIES} parties.`);
+    }
+  } else {
+    selectedParties.value.splice(index, 1);
+  }
+};
 </script>
 
 <template>
-  <div class="parties-view">
-    <h1>Politieke Partijen</h1>
+  <div class="p-8 max-w-[1400px] mx-auto min-h-screen bg-gradient-to-br from-gray-50 to-gray-300">
+    <h1 class="text-4xl sm:text-3xl text-2xl text-center mb-2 text-gray-900 font-bold">Politieke Partijen</h1>
 
-    <div v-if="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading parties...</p>
+
+    <div v-if="loading" class="text-center p-16 flex flex-col items-center gap-4">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      <p class="text-gray-600 text-lg">Partijen Laden...</p>
     </div>
 
-    <div v-else-if="error" class="error">
+    <div v-else-if="error" class="text-center p-8 text-xl text-red-700 bg-red-100 rounded-lg m-8">
       Failed to load parties. Please try again.
     </div>
 
     <div v-else>
-      <p class="party-count">{{ parties.length }} parties registered</p>
+      <!-- === COMPARISON PANEL === -->
+      <div class="bg-white rounded-xl p-6 mb-8 shadow-md border border-gray-200 min-h-[200px]">
+        <p class="text-xl font-semibold text-gray-900 mb-6 border-b border-dashed border-gray-200 pb-4">Your Comparison ({{ selectedPartyCount }} / {{ MAX_PARTIES }})</p>
 
-      <div class="party-grid">
+        <div v-if="selectedPartyCount === 0" class="text-center p-8 text-gray-600 italic bg-gray-50 rounded-lg">
+          Selecteer twee partijen uit de onderstaande lijst om hun nationale resultaten te vergelijken.
+        </div>
+
+        <div v-else class="grid grid-cols-1 gap-6 max-w-2xl mx-auto md:max-w-none">
+          <ComparisonChart
+            :parties="comparisonData"
+            metric="validVotes"
+            title="Stemmen"
+          />
+        </div>
+      </div>
+      <!-- === END COMPARISON PANEL === -->
+
+      <p class="text-center text-gray-700 font-medium mb-6 text-base">{{ parties.length }} parties registered for TK2023</p>
+
+      <div class="grid gap-4 grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-6 md:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fadeIn">
         <div
           v-for="party in parties"
           :key="party.registeredAppellation"
-          class="party-card"
-          :style="{ borderLeftColor: getPartyColor(party.registeredAppellation) }"
+          class="flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-md transition-all duration-300 ease-in-out cursor-pointer border-l-4 hover:-translate-y-1 hover:shadow-lg"
+          :class="{
+            'ring-4 scale-102': isSelected(party),
+            'opacity-60 cursor-not-allowed shadow-none hover:transform-none hover:shadow-md': !isSelected(party) && selectedPartyCount >= MAX_PARTIES
+          }"
+          :style="{
+            'border-left-color': getPartyColor(party.registeredAppellation),
+            'ring-color': getPartyColor(party.registeredAppellation)
+          }"
+          @click="toggleParty(party)"
         >
           <div
-            class="party-icon"
-            :style="{ backgroundColor: getPartyColor(party.registeredAppellation) }"
+            class="w-[70px] h-[70px] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md"
+            :style="{ 'background-color': getPartyColor(party.registeredAppellation) }"
           >
             {{ getInitials(party.registeredAppellation) }}
           </div>
-          <h3>{{ party.registeredAppellation }}</h3>
+          <h3 class="text-base text-gray-900 text-center leading-snug break-words w-full">{{ party.registeredAppellation }}</h3>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.parties-view {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 0.5rem;
-  color: #1f2937;
-  font-size: 2.5rem;
-}
-
-.subtitle {
-  text-align: center;
-  color: #6b7280;
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
-}
-
-.party-count {
-  text-align: center;
-  color: #4b5563;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
-}
-
-.loading {
-  text-align: center;
-  padding: 4rem 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading p {
-  color: #6b7280;
-  font-size: 1.125rem;
-}
-
-.error {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #dc2626;
-  background: #fee2e2;
-  border-radius: 8px;
-  margin: 2rem;
-}
-
-.party-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  animation: fadeIn 0.5s ease-in;
-}
-
+<style>
+/* Added back keyframes for animation, as this can't be done in Tailwind config */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -162,82 +164,8 @@ h1 {
     transform: translateY(0);
   }
 }
-
-.party-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  border-left: 4px solid;
-  cursor: pointer;
-}
-
-.party-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.party-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 1.25rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.party-card h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: #1f2937;
-  text-align: center;
-  line-height: 1.4;
-  word-wrap: break-word;
-}
-
-@media (max-width: 1024px) {
-  .party-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .parties-view {
-    padding: 1rem;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  .party-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-
-  .party-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 1.125rem;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.75rem;
-  }
-
-  .party-grid {
-    grid-template-columns: 1fr;
-  }
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in;
 }
 </style>
+

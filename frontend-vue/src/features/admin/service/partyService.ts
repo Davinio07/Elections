@@ -1,12 +1,30 @@
-// partyService.ts
-
-interface PoliticalParty {
+/**
+ * Interface representing a political party (basic info).
+ */
+export interface PoliticalParty {
+  /** The officially registered name of the party. */
   registeredAppellation: string;
+  // FIX 1: Removed partyName. It's not on the API model.
 }
 
+/**
+ * Interface representing a party's national result.
+ * This matches the Java model provided.
+ */
+export interface NationalResult {
+  partyName: string;
+  validVotes: number;
+}
+
+/**
+ * The base URL for the elections API.
+ */
 const API_BASE_URL = 'http://localhost:8080/api/elections';
 
-// Official party colors based on Dutch political parties
+/**
+ * A mapping of official party names to their designated hex color codes.
+ * Based on common colors for Dutch political parties.
+ */
 export const partyColors: Record<string, string> = {
   'VVD': '#FF6600',
   'D66': '#00A03E',
@@ -36,16 +54,74 @@ export const partyColors: Record<string, string> = {
   'Politieke Partij voor Basisinkomen': '#9370DB',
 };
 
+/**
+ * Retrieves the hex color code for a given party name.
+ *
+ * @param {string} partyName - The registered appellation of the party.
+ * @returns {string} The corresponding hex color code or a default gray if not found.
+ */
 export const getPartyColor = (partyName: string): string => {
+  // FIX 2: Reverted to simple implementation.
+  // We pass the full "registeredAppellation" which may match a key.
   return partyColors[partyName] || '#6B7280'; // Default gray if not found
 };
 
-export const partyService = {
-  async getParties(electionId: string): Promise<PoliticalParty[]> {
-    const response = await fetch(`${API_BASE_URL}/${electionId}/parties`);
+/**
+ * Generic helper function for handling API requests.
+ */
+async function fetchFromAPI<T>(endpoint: string): Promise<T> {
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+
     if (!response.ok) {
-      throw new Error('Failed to fetch parties');
+      let errorBody = 'Unknown error';
+      try {
+        errorBody = await response.text();
+      } catch (textError) { /* ignore */ }
+      console.error(`API Error: ${response.status} ${response.statusText}`, errorBody);
+      throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
     }
-    return response.json();
+
+    return await response.json();
+
+  } catch (error) {
+    console.error(`Error in fetchFromAPI (endpoint: ${endpoint}):`, error);
+    if (error instanceof SyntaxError) {
+      throw new Error('Failed to parse server response. Invalid JSON.');
+    }
+    if (error instanceof TypeError) {
+      throw new Error('Network error: Could not connect to the API.');
+    }
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unknown error occurred.');
+  }
+}
+
+
+/**
+ * Service object for handling political party data.
+ */
+export const partyService = {
+  /**
+   * Fetches a list of political parties for a specific election.
+   *
+   * @param {string} electionId - The unique identifier for the election.
+   * @returns {Promise<PoliticalParty[]>} A promise that resolves to an array of PoliticalParty objects.
+   */
+  async getParties(electionId: string): Promise<PoliticalParty[]> {
+    return fetchFromAPI<PoliticalParty[]>(`/${electionId}/parties`);
+  },
+
+  /**
+   * Fetches the national results (seats, votes, percentage) for all parties in an election.
+   *
+   * @param {string} electionId - The unique identifier for the election.
+   * @returns {Promise<NationalResult[]>} A promise that resolves to an array of NationalResult objects.
+   */
+  async getNationalResults(electionId: string): Promise<NationalResult[]> {
+    return fetchFromAPI<NationalResult[]>(`/${electionId}/national`);
   }
 };
+
