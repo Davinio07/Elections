@@ -1,9 +1,9 @@
 package nl.hva.elections.mover;
 
-import nl.hva.elections.persistence.model.Candidate; // <-- NEW
+import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.persistence.model.Party;
 
-import nl.hva.elections.repositories.CandidateRepository; // <-- NEW
+import nl.hva.elections.repositories.CandidateRepository;
 import nl.hva.elections.repositories.PartyRepository;
 
 import nl.hva.elections.xml.model.Election;
@@ -18,13 +18,13 @@ public class DataInitializer implements CommandLineRunner {
 
     private final DutchElectionService xmlService;
     private final PartyRepository partyRepository;
-    private final CandidateRepository candidateRepository; // <-- NEW: Injected Repository
+    private final CandidateRepository candidateRepository;
 
     // Constructor is updated to include CandidateRepository
     public DataInitializer(DutchElectionService xmlService, PartyRepository partyRepository, CandidateRepository candidateRepository) {
         this.xmlService = xmlService;
         this.partyRepository = partyRepository;
-        this.candidateRepository = candidateRepository; // <-- NEW
+        this.candidateRepository = candidateRepository;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
                     // Save the new candidate
                     candidateRepository.save(newCandidateEntity);
                 }, () -> {
-                    // --- PRINT ERROR IF PARTY NOT FOUND IN DB ---
+                    // PRINT ERROR IF PARTY NOT FOUND IN DB
                     System.err.println("Lookup failed! No Party found in DB with name: [" + partyName + "]");
                 });
             }

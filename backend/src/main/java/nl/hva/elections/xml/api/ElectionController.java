@@ -12,6 +12,7 @@ import nl.hva.elections.xml.service.DutchElectionService;
 import nl.hva.elections.persistence.model.Candidate; // <-- RESOLVES AMBIGUITY, USES JPA MODEL
 import nl.hva.elections.repositories.CandidateRepository;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -146,13 +147,12 @@ public class ElectionController {
     @GetMapping("/candidates/db")
     public ResponseEntity<List<Candidate>> getAllCandidatesFromDb() {
         try {
-            // Use the injected repository to fetch all candidates from the database
             List<Candidate> candidates = candidateRepository.findAll();
             System.out.println("Fetched " + candidates.size() + " candidates from DB.");
             return ResponseEntity.ok(candidates);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
