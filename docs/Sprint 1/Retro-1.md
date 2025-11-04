@@ -1,17 +1,4 @@
-# Retrospective sprint 
-
-
-// Alle tekst met // weghalen voordat je het op DLO zet. Zorg dat het document er verzorgd uitziet.
-
-// De retrospective doe je met je team.
-
-
-Doe de retrospective m.b.v. een van de manieren op https://www.funretrospectives.com/category/retrospective/
-
->> Formuleer op basis hiervan concrete verbeterpunten voor de komende sprint
-
->> Geef elkaar feedback op basis van gedrag in de afgelopen sprint.
-
+# Retrospective sprint 1
 
 | Well | Not Well | New Ideas |
 |-------|----------|-------------|
@@ -21,11 +8,7 @@ Doe de retrospective m.b.v. een van de manieren op https://www.funretrospectives
 | There was a positive and respectful atmosphere | Sometimes too many things are discussed at once, which makes it chaotic | Use a fixed agenda and limit the number of topics per meeting |
 | Everyone was open to feedback | Sometimes feedback is handled too quickly without proper discussion | Plan checkup moments at the end of each sprint before delivering the work |
 
-
-## Aandeel teamleden
-
-// Geef per teamlid aan hoeveel storypoints of werk hij/zij deze sprint heeft kunnen realiseren. Vervang hieronder de namen van de teamleden en geef per teamlid het aantal storypoints. De mermaid code genereert vervolgens een pie-chart. 
-
+## Proportion team members
 ```mermaid
 pie 
     title Storypoints per Teamlid   
@@ -36,47 +19,45 @@ pie
     "Teamlid 5" : 0
 ```
 
-// Geef onder de pie chart een korte toelichting: wat valt op?  Kunnen jullie de verschillen verklaren?
+## Feedback for team members
 
-## Feedback voor teamleden
-
-// Geef hieronder zo specifiek mogelijke feedback voor elk teamlid.
-
-// tip: bereid de feedback op je teamleden eerst individueel voor en ga dan pas samen zitten.
-
-// herhaal onderstaande kopjes voor elk teamlid.
-
-### Feedback teamlid
+### Feedback team member
 
 #### Tops
 
-## Suleyman:
+##### Suleyman:
 We can count on you, you bring a positive atmosphere
 
-## Zarko:
+##### Zarko:
 You work efficiently, you are eager to help
 
-## Davinio:
+##### Davinio:
 You are always there and show motivation
 
-## Baran:
+##### Baran:
 You bring positive energy, you are a real go-getter
 
-### Tips
+##### Matin:
+You show strong technical insight and deliver reliable work
 
-## Suleyman:
+#### Tips
+
+##### Suleyman:
 You could be more active outside of school, and read the projects more carefully so you know better what needs to be done
 
-## Zarko:
+##### Zarko:
 Try to share your ideas more often, and make your communication clearer
 
-## Davinio:
+##### Davinio:
 Pay more attention to details in your work, and try to take breaks so you stay sharp
 
-## Baran:
+##### Baran:
 Keep a closer eye on your planning, and try to ask for feedback from the team more often
 
-#### Personal Reflections  
+##### Matin:
+Try to communicate your progress more often, so the team knows what you are working on
+
+## Personal Reflections  
 
 ### Baran
 
@@ -118,6 +99,31 @@ My development goal is to improve my communication and the sharing of ideas. I n
 **SMART Goal:**  
 By the end of this sprint, I want to have actively shared my ideas at least four times in team meetings and received feedback confirming that my communication has become clearer.  
 
-->>>>> DLO, upload per persoon op de DLO een doc. 
+---
 
-Noem deze retrospective sprint + nummer (zodat we weten waar het over gaat)
+### Suleyman
+
+During Sprint 1 I focused mostly on the preparing and designing of the election project. I try to get more involved into presenting the product during sprint reviews.
+
+**As a TOP I received:**
+“We can count on you, you bring a positive atmosphere.”
+It is nice to hear that this is the effect I have on others I would like to keep this going._
+
+**As a TIP I received:**
+“You could be more active outside of school, and read the projects more carefully so you know better what needs to be done”
+I have noticed this myself and want to try to get more invloved into the discusions that happen in the chat outside of school.
+
+---
+
+### Matin
+
+During Sprint 1 I mainly worked on the technical setup of the project and helped with writing and reviewing code.  
+
+**As a TOP I received:**  
+“You show strong technical insight and deliver reliable work.”  
+I am happy this was noticed, because I always try to make sure the project has a good base and works well. I will keep focusing on delivering quality and helping my teammates.  
+
+**As a TIP I received:**  
+“Try to communicate your progress more often, so the team knows what you are working on.”  
+I agree with this and want to improve. Next sprint I will share more updates in the group chat and give short reports during meetings, so everyone knows what I am doing and we can work together better.  
+

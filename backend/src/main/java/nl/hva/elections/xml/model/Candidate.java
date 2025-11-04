@@ -6,8 +6,7 @@ public class Candidate {
     private String lastName;
     private String gender;
     private String locality;
-
-
+    private String partyName; // <--- ADD THIS FIELD
 
     public Candidate(String id) {
         this.id = id;
@@ -42,5 +41,12 @@ public class Candidate {
     public void setLocality(String locality) {
         this.locality = locality;
     }
-}
 
+    // <--- ADD GETTER AND SETTER FOR partyName
+    public String getPartyName() {
+        return partyName;
+    }
+    public void setPartyName(String partyName) {
+        this.partyName = partyName;
+    }
+}

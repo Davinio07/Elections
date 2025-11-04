@@ -1,9 +1,6 @@
 package nl.hva.elections.xml.service;
 
-import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.MunicipalityResult;
-import nl.hva.elections.xml.model.NationalResult;
-import nl.hva.elections.xml.model.Region;
+import nl.hva.elections.xml.model.*;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.DutchElectionParser;
 import nl.hva.elections.xml.utils.xml.transformers.*;
@@ -15,10 +12,11 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.*;
 /**
  * A demo service for demonstrating how an EML-XML parser can be used inside a backend application.<br/>
  * <br/>
@@ -48,7 +46,7 @@ public class DutchElectionService {
         DutchRegionTransformer regionTransformer = new DutchRegionTransformer(election);
         DutchNationalVotesTransformer nationalVotesTransformer = new DutchNationalVotesTransformer(election);
         DutchConstituencyVotesTransformer constituencyVotesTransformer = new DutchConstituencyVotesTransformer(election);
-        DutchMunicipalityVotesTransformer municipalityVotesTransformer = new DutchMunicipalityVotesTransformer(election);
+        DutchKiesKringenTransformer municipalityVotesTransformer = new DutchKiesKringenTransformer(election);
         DutchResultTransformer resultTransformer = new DutchResultTransformer(election);
 
         // Create the parser with all the transformers in the correct order
@@ -93,7 +91,7 @@ public class DutchElectionService {
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
                 new DutchConstituencyVotesTransformer(election),
-                new DutchMunicipalityVotesTransformer(election)
+                new DutchKiesKringenTransformer(election)
         );
 
         try {
@@ -156,22 +154,71 @@ public class DutchElectionService {
      */
     public List<String> getMunicipalityNames(Election election) {
         return election.getMunicipalityResults().stream()
-                .map(MunicipalityResult::getMunicipalityName)
+                .map(KiesKring::getMunicipalityName)
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList());
     }
 
     /**
-     * Filters the election results for a single, specific municipality.
-     * @param election The fully loaded election object.
-     * @param municipalityName The name of the municipality to filter by.
-     * @return A list of MunicipalityResult objects, only for the requested municipality.
+     * This method finds the election results for a specific municipality.
+     * @param election The object that holds all the election data.
+     * @param municipalityName The name of the municipality we are looking for.
+     * @return A list of results for that municipality, sorted by votes.
      */
-    public List<MunicipalityResult> getResultsForMunicipality(Election election, String municipalityName) {
-        return election.getMunicipalityResults().stream()
-                .filter(result -> result.getMunicipalityName().equalsIgnoreCase(municipalityName))
-                .sorted(Comparator.comparing(MunicipalityResult::getValidVotes).reversed())
-                .collect(Collectors.toList());
+    public List<KiesKring> getResultsForMunicipality(Election election, String municipalityName) {
+        // Create an empty list to hold our results
+        List<KiesKring> foundResults = new ArrayList<>();
+
+        // Loop through all municipality results in the election data
+        for (KiesKring result : election.getMunicipalityResults()) {
+            // Check if the municipality name is the one we want (ignoring case)
+            if (result.getMunicipalityName().equalsIgnoreCase(municipalityName)) {
+                // If it is, add it to our new list
+                foundResults.add(result);
+            }
+        }
+
+        // Sort the list of results based on the number of valid votes
+        foundResults.sort(Comparator.comparing(KiesKring::getValidVotes).reversed());
+
+        // Return the sorted list
+        return foundResults;
+    }
+
+    /**
+     * This function calculates seat distribution in an election using the D'Hondt method.
+     *
+     * @param results    A list of {@code NationalResult} objects, where each object contains
+     * the party's name and its total number of valid votes.
+     * @param totalSeats The total number of seats to be allocated.
+     * @return A {@code Map<String, Integer>} where the keys are the party names and the
+     * values are the number of seats allocated to each party.
+     */
+    public Map<String, Integer> calculateSeats(List<NationalResult> results, int totalSeats) {
+        Map<String, Integer> seats = new HashMap<>();
+        Map<String, Integer> voteCounts = results.stream()
+                .collect(Collectors.toMap(NationalResult::getPartyName, NationalResult::getValidVotes));
+
+        for (String party : voteCounts.keySet()) {
+            seats.put(party, 0); // initialize seats
+        }
+
+        for (int i = 0; i < totalSeats; i++) {
+            String maxParty = null;
+            double maxValue = -1;
+            for (String party : voteCounts.keySet()) {
+                int votes = voteCounts.get(party);
+                int allocatedSeats = seats.get(party);
+                double value = votes / (allocatedSeats + 1.0); // D’Hondt formula
+                if (value > maxValue) {
+                    maxValue = value;
+                    maxParty = party;
+                }
+            }
+            seats.put(maxParty, seats.get(maxParty) + 1);
+        }
+
+        return seats;
     }
 }

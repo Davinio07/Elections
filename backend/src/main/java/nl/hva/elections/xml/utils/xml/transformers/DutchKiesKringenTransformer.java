@@ -1,7 +1,7 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
 import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.MunicipalityResult;
+import nl.hva.elections.xml.model.KiesKring;
 import nl.hva.elections.xml.utils.xml.VotesTransformer;
 
 import java.util.Map;
@@ -10,14 +10,14 @@ import java.util.Map;
  * This class handles municipality-level votes from XML files.
  * It takes the data and puts it into our data model.
  */
-public class DutchMunicipalityVotesTransformer implements VotesTransformer {
+public class DutchKiesKringenTransformer implements VotesTransformer {
     private final Election election;
 
     /**
      * Creates a new transformer. It needs an 'Election' object to store the votes in.
      * @param election The main election object where we store all results.
      */
-    public DutchMunicipalityVotesTransformer(Election election) {
+    public DutchKiesKringenTransformer(Election election) {
         this.election = election;
     }
 
@@ -43,7 +43,7 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
             }
 
             // Create a new MunicipalityResult object with the data
-            MunicipalityResult result = new MunicipalityResult(municipalityName, partyName, totalVotes);
+            KiesKring result = new KiesKring(municipalityName, partyName, totalVotes);
             // Add the new result to our main Election object
             election.addMunicipalityResult(result);
         }

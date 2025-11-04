@@ -64,7 +64,7 @@ public class UserService implements UserDetailsService {
         userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
             throw new IllegalStateException("Email is already in use");
         });
-        // Encrypt the password before storing it. Super important!
+        // Encrypt the password before storing it.
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

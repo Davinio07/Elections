@@ -1,14 +1,20 @@
 package nl.hva.elections.xml.api;
 
-import nl.hva.elections.xml.model.Candidate;
 import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.model.NationalResult;
+import nl.hva.elections.xml.model.KiesKring; // Needed for getMunicipalityResultsByName
+
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+// JPA/Database models (These are required for the new database endpoint)
+import nl.hva.elections.persistence.model.Candidate; // <-- RESOLVES AMBIGUITY, USES JPA MODEL
+import nl.hva.elections.repositories.CandidateRepository;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -18,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
@@ -30,9 +37,12 @@ public class ElectionController {
 
     private static final Logger logger = LoggerFactory.getLogger(ElectionController.class);
     private final DutchElectionService electionService;
+    private final CandidateRepository candidateRepository; // <-- Used for new DB endpoint
 
-    public ElectionController(DutchElectionService electionService) {
+    // Constructor updated to inject CandidateRepository
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository) {
         this.electionService = electionService;
+        this.candidateRepository = candidateRepository;
     }
 
     /**
@@ -121,20 +131,29 @@ public class ElectionController {
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("{electionId}/candidates")
-    public List<Candidate> getCandidates(@PathVariable String electionId,
-                                         @RequestParam(required = false) String folderName) {
+    /* * The old getCandidates method has been removed to resolve the incompatible types error.
+     * You should now use the new /candidates/db endpoint to read data from the database.
+     */
+    // @GetMapping("{electionId}/candidates") - OLD METHOD REMOVED!
+
+    /**
+     * Endpoint to get all candidates directly from the database (JPA model).
+     * This is the replacement for the old XML-based method and reads persisted data.
+     * Accessible via GET /api/elections/candidates/db
+     * @return A list of all persisted candidates.
+     */
+    @GetMapping("/candidates/db")
+    public ResponseEntity<List<Candidate>> getAllCandidatesFromDb() {
         try {
-            logger.info("Fetching candidates for election: {}", electionId);
-            Election election = (folderName == null)
-                    ? electionService.readResults(electionId, electionId)
-                    : electionService.readResults(electionId, folderName);
-            return (election == null) ? Collections.emptyList() : election.getCandidates();
+            List<Candidate> candidates = candidateRepository.findAll();
+            System.out.println("Fetched " + candidates.size() + " candidates from DB.");
+            return ResponseEntity.ok(candidates);
         } catch (Exception e) {
-            logger.error("Error fetching candidates for electionId: {}. Returning empty list.", electionId, e);
-            return Collections.emptyList();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     /**
      * Get all political parties for a specific election.
@@ -281,10 +300,25 @@ public class ElectionController {
      * @return A response entity containing a list of results for that municipality.
      */
     @GetMapping("/municipalities/{municipalityName}")
-    public ResponseEntity<List<MunicipalityResult>> getMunicipalityResultsByName(@PathVariable String municipalityName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+    public ResponseEntity<List<KiesKring>> getMunicipalityResultsByName(@PathVariable String municipalityName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
         logger.info("Fetching results for municipality: {}", municipalityName);
         Election election = electionService.loadAllElectionData();
-        List<MunicipalityResult> results = electionService.getResultsForMunicipality(election, municipalityName);
+        List<KiesKring> results = electionService.getResultsForMunicipality(election, municipalityName);
         return ResponseEntity.ok(results);
+    }
+
+    /**
+     * This is a web API endpoint that shows the final seat allocation for a specific election.
+     *
+     * @param electionId The unique identifier for the election, passed in the URL path.
+     * @return A {@code ResponseEntity} containing a map where the key is the party name
+     * and the value is the number of seats allocated. It returns an HTTP 200 (OK)
+     * status on successful retrieval and calculation.
+     */
+    @GetMapping("{electionId}/seats")
+    public ResponseEntity<Map<String, Integer>> getSeats(@PathVariable String electionId) {
+        List<NationalResult> results = electionService.getNationalResults(electionId);
+        Map<String, Integer> seats = electionService.calculateSeats(results, 150);
+        return ResponseEntity.ok(seats);
     }
 }

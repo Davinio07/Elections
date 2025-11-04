@@ -4,7 +4,7 @@ import ScaledElectionResults from "@/features/admin/view/ScaledElectionResults.v
 import KieskringDetails from "@/features/admin/view/KieskringDetails.vue";
 import PartiesView from '@/features/admin/view/PartiesView.vue';
 import NationalElectionResults from "@/features/admin/view/NationalElectionResults.vue";
-import Candidates from '@/features/admin/view/Candidates.vue';
+import CandidateList from '@/features/admin/view/Candidates.vue';
 import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElectionResults.vue';
 import Registration from '@/features/admin/view/UserRegistration.vue';
 import UserLogin from '@/features/admin/view/UserLogin.vue';
@@ -48,7 +48,7 @@ const routes = [
   {
     path: '/candidates',
     name: 'Candidates',
-    component: Candidates
+    component: CandidateList
   },
     {
     path: '/municipality-results',
