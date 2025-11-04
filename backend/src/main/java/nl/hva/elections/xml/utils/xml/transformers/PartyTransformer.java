@@ -1,7 +1,7 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
 import nl.hva.elections.xml.model.Party;
-import nl.hva.elections.xml.service.PartyService.AffiliationIdentifier;
+import nl.hva.elections.xml.service.XmlPartyService.AffiliationIdentifier;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;

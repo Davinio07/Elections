@@ -1,76 +1,52 @@
 package nl.hva.elections.persistence.model;
 
-import jakarta.persistence.*;
-import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 @Entity
 public class Party {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "party_id")
-    private Integer id;
+    private Long id;
 
-    @Column(unique = true, nullable = false)
+    private String electionId; // e.g., "TK2021", "TK2023"
     private String name;
-    private String logoUrl;
-    private Integer nationalSeats;
-    private Long totalVotes;
-    private Double votePercentage;
 
-    // This links to the Candidate class
-    // "mappedBy" tells JPA that the 'party' field in the Candidate class owns this relationship
-    @OneToMany(mappedBy = "party")
-    @JsonIgnore
-    private List<Candidate> candidates;
+    @JsonProperty("totalVotes")
+    private int votes;
 
-    // A no-argument constructor is required by JPA
-    public Party() {}
+    @JsonProperty("nationalSeats")
+    private int seats;
 
-    // A constructor to make it easy to create
-    public Party(String name, String logoUrl, int nationalSeats, long totalVotes, double votePercentage) {
-        this.name = name;
-        this.logoUrl = logoUrl;
-        this.nationalSeats = nationalSeats;
-        this.totalVotes = totalVotes;
-        this.votePercentage = votePercentage;
+    @JsonProperty("votePercentage")
+    private double percentage;
+
+    /**
+     * Required default constructor for JPA/Hibernate.
+     */
+    public Party() {
     }
 
-    // --- Getters and Setters ---
+    // Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-    public Integer getNationalSeats() {
-        return nationalSeats;
-    }
-    public void setNationalSeats(Integer nationalSeats) {
-        this.nationalSeats = nationalSeats;
-    }
-    public Long getTotalVotes() { return totalVotes; }
-    public void setTotalVotes(Long totalVotes) { this.totalVotes = totalVotes; }
-    public Double getVotePercentage() { return votePercentage; }
-    public void setVotePercentage(Double votePercentage) { this.votePercentage = votePercentage; }
+    public String getElectionId() { return electionId; }
+    public void setElectionId(String electionId) { this.electionId = electionId; }
 
-    public List<Candidate> getCandidates() {
-        return candidates;
-    }
-    public void setCandidates(List<Candidate> candidates) {
-        this.candidates = candidates;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getSeats() { return seats; }
+    public void setSeats(int seats) { this.seats = seats; }
+
+    public int getVotes() { return votes; }
+    public void setVotes(int votes) { this.votes = votes; }
+
+    public double getPercentage() { return percentage; }
+    public void setPercentage(double percentage) { this.percentage = percentage; }
 }

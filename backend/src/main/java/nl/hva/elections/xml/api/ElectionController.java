@@ -1,5 +1,6 @@
 package nl.hva.elections.xml.api;
 
+import nl.hva.elections.services.dbPartyService;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
@@ -11,7 +12,6 @@ import nl.hva.elections.xml.service.DutchElectionService;
 // JPA/Database models (These are required for the new database endpoint)
 import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.repositories.CandidateRepository;
-import nl.hva.elections.repositories.PartyRepository;
 import nl.hva.elections.persistence.model.Party;
 
 import org.springframework.http.ResponseEntity;
@@ -34,14 +34,14 @@ import java.util.Map;
 public class ElectionController {
     private final DutchElectionService electionService;
     private final CandidateRepository candidateRepository; // <-- Used for new DB endpoint
-    private final PartyRepository partyRepository;
+    private final dbPartyService dbPartyService;
     private List<Region> regions = new ArrayList<>();
 
     // Constructor updated to inject CandidateRepository
-    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository) {
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, dbPartyService dbPartyService) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
-        this.partyRepository = partyRepository;
+        this.dbPartyService = dbPartyService;
     }
 
     /**
@@ -164,23 +164,13 @@ public class ElectionController {
      * Gets all political parties from the database with their votes and seats.
      * Replaces XML-based national results for frontend charts.
      */
-    @GetMapping("/parties/db")
-    public ResponseEntity<List<Party>> getAllPartiesFromDb() {
-        try {
-            List<Party> parties = partyRepository.findAll();
-
-            if (parties.isEmpty()) {
-                System.out.println("No parties found in database.");
-                return ResponseEntity.noContent().build();
-            }
-
-            System.out.println("Fetched " + parties.size() + " parties from DB.");
-            return ResponseEntity.ok(parties);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).build();
+    @GetMapping("/{electionId}/parties/db")
+    public ResponseEntity<List<Party>> getPartiesByElection(@PathVariable String electionId) {
+        List<Party> parties = dbPartyService.getPartiesByElection(electionId);
+        if (parties.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(parties);
     }
 
 

@@ -7,11 +7,17 @@ import nl.hva.elections.repositories.CandidateRepository; // <-- NEW
 import nl.hva.elections.repositories.PartyRepository;
 
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.service.DutchElectionService;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -19,6 +25,8 @@ public class DataInitializer implements CommandLineRunner {
     private final DutchElectionService xmlService;
     private final PartyRepository partyRepository;
     private final CandidateRepository candidateRepository; // <-- NEW: Injected Repository
+
+    private static final List<String> electionList = List.of("TK2023", "TK2021");
 
     // Constructor is updated to include CandidateRepository
     public DataInitializer(DutchElectionService xmlService, PartyRepository partyRepository, CandidateRepository candidateRepository) {
@@ -30,81 +38,66 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // Check if both tables have data. If yes, skip.
-        if (partyRepository.count() > 0 && candidateRepository.count() > 0) {
-            System.out.println("Database already contains party and candidate data. Skipping data load.");
+        // Check if data already exists. If so, skip initialization.
+        if (partyRepository.count() > 0 || candidateRepository.count() > 0) {
+            System.out.println("Database already contains data. Skipping data load.");
             return;
         }
-        System.out.println("Database is empty. Loading data from XML...");
 
+        System.out.println("Database is empty. Loading data from XML for " + electionList.size() + " elections...");
 
-        // Get all data from the XML parser
-        Election electionData = xmlService.loadAllElectionData();
+        // Loop through each specified election ID
+        for (String electionId : electionList) {
+            System.out.println("--- Loading data for: " + electionId + " ---");
 
-        // 1. Save Parties (MUST run first, candidates need the Party IDs)
-        // --- Load parties first ---
-        if (partyRepository.count() == 0) {
-            System.out.println("Loading party data from XML...");
-            for (PoliticalParty xmlParty : electionData.getPoliticalParties()) {
-                Party newParty = new Party(
-                        xmlParty.getRegisteredAppellation(),
-                        null,
-                        0,
-                        0L,
-                        0.0
-                );
-                partyRepository.save(newParty);
-            }
-            System.out.println("Finished loading party data. Total parties saved: " + partyRepository.count());
-        }
+            // Load the specific election data from XML
+            Election electionData = xmlService.readResults(electionId, electionId);
 
-        // --- Update parties with national results (votes + seats) ---
-        for (var nationalResult : electionData.getNationalResults()) {
-            String partyName = nationalResult.getPartyName();
-            partyRepository.findByName(partyName).ifPresentOrElse(jpaParty -> {
-                jpaParty.setTotalVotes((long) nationalResult.getValidVotes());
-                jpaParty.setNationalSeats(nationalResult.getSeats());
-                optionally: jpaParty.setVotePercentage(nationalResult.getVotePercentage());
-                partyRepository.save(jpaParty);
-            }, () -> {
-                System.err.println("No DB party found for: " + partyName);
-            });
-        }
+            // 1. Save Parties
+            // We use NationalResult as the source, as it contains all necessary data
+            // (name, votes, seats, percentage) for the Party entity.
+            if (electionData.getNationalResults() != null) {
+                for (NationalResult xmlResult : electionData.getNationalResults()) {
+                    Party jpaParty = new Party();
+                    jpaParty.setElectionId(electionId); // <-- Set the election identifier
+                    jpaParty.setName(xmlResult.getPartyName());
+                    jpaParty.setVotes(xmlResult.getValidVotes());
+                    jpaParty.setSeats(xmlResult.getSeats());
+                    jpaParty.setPercentage(xmlResult.getVotePercentage()); // <-- Corrected: was setVotes
 
-
-        // 2. Save Candidates
-        if (candidateRepository.count() == 0) {
-            System.out.println("Loading candidate data from XML...");
-
-            for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
-
-                String partyName = xmlCandidate.getPartyName();
-
-                // --- ADD SAFETY CHECK TO SKIP BAD CANDIDATES ---
-                if (partyName == null || partyName.isBlank()) {
-                    // This prints a message only if the party name is missing
-                    System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing or empty.");
-                    continue;
+                    partyRepository.save(jpaParty);
                 }
-
-                // Find the JPA Party entity by name using PartyRepository
-                partyRepository.findByName(partyName).ifPresentOrElse(jpaParty -> {
-
-                    // Create the new JPA Candidate entity
-                    Candidate newCandidateEntity = new Candidate();
-                    newCandidateEntity.setName(xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName());
-                    newCandidateEntity.setResidence(xmlCandidate.getLocality());
-                    newCandidateEntity.setGender(xmlCandidate.getGender());
-                    newCandidateEntity.setParty(jpaParty);
-
-                    // Save the new candidate
-                    candidateRepository.save(newCandidateEntity);
-                }, () -> {
-                    // --- PRINT ERROR IF PARTY NOT FOUND IN DB ---
-                    System.err.println("Lookup failed! No Party found in DB with name: [" + partyName + "]");
-                });
+                System.out.println("Saved " + electionData.getNationalResults().size() + " parties for " + electionId);
             }
-            System.out.println("Finished loading candidate data. Total candidates saved: " + candidateRepository.count());
+
+            // 2. Save Candidates
+            if (electionData.getCandidates() != null) {
+                int savedCandidates = 0;
+                for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
+                    String partyName = xmlCandidate.getPartyName();
+
+                    if (partyName == null || partyName.isBlank()) {
+                        System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing.");
+                        continue;
+                    }
+
+                    // Find the corresponding Party entity using both name and electionId
+                    partyRepository.findByNameAndElectionId(partyName, electionId).ifPresentOrElse(jpaParty -> {
+                        Candidate newCandidateEntity = new Candidate();
+                        newCandidateEntity.setName(xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName());
+                        newCandidateEntity.setResidence(xmlCandidate.getLocality());
+                        newCandidateEntity.setGender(xmlCandidate.getGender());
+                        newCandidateEntity.setParty(jpaParty); // Link to the Party entity
+
+                        candidateRepository.save(newCandidateEntity);
+                    }, () -> {
+                        System.err.println("Lookup failed for " + electionId + " candidate! No Party found in DB with name: [" + partyName + "]");
+                    });
+                    savedCandidates++;
+                }
+                System.out.println("Saved " + savedCandidates + " candidates for " + electionId);
+            }
         }
+        System.out.println("--- Database initialization complete. ---");
     }
 }
