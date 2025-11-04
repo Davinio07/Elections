@@ -12,6 +12,7 @@
           <router-link to="/ScaledElectionResults">Provinciaal</router-link>
           <router-link to="/register">Registreer</router-link>
           <router-link to="/kieskring-details">Kieskring Details</router-link>
+          <router-link to="/login">Inloggen</router-link>
         </nav>
       </div>
     </header>
