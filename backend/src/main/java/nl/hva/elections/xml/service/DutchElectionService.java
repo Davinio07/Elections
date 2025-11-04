@@ -4,6 +4,8 @@ import nl.hva.elections.xml.model.*;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.DutchElectionParser;
 import nl.hva.elections.xml.utils.xml.transformers.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
@@ -23,6 +25,9 @@ import java.util.*;
 @Service
 public class DutchElectionService {
 
+    // Added a logger here, just like in the controller.
+    private static final Logger logger = LoggerFactory.getLogger(DutchElectionService.class);
+
     private static final String ELECTION_ID = "TK2023";
     private static final String ELECTION_DATA_FOLDER = "/TK2023_HvA_UvA";
 
@@ -32,6 +37,7 @@ public class DutchElectionService {
      * This method is used by the frontend to get all data at once.
      */
     public Election loadAllElectionData() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        logger.info("Starting to load all election data for election ID: {}", ELECTION_ID);
         Election election = new Election(ELECTION_ID);
 
         // Instantiate all the required transformers
@@ -59,19 +65,21 @@ public class DutchElectionService {
 
         // Let the parser handle finding and parsing all the files
         if (resourcePath != null) {
+            logger.info("Found election data folder at: {}", resourcePath);
             parser.parseResults(ELECTION_ID, resourcePath);
         } else {
+            // We need to throw an exception if the data isn't there.
             throw new IOException("Resource folder not found in classpath: " + ELECTION_DATA_FOLDER);
         }
 
-
+        logger.info("Finished loading all election data for election ID: {}", ELECTION_ID);
         return election;
     }
 
 
 
     public Election readResults(String electionId, String folderName) {
-        System.out.println("Processing files...");
+        logger.info("Processing files for electionId: {} from folder: {}", electionId, folderName);
 
         Election election = new Election(electionId);
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
@@ -98,14 +106,18 @@ public class DutchElectionService {
 
             electionParser.parseResults(electionId, resourcePath);
 
-            // Do what ever you like to do
-            System.out.println("Dutch Election results: " + election);
+            // Let's log some details after parsing. I'm using DEBUG level because this is pretty verbose
+            // and not something we want to see in production logs unless we are debugging.
+            logger.debug("Dutch Election results: {}", election);
             // Now is also the time to send the election information to a database for example.
-            System.out.println("National results: " + election.getNationalResults());
-            System.out.println("Regions: " + election.getRegions());
+            logger.debug("National results count: {}", election.getNationalResults().size());
+            logger.debug("Regions count: {}", election.getRegions().size());
 
             return election;
         } catch (IOException | XMLStreamException | ParserConfigurationException | SAXException e) {
+            // Good practice: log the exception here before we re-throw it.
+            // This way, we know exactly where the error started.
+            logger.error("Failed to process the election results for electionId: {}", electionId, e);
             // Throw a runtime exception with a clear message to be handled by the controller advice or error handler.
             throw new RuntimeException("Failed to process the election results for electionId: " + electionId, e);
         }
