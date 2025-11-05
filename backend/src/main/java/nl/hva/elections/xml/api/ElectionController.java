@@ -1,5 +1,6 @@
 package nl.hva.elections.xml.api;
 
+import nl.hva.elections.services.dbPartyService;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;

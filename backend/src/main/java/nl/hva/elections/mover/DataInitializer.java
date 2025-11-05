@@ -76,95 +76,96 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         System.out.println("Database is empty. Loading data from XML for " + electionList.size() + " elections...");
-            for (String electionId : electionList) {
-                System.out.println("--- Loading data for: " + electionId + " ---");
+        for (String electionId : electionList) {
+            System.out.println("--- Loading data for: " + electionId + " ---");
 
-                // Load all XML data for this specific election
-                Election electionData = xmlService.readResults(electionId, electionId);
+            // Load all XML data for this specific election
+            Election electionData = xmlService.readResults(electionId, electionId);
 
-                // --- 1. Process and Save Parties ---
-                List<NationalResult> rawResults = electionData.getNationalResults();
-                if (rawResults == null || rawResults.isEmpty()) {
-                    System.err.println("No national results found for " + electionId + ". Skipping party load.");
-                } else {
-                    // Step 1: Calculate seat distribution (D'Hondt)
-                    Map<String, Integer> calculatedSeatsMap = xmlService.calculateSeats(rawResults, totalSeats);
+            // --- 1. Process and Save Parties ---
+            List<NationalResult> rawResults = electionData.getNationalResults();
+            if (rawResults == null || rawResults.isEmpty()) {
+                System.err.println("No national results found for " + electionId + ". Skipping party load.");
+            } else {
+                // Step 1: Calculate seat distribution (D'Hondt)
+                Map<String, Integer> calculatedSeatsMap = xmlService.calculateSeats(rawResults, totalSeats);
 
-                    // Step 2: Calculate total votes for percentage calculation
-                    double totalVotes = rawResults.stream()
-                            .mapToDouble(NationalResult::getValidVotes)
-                            .sum();
+                // Step 2: Calculate total votes for percentage calculation
+                double totalVotes = rawResults.stream()
+                        .mapToDouble(NationalResult::getValidVotes)
+                        .sum();
 
-                    // Step 3: Iterate, combine calculated data, and save Party entities
-                    for (NationalResult rawResult : rawResults) {
-                        String partyName = rawResult.getPartyName();
-                        int votes = rawResult.getValidVotes();
+                // Step 3: Iterate, combine calculated data, and save Party entities
+                for (NationalResult rawResult : rawResults) {
+                    String partyName = rawResult.getPartyName();
+                    int votes = rawResult.getValidVotes();
 
-                        // Retrieve calculated values
-                        int calculatedSeats = calculatedSeatsMap.getOrDefault(partyName, 0);
-                        double calculatedPercentage = (totalVotes > 0) ? ((double) votes / totalVotes) * 100.0 : 0.0;
+                    // Retrieve calculated values
+                    int calculatedSeats = calculatedSeatsMap.getOrDefault(partyName, 0);
+                    double calculatedPercentage = (totalVotes > 0) ? ((double) votes / totalVotes) * 100.0 : 0.0;
 
-                        // Create and persist the complete Party entity
-                        Party jpaParty = new Party();
-                        jpaParty.setElectionId(electionId);
-                        jpaParty.setName(partyName);
-                        jpaParty.setVotes(votes);
-                        jpaParty.setSeats(calculatedSeats);
-                        jpaParty.setPercentage(calculatedPercentage);
+                    // Create and persist the complete Party entity
+                    Party jpaParty = new Party();
+                    jpaParty.setElectionId(electionId);
+                    jpaParty.setName(partyName);
+                    jpaParty.setVotes(votes);
+                    jpaParty.setSeats(calculatedSeats);
+                    jpaParty.setPercentage(calculatedPercentage);
 
-                        partyRepository.save(jpaParty);
-                    }
-                    System.out.println("Saved " + rawResults.size() + " parties for " + electionId + " with calculated seats/percentages.");
+                    partyRepository.save(jpaParty);
                 }
-
-
-        // 2. Save Candidates
-        if (candidateRepository.count() == 0) {
-            System.out.println("Loading candidate data from XML...");
-
-            final AtomicInteger candidatesSaved = new AtomicInteger(0);
-
-            for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
-
-                String partyName = xmlCandidate.getPartyName();
-
-                if (partyName == null || partyName.isBlank()) {
-                    System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing or empty.");
-                    continue;
-                }
-
-                String cleanedPartyName = partyName.trim();
-
-                // --- 1. DETERMINE CANDIDATE'S FULL NAME (as saved in DB) ---
-                String candidateFullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
-                // -------------------------------------------------------------
-
-                // Find the JPA Party entity by name using PartyRepository
-                partyRepository.findByName(cleanedPartyName).ifPresentOrElse(jpaParty -> {
-
-                    // --- 2. CHECK FOR DUPLICATES BEFORE SAVING ---
-                    if (candidateRepository.existsByNameAndPartyId(candidateFullName, jpaParty.getId())) {
-                        System.out.println("SKIPPING DUPLICATE: Candidate '" + candidateFullName + "' already exists for party " + jpaParty.getName());
-                        return; // Skip to the next iteration
-                    }
-                    // ---------------------------------------------
-
-                    // 3. Save Candidate (Only if no duplicate found)
-                    Candidate newCandidateEntity = new Candidate();
-                    newCandidateEntity.setName(candidateFullName); // Use the full name for the final entity
-                    newCandidateEntity.setResidence(xmlCandidate.getLocality());
-                    newCandidateEntity.setGender(xmlCandidate.getGender());
-                    newCandidateEntity.setParty(jpaParty);
-
-                    candidateRepository.save(newCandidateEntity);
-
-                    candidatesSaved.incrementAndGet();
-
-                }, () -> {
-                    System.err.println("Lookup failed! No Party found in DB with name: [" + cleanedPartyName + "]");
-                });
+                System.out.println("Saved " + rawResults.size() + " parties for " + electionId + " with calculated seats/percentages.");
             }
-            System.out.println("Finished loading candidate data. Total candidates saved: " + candidatesSaved.get());
+
+
+            // 2. Save Candidates
+            if (candidateRepository.count() == 0) {
+                System.out.println("Loading candidate data from XML...");
+
+                final AtomicInteger candidatesSaved = new AtomicInteger(0);
+
+                for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
+
+                    String partyName = xmlCandidate.getPartyName();
+
+                    if (partyName == null || partyName.isBlank()) {
+                        System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing or empty.");
+                        continue;
+                    }
+
+                    String cleanedPartyName = partyName.trim();
+
+                    // --- 1. DETERMINE CANDIDATE'S FULL NAME (as saved in DB) ---
+                    String candidateFullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
+                    // -------------------------------------------------------------
+
+                    // Find the JPA Party entity by name using PartyRepository
+                    partyRepository.findByNameAndElectionId(cleanedPartyName, electionId).ifPresentOrElse(jpaParty -> {
+
+                        // --- 2. CHECK FOR DUPLICATES BEFORE SAVING ---
+                        if (candidateRepository.existsByNameAndPartyId(candidateFullName, jpaParty.getId())) {
+                            System.out.println("SKIPPING DUPLICATE: Candidate '" + candidateFullName + "' already exists for party " + jpaParty.getName());
+                            return; // Skip to the next iteration
+                        }
+                        // ---------------------------------------------
+
+                        // 3. Save Candidate (Only if no duplicate found)
+                        Candidate newCandidateEntity = new Candidate();
+                        newCandidateEntity.setName(candidateFullName); // Use the full name for the final entity
+                        newCandidateEntity.setResidence(xmlCandidate.getLocality());
+                        newCandidateEntity.setGender(xmlCandidate.getGender());
+                        newCandidateEntity.setParty(jpaParty);
+
+                        candidateRepository.save(newCandidateEntity);
+
+                        candidatesSaved.incrementAndGet();
+
+                    }, () -> {
+                        System.err.println("Lookup failed! No Party found in DB with name: [" + cleanedPartyName + "]");
+                    });
+                }
+                System.out.println("Finished loading candidate data. Total candidates saved: " + candidatesSaved.get());
+            }
         }
     }
 }
