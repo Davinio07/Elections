@@ -1,4 +1,4 @@
-![](Kieskring.md)
+![](Kieskring.jpg)
 # Kieskringen Pagina Documentatie
 
 Dit document beschrijft de functionaliteit en het ontwerp van de kieskringen pagina, zoals weergegeven is in de afbeelding.
