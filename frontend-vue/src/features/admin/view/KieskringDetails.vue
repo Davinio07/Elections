@@ -80,7 +80,6 @@ onMounted(async () => {
     );
     kieskringData.value = resultsArray;
   } catch (err) {
-    console.error(err);
     error.value = 'Fout bij het ophalen van de kieskringgegevens.';
   } finally {
     loading.value = false;

@@ -26,6 +26,7 @@ export async function getResultsForKieskring(municipalityName: string): Promise<
  * Gets a list of all the municipality names.
  * @returns A promise that gives us an array of names.
  */
+
 export async function getKieskringNames(): Promise<string[]> {
     try {
         const response = await apiClient<string[]>('/elections/municipalities/names');
