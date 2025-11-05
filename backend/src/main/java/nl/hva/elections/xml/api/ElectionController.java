@@ -1,5 +1,6 @@
 package nl.hva.elections.xml.api;
 
+import nl.hva.elections.services.dbPartyService;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
@@ -11,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JPA/Database models (These are required for the new database endpoint)
-import nl.hva.elections.persistence.model.Candidate; // <-- RESOLVES AMBIGUITY, USES JPA MODEL
-import nl.hva.elections.persistence.model.Party; // <-- NEW IMPORT
+import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.repositories.CandidateRepository;
-import nl.hva.elections.repositories.PartyRepository; // <-- NEW IMPORT
+import nl.hva.elections.repositories.PartyRepository;
+import nl.hva.elections.persistence.model.Party;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
- * The try-catch blocks are now simplified, as all exceptions will be
- * handled by the GlobalExceptionHandler.
  */
 @RestController
 @RequestMapping("/api/elections")
@@ -40,20 +40,19 @@ public class ElectionController {
     private static final Logger logger = LoggerFactory.getLogger(ElectionController.class);
     private final DutchElectionService electionService;
     private final CandidateRepository candidateRepository; // <-- Used for new DB endpoint
-    private final PartyRepository partyRepository; // <-- NEW FIELD
+    private final dbPartyService dbPartyService;
+    private List<Region> regions = new ArrayList<>();
 
     // Constructor updated to inject CandidateRepository
-    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository) {
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, dbPartyService dbPartyService) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
-        this.partyRepository = partyRepository; // <-- INITIALIZE NEW FIELD
+        this.dbPartyService = dbPartyService;
     }
 
     /**
-     * Haalt alle verkiezingsdata in één keer op.
-     * We've removed the try-catch here. If any exception occurs, our GlobalExceptionHandler
-     * will catch it and return a structured 500 error response. This keeps our controller methods clean and focused
-     * on their primary responsibility.
+     * Retrieves all election data in one fell swoop.
+     * This is the endpoint used by the front end.
      */
     @GetMapping("/results")
     public ResponseEntity<Election> getElectionResults() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
@@ -83,6 +82,13 @@ public class ElectionController {
         }
     }
 
+    public void addRegion(Region region) {
+        this.regions.add(region);
+    }
+
+    public List<Region> getRegions() {
+        return regions;
+    }
 
     @GetMapping("{electionId}/regions")
     public List<Region> getRegions(@PathVariable String electionId,
@@ -168,26 +174,21 @@ public class ElectionController {
             return ResponseEntity.ok(candidates);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
-    // --- NEW ENDPOINT: Fetch all parties from DB for the filter UI ---
     /**
-     * Endpoint to get all parties directly from the database (JPA model).
-     * Accessible via GET /api/elections/parties/db
+     * Gets all political parties from the database with their votes and seats.
+     * Replaces XML-based national results for frontend charts.
      */
-    @GetMapping("/parties/db")
-    public ResponseEntity<List<Party>> getAllPartiesFromDb() {
-        try {
-            // Returns the list of all Party entities
-            List<Party> parties = partyRepository.findAll();
-            return ResponseEntity.ok(parties);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).build();
+    @GetMapping("/{electionId}/parties/db")
+    public ResponseEntity<List<Party>> getPartiesByElection(@PathVariable String electionId) {
+        List<Party> parties = dbPartyService.getPartiesByElection(electionId);
+        if (parties.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(parties);
     }
 
 

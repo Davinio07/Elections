@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
  * @Service marks this class as a business service component in Spring's context,
  * allowing it to be automatically managed and injected.
  */
-@Service
-public class PartyService {
+@Service("xmlPartyService")
+public class XmlPartyService {
 
     private final PartyTransformer transformer;
 
@@ -20,7 +20,7 @@ public class PartyService {
      * Constructor Injection: Spring automatically injects the PartyTransformer,
      * which is made available because it's marked with @Component.
      */
-    public PartyService(PartyTransformer transformer) {
+    public XmlPartyService(PartyTransformer transformer) {
         this.transformer = transformer;
     }
 

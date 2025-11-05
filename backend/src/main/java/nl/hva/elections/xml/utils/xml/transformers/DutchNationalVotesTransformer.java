@@ -35,9 +35,14 @@ public class DutchNationalVotesTransformer implements VotesTransformer {
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
         String partyName = electionData.get("RegisteredName");
         String votesString = electionData.get("ValidVotes");
-        int totalVotes = votesString != null ? Integer.parseInt(votesString) : 0;
+        String seatsString = electionData.get("Seats");
+        String percentageString = electionData.get("VotePercentage");
 
-        NationalResult result = new NationalResult(partyName, totalVotes);
+        int totalVotes = votesString != null ? Integer.parseInt(votesString) : 0;
+        int seats = seatsString != null ? Integer.parseInt(seatsString) : 0;
+        double votePercentage = percentageString != null ? Double.parseDouble(percentageString) : 0.0;
+
+        NationalResult result = new NationalResult(partyName, totalVotes, seats, votePercentage);
         election.addNationalResult(result);
 
         System.out.printf("%s party votes: %s%n", aggregated ? "National" : "Constituency", electionData);

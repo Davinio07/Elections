@@ -9,9 +9,8 @@ import java.util.List;
 
 @Repository
 public interface CandidateRepository extends JpaRepository<Candidate, Integer> {
-    boolean existsByPartyIdAndName(Integer partyId, String name);
     /** Checks if a candidate with this exact name already exists for this party. */
-    boolean existsByNameAndPartyId(String name, Integer partyId);
+    boolean existsByNameAndPartyId(String name, Long partyId);
 
     /** Finds candidates based on both Party ID and Gender. */
     List<Candidate> findByPartyIdAndGender(Integer partyId, String gender);

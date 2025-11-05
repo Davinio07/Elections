@@ -216,7 +216,9 @@ public class DutchElectionService {
                     maxParty = party;
                 }
             }
-            seats.put(maxParty, seats.get(maxParty) + 1);
+            if (maxParty != null) {
+                seats.put(maxParty, seats.get(maxParty) + 1);
+            }
         }
 
         return seats;
