@@ -10,8 +10,9 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">Partijen</router-link>
           <router-link to="/ScaledElectionResults">Provinciaal</router-link>
-          <router-link to="/register">Registreer</router-link>
           <router-link to="/kieskring-details">Kieskring Details</router-link>
+          <router-link to="/register">Registreer</router-link>
+          <router-link to="/login">Login</router-link>
         </nav>
       </div>
     </header>

@@ -3,6 +3,8 @@ package nl.hva.elections.xml.utils.xml;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.transformers.CompositeVotesTransformer;
 import nl.hva.elections.xml.utils.xml.transformers.DutchRegionTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,6 +38,9 @@ import java.util.Map;
  * <i><b>NOTE: </b>There are some TODO's present that need fixing!</i>
  */
 public class DutchElectionParser {
+    // Adding a logger here as well to make our parsing process observable.
+    private static final Logger logger = LoggerFactory.getLogger(DutchElectionParser.class);
+    
     private final DefinitionTransformer definitionTransformer;
     private final CandidateTransformer candidateTransformer;
     private final VotesTransformer resultTransformer;
@@ -83,7 +88,7 @@ public class DutchElectionParser {
      * @throws XMLStreamException when a file has not the expected format.
      */
     public void parseResults(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
-        System.out.printf("Loading election data from %s\n", folderName);
+        logger.info("Loading election data from folder: {}", folderName);
 
         // The first call to parseFiles needs to use all seven transformers
         // to correctly load all the initial data, including regions and candidates.
@@ -115,8 +120,9 @@ public class DutchElectionParser {
         List<Path> files = PathUtils.findFilesToScan(folderName, fileFilter);
         files.sort(Comparator.comparing(Path::getFileName));
         for (Path electionFile : files) {
-            // TODO replace with proper usage of a logging framework
-            System.out.printf("Processing: %s\n", electionFile);
+            // Replaced the System.out.printf with a logger.
+            // This is cleaner and gives us timestamps and log levels for free.
+            logger.info("Processing file: {}", electionFile);
             try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(electionFile.toString()), 64 * 1024)) {
                 SAXParserFactory factory = SAXParserFactory.newInstance();
                 factory.setNamespaceAware(true);
@@ -124,8 +130,7 @@ public class DutchElectionParser {
                 emlHandler.setFileName(electionFile.toString());
                 parser.parse(bis, emlHandler);
             }
-            // TODO replace with proper usage of a logging framework
-            System.out.printf("Processed: %s\n", electionFile);
+            logger.info("Successfully processed file: {}", electionFile);
         }
     }
 }
