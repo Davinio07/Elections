@@ -142,20 +142,22 @@ onBeforeUnmount(() => {
         <h2 class="filter-title">Filter op:</h2>
 
         <div class="filter-group party-filters">
-          <button
-            @click="selectParty(null)"
-            :class="{ 'active-filter': selectedPartyId === null }"
-          >Alle Partijen</button>
-
-          <button
-            v-for="party in parties"
-            :key="party.id"
-            @click="selectParty(party.id)"
-            :class="{ 'active-filter': selectedPartyId === party.id }"
-            :title="party.name"
+          <label for="party-selector" class="sr-only">Kies Partij</label>
+          <select
+            id="party-selector"
+            v-model="selectedPartyId"
+            class="filter-select"
           >
-            {{ party.name }}
-          </button>
+            <option :value="null">Alle Partijen</option>
+
+            <option
+              v-for="party in parties"
+              :key="party.id"
+              :value="party.id"
+            >
+              {{ party.name }}
+            </option>
+          </select>
         </div>
 
         <div class="filter-group gender-filters">
@@ -254,6 +256,16 @@ onBeforeUnmount(() => {
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #334155;
+}
+.filter-select {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #334155;
+  align-self: center;
 }
 .filter-group {
   display: flex;
