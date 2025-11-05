@@ -1,5 +1,6 @@
 package nl.hva.elections.xml.api;
 
+import nl.hva.elections.exceptions.ElectionNotFoundException;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.PoliticalParty;
 import nl.hva.elections.xml.model.Region;
@@ -12,6 +13,7 @@ import nl.hva.elections.xml.service.DutchElectionService;
 import nl.hva.elections.persistence.model.Candidate; // <-- RESOLVES AMBIGUITY, USES JPA MODEL
 import nl.hva.elections.repositories.CandidateRepository;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -100,15 +102,45 @@ public class ElectionController {
         }
     }
 
+    /**
+     * Retrieves all "kieskringen" (regions) for a specific election.
+     *
+     * @param electionId The unique identifier for the election.
+     * @param folderName An optional folder name to specify a different data source.
+     * @return A list of regions for the election.
+     */
     @GetMapping("{electionId}/regions/kieskringen")
-    public List<Region> getKieskringen(@PathVariable String electionId,
-                                       @RequestParam(required = false) String folderName) {
-        Election election = (folderName == null)
-                ? electionService.readResults(electionId, electionId)
-                : electionService.readResults(electionId, folderName);
+    public ResponseEntity<?> getKieskringen(@PathVariable String electionId,
+                                            @RequestParam(required = false) String folderName) {
+        try {
+            // Happy Path (200 OK)
+            Election election = (folderName == null)
+                    ? electionService.readResults(electionId, electionId)
+                    : electionService.readResults(electionId, folderName);
 
-        return electionService.getKieskringen(election);
-    }
+            List<Region> regions = electionService.getKieskringen(election);
+
+            // returns the list with a 200 OK status
+            return ResponseEntity.ok(regions);
+
+        } catch (ElectionNotFoundException ex) {
+            // Not Found (404)
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND) // Sets status to 404
+                    .body(ex.getMessage());
+
+        } catch (IllegalArgumentException ex) {
+            // Bad Request (400)
+            return ResponseEntity
+                    .badRequest()                 // Sets status to 400
+                    .body(ex.getMessage());
+
+        } catch (Exception ex) {
+            // Server Error (500)
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR) // Sets status to 500
+                    .body("An unexpected internal error occurred.");
+        }}
 
     /**
      * Get a list of all municipalities (gemeenten).

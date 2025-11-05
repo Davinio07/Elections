@@ -22,7 +22,7 @@ public class Party {
      * "mappedBy" tells JPA that the 'party' field in the Candidate class owns this relationship
      */
     @OneToMany(mappedBy = "party")
-    @JsonIgnore // <--- ADD THIS ANNOTATION
+    @JsonIgnore
     private List<Candidate> candidates;
 
     // A no-argument constructor is required by JPA
