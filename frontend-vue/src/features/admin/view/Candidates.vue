@@ -1,24 +1,41 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-// FIX 1: Import the shared type, which fixes the type assignment error
-import { getCandidates, type CandidateData } from '@/features/admin/service/ScaledElectionResults_api.ts';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import {
+  getCandidates,
+  getAllPartiesForFilters, // <-- NEW IMPORT
+  type CandidateData,
+  type PartyFilterData // <-- NEW TYPE IMPORT
+} from '@/features/admin/service/ScaledElectionResults_api.ts';
 
-// FIX 2: Removed the old local interface definition.
-
+// --- EXISTING STATE ---
 const electionId = ref<'TK2023' | 'TK2024'>('TK2023');
 const loading = ref(false);
 const error = ref('');
-// Use the imported type
 const candidates = ref<CandidateData[]>([]);
 
-// --- NEW: modal state ---
-const showModal = ref(false);
-const activeCandidate = ref<CandidateData | null>(null); // Use the imported type
+// --- NEW FILTER STATE ---
+const parties = ref<PartyFilterData[]>([]); // To hold all parties for buttons
+const selectedPartyId = ref<number | null>(null);
+const selectedGender = ref<string | null>(null);
 
-function openCandidate(c: CandidateData) { // Use the imported type
+const availableGenders = ['male', 'female'];
+
+// --- EXISTING MODAL STATE ---
+const showModal = ref(false);
+const activeCandidate = ref<CandidateData | null>(null);
+
+// --- FILTER FUNCTIONS ---
+function selectParty(id: number | null) {
+  selectedPartyId.value = id;
+}
+
+function selectGender(gender: string | null) {
+  selectedGender.value = gender;
+}
+
+function openCandidate(c: CandidateData) {
   activeCandidate.value = c;
   showModal.value = true;
-  // nextTick(() => try to focus the close button) — optional
 }
 
 function closeModal() {
@@ -37,8 +54,7 @@ function folderFor(): string | undefined {
   return undefined;
 }
 
-function displayName(c: CandidateData): string { // Use the imported type
-                                                 // Note: The new getCandidates mapping handles splitting the name into firstName and lastName
+function displayName(c: CandidateData): string {
   const firstOrInitials = (c.firstName?.trim() || c.initials?.trim() || '').trim();
   const prefix = c.prefix && c.prefix.trim() ? ` ${c.prefix.trim()}` : '';
   const last = c.lastName?.trim() || '';
@@ -46,7 +62,7 @@ function displayName(c: CandidateData): string { // Use the imported type
   return name || c.id || 'Onbekende kandidaat';
 }
 
-function candidateKey(c: CandidateData, i: number): string { // Use the imported type
+function candidateKey(c: CandidateData, i: number): string {
   const parts = [
     c.id ?? '',
     c.listNumber ?? '',
@@ -57,13 +73,26 @@ function candidateKey(c: CandidateData, i: number): string { // Use the imported
   return parts.length ? parts.join('|') : `idx-${i}`;
 }
 
+// --- DATA LOADING ---
+
+async function loadParties() {
+  try {
+    // Fetches parties from the new /parties/db endpoint for use in filters
+    parties.value = await getAllPartiesForFilters();
+  } catch (e) {
+    console.error("Could not load parties for filters", e);
+  }
+}
+
 async function load() {
   loading.value = true;
   error.value = '';
   candidates.value = [];
   try {
-    // Call without electionId/folderName as the API is now simplified
-    candidates.value = await getCandidates();
+    // Pass the current filter state (partyId and gender) to the API call.
+    // The backend handles which candidates to return.
+    candidates.value = await getCandidates(selectedPartyId.value, selectedGender.value);
+
     if (!candidates.value.length) error.value = 'Geen kandidaten gevonden.';
   } catch (e) {
     error.value = 'Fout bij het ophalen van kandidaten.';
@@ -73,11 +102,20 @@ async function load() {
 }
 
 function onElectionChange() {
+  // If election changes, we just reload all data.
   load();
 }
 
-onMounted(() => {
+// --- LIFECYCLE HOOKS ---
+
+// Watch filters and reload data whenever they change
+watch([selectedPartyId, selectedGender], () => {
   load();
+});
+
+onMounted(() => {
+  loadParties(); // Load parties once for the filter buttons
+  load();       // Initial data load
   window.addEventListener('keydown', onKeydown);
 });
 onBeforeUnmount(() => {
@@ -98,6 +136,45 @@ onBeforeUnmount(() => {
           </select>
         </label>
         <button @click="load" :disabled="loading">Ophalen</button>
+      </div>
+
+      <div class="filters">
+        <h2 class="filter-title">Filter op:</h2>
+
+        <div class="filter-group party-filters">
+          <label for="party-selector" class="sr-only">Kies Partij</label>
+          <select
+            id="party-selector"
+            v-model="selectedPartyId"
+            class="filter-select"
+          >
+            <option :value="null">Alle Partijen</option>
+
+            <option
+              v-for="party in parties"
+              :key="party.id"
+              :value="party.id"
+            >
+              {{ party.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group gender-filters">
+          <button
+            @click="selectGender(null)"
+            :class="{ 'active-filter': selectedGender === null }"
+          >Alle Geslachten</button>
+
+          <button
+            v-for="gender in availableGenders"
+            :key="gender"
+            @click="selectGender(gender)"
+            :class="{ 'active-filter': selectedGender === gender }"
+          >
+            {{ gender.charAt(0).toUpperCase() + gender.slice(1) }}
+          </button>
+        </div>
       </div>
     </header>
 
@@ -169,7 +246,54 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ... (existing styles) ... */
+/* --- NEW FILTER STYLES --- */
+.filters {
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+.filter-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+.filter-select {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #334155;
+  align-self: center;
+}
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.filter-group button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: #334155;
+}
+.filter-group button:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+.active-filter {
+  background: #0f172a !important;
+  color: white !important;
+  border-color: #0f172a !important;
+}
+
+/* --- EXISTING STYLES --- */
 .page { display: grid; gap: 1rem; padding: 1rem; }
 .bar { display: grid; gap: .75rem; }
 .controls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
@@ -199,7 +323,6 @@ onBeforeUnmount(() => {
   text-decoration: underline;
 }
 
-/* --- NEW: modal styles --- */
 .modal-backdrop {
   position: fixed; inset: 0; background: rgba(15, 23, 42, .5);
   display: grid; place-items: center; z-index: 1000;

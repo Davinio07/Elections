@@ -25,6 +25,26 @@ export interface CandidateData { // <-- Export this as the canonical type
   numberOnList?: string | null;
 }
 
+export interface PartyFilterData {
+  id: number;
+  name: string;
+}
+
+export async function getAllPartiesForFilters(): Promise<PartyFilterData[]> {
+  try {
+    // Calls the new backend endpoint
+    const endpoint = `/elections/parties/db`;
+    const rawParties = await apiClient<any[]>(endpoint, { method: 'GET' });
+
+    // Map the full Party model to just ID and Name
+    return rawParties.map(p => ({ id: p.id, name: p.name }));
+
+  } catch (error) {
+    console.error('Error fetching parties for filters:', error);
+    return [];
+  }
+}
+
 export async function ScaledElectionResults(): Promise<string> {
   try {
     const url = 'http://localhost:8080/api/ScaledElectionResults/Result'.trim();
@@ -63,19 +83,30 @@ export async function getProvinces(electionId: string): Promise<any[]> {
 // ... (existing code for ScaledElectionResults and getProvinces)
 
 // FIX: Updated function to use DB endpoint and map JPA fields to Vue fields
-export async function getCandidates(): Promise<CandidateData[]> { // <-- Use CandidateData as return type
+// --- UPDATED FUNCTION: getCandidates with filters ---
+export async function getCandidates(partyId?: number | null, gender?: string | null): Promise<CandidateData[]> {
   try {
-    // ... existing try block content ...
-    // 1. Use the correct database endpoint (does not need electionId)
-    const endpoint = `/elections/candidates/db`;
+    let url = `/elections/candidates/db`;
+    const params = new URLSearchParams();
 
-    // Fetch the raw JPA candidates list
-    // <-- ENSURE THIS LINE IS PRESENT AND CORRECT -->
-    const rawCandidates = await apiClient<JpaCandidate[]>(endpoint, { method: 'GET' });
+    // Add filters to URL parameters if they exist
+    if (partyId) {
+      params.append('partyId', partyId.toString());
+    }
+    if (gender) {
+      params.append('gender', gender);
+    }
 
-    // 2. Map the JPA fields to the CandidateData fields expected by the component
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+
+    // Fetch with the constructed URL
+    const rawCandidates = await apiClient<JpaCandidate[]>(url, { method: 'GET' });
+
+    // ... (rest of the mapping logic remains the same) ...
     return rawCandidates.map(c => {
-      // Simple heuristic to split full name: everything but the last word is first name
+      // ... mapping logic ...
       const parts = c.name.split(' ');
       const lastName = parts.length > 1 ? parts[parts.length - 1] : c.name;
       const firstName = parts.length > 1 ? parts.slice(0, parts.length - 1).join(' ') : '';
@@ -84,10 +115,9 @@ export async function getCandidates(): Promise<CandidateData[]> { // <-- Use Can
         id: c.id,
         firstName: firstName,
         lastName: lastName,
-        locality: c.residence, // Map JPA 'residence' to Vue 'locality'
+        locality: c.residence,
         gender: c.gender,
-        listName: c.party?.name, // Use party name as list name
-        // Explicitly set unused fields to null to match the component's expectations:
+        listName: c.party?.name,
         initials: null,
         prefix: null,
         listNumber: null,
@@ -97,7 +127,6 @@ export async function getCandidates(): Promise<CandidateData[]> { // <-- Use Can
 
   } catch (error) {
     console.error('Error fetching candidates:', error);
-    // Return an empty array on error, as expected by the calling component
     return [];
   }
 }

@@ -1,9 +1,9 @@
 package nl.hva.elections.mover;
 
-import nl.hva.elections.persistence.model.Candidate; // <-- NEW
+import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.persistence.model.Party;
 
-import nl.hva.elections.repositories.CandidateRepository; // <-- NEW
+import nl.hva.elections.repositories.CandidateRepository;
 import nl.hva.elections.repositories.PartyRepository;
 
 import nl.hva.elections.xml.model.Election;
@@ -13,18 +13,20 @@ import nl.hva.elections.xml.service.DutchElectionService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final DutchElectionService xmlService;
     private final PartyRepository partyRepository;
-    private final CandidateRepository candidateRepository; // <-- NEW: Injected Repository
+    private final CandidateRepository candidateRepository;
 
     // Constructor is updated to include CandidateRepository
     public DataInitializer(DutchElectionService xmlService, PartyRepository partyRepository, CandidateRepository candidateRepository) {
         this.xmlService = xmlService;
         this.partyRepository = partyRepository;
-        this.candidateRepository = candidateRepository; // <-- NEW
+        this.candidateRepository = candidateRepository;
     }
 
     @Override
@@ -60,35 +62,49 @@ public class DataInitializer implements CommandLineRunner {
         if (candidateRepository.count() == 0) {
             System.out.println("Loading candidate data from XML...");
 
+            final AtomicInteger candidatesSaved = new AtomicInteger(0);
+
             for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
 
                 String partyName = xmlCandidate.getPartyName();
 
-                // --- ADD SAFETY CHECK TO SKIP BAD CANDIDATES ---
                 if (partyName == null || partyName.isBlank()) {
-                    // This prints a message only if the party name is missing
                     System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing or empty.");
                     continue;
                 }
 
-                // Find the JPA Party entity by name using PartyRepository
-                partyRepository.findByName(partyName).ifPresentOrElse(jpaParty -> {
+                String cleanedPartyName = partyName.trim();
 
-                    // Create the new JPA Candidate entity
+                // --- 1. DETERMINE CANDIDATE'S FULL NAME (as saved in DB) ---
+                String candidateFullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
+                // -------------------------------------------------------------
+
+                // Find the JPA Party entity by name using PartyRepository
+                partyRepository.findByName(cleanedPartyName).ifPresentOrElse(jpaParty -> {
+
+                    // --- 2. CHECK FOR DUPLICATES BEFORE SAVING ---
+                    if (candidateRepository.existsByNameAndPartyId(candidateFullName, jpaParty.getId())) {
+                        System.out.println("SKIPPING DUPLICATE: Candidate '" + candidateFullName + "' already exists for party " + jpaParty.getName());
+                        return; // Skip to the next iteration
+                    }
+                    // ---------------------------------------------
+
+                    // 3. Save Candidate (Only if no duplicate found)
                     Candidate newCandidateEntity = new Candidate();
-                    newCandidateEntity.setName(xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName());
+                    newCandidateEntity.setName(candidateFullName); // Use the full name for the final entity
                     newCandidateEntity.setResidence(xmlCandidate.getLocality());
                     newCandidateEntity.setGender(xmlCandidate.getGender());
                     newCandidateEntity.setParty(jpaParty);
 
-                    // Save the new candidate
                     candidateRepository.save(newCandidateEntity);
+
+                    candidatesSaved.incrementAndGet();
+
                 }, () -> {
-                    // --- PRINT ERROR IF PARTY NOT FOUND IN DB ---
-                    System.err.println("Lookup failed! No Party found in DB with name: [" + partyName + "]");
+                    System.err.println("Lookup failed! No Party found in DB with name: [" + cleanedPartyName + "]");
                 });
             }
-            System.out.println("Finished loading candidate data. Total candidates saved: " + candidateRepository.count());
+            System.out.println("Finished loading candidate data. Total candidates saved: " + candidatesSaved.get());
         }
     }
 }
