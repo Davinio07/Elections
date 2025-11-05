@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 // JPA/Database models (These are required for the new database endpoint)
 import nl.hva.elections.persistence.model.Candidate; // <-- RESOLVES AMBIGUITY, USES JPA MODEL
+import nl.hva.elections.persistence.model.Party; // <-- NEW IMPORT
 import nl.hva.elections.repositories.CandidateRepository;
+import nl.hva.elections.repositories.PartyRepository; // <-- NEW IMPORT
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,11 +40,13 @@ public class ElectionController {
     private static final Logger logger = LoggerFactory.getLogger(ElectionController.class);
     private final DutchElectionService electionService;
     private final CandidateRepository candidateRepository; // <-- Used for new DB endpoint
+    private final PartyRepository partyRepository; // <-- NEW FIELD
 
     // Constructor updated to inject CandidateRepository
-    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository) {
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
+        this.partyRepository = partyRepository; // <-- INITIALIZE NEW FIELD
     }
 
     /**
@@ -137,20 +141,52 @@ public class ElectionController {
     // @GetMapping("{electionId}/candidates") - OLD METHOD REMOVED!
 
     /**
-     * Endpoint to get all candidates directly from the database (JPA model).
-     * This is the replacement for the old XML-based method and reads persisted data.
-     * Accessible via GET /api/elections/candidates/db
-     * @return A list of all persisted candidates.
+     * Endpoint to get all candidates directly from the database (JPA model), with optional filters.
+     * This replaces the previous /candidates/db method.
      */
     @GetMapping("/candidates/db")
-    public ResponseEntity<List<Candidate>> getAllCandidatesFromDb() {
+    public ResponseEntity<List<Candidate>> getAllCandidatesFromDb(
+            @RequestParam(required = false) Integer partyId,
+            @RequestParam(required = false) String gender) { // <-- NEW PARAMETERS
         try {
-            List<Candidate> candidates = candidateRepository.findAll();
-            System.out.println("Fetched " + candidates.size() + " candidates from DB.");
+            List<Candidate> candidates;
+
+            // Logic to select the correct JPA repository method based on presence of filters
+            if (partyId != null && gender != null) {
+                candidates = candidateRepository.findByPartyIdAndGender(partyId, gender);
+            } else if (partyId != null) {
+                candidates = candidateRepository.findByPartyId(partyId);
+            } else if (gender != null) {
+                candidates = candidateRepository.findByGender(gender);
+            } else {
+                // No filters applied, return all
+                candidates = candidateRepository.findAll();
+            }
+
+            System.out.printf("Fetched %d candidates from DB with filters (partyId: %s, gender: %s).\n",
+                    candidates.size(), partyId, gender);
             return ResponseEntity.ok(candidates);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+
+    // --- NEW ENDPOINT: Fetch all parties from DB for the filter UI ---
+    /**
+     * Endpoint to get all parties directly from the database (JPA model).
+     * Accessible via GET /api/elections/parties/db
+     */
+    @GetMapping("/parties/db")
+    public ResponseEntity<List<Party>> getAllPartiesFromDb() {
+        try {
+            // Returns the list of all Party entities
+            List<Party> parties = partyRepository.findAll();
+            return ResponseEntity.ok(parties);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
 
