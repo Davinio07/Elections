@@ -3,7 +3,6 @@
     <h1>Account Aanmaken</h1>
     <form @submit.prevent="handleRegister" class="registration-form">
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
       <div class="form-group">
         <label for="username">Gebruikersnaam</label>
         <input type="text" id="username" v-model="username" required :disabled="loading" />
@@ -25,31 +24,36 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { registerUser } from '../service/user-api';
 import { ApiError } from '@/services/api-client';
+import { setToken } from '@/services/auth-store';
 
 const username = ref('');
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
 const errorMessage = ref<string | null>(null);
-const successMessage = ref<string | null>(null);
+const router = useRouter();
 
 async function handleRegister() {
   loading.value = true;
   errorMessage.value = null;
-  successMessage.value = null;
 
   try {
-    await registerUser({
+    // response object now contains the token
+    const response = await registerUser({
       username: username.value,
       email: email.value,
       password: password.value,
     });
-    successMessage.value = 'Registratie succesvol! Je kunt nu inloggen.';
-    username.value = '';
-    email.value = '';
-    password.value = '';
+
+    // save the token
+    setToken(response.token);
+
+    // redirect to parties page after successful registration
+    router.push('/parties');
+
   } catch (error) {
     if (error instanceof ApiError) {
       errorMessage.value = error.message;

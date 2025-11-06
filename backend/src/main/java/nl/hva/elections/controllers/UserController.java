@@ -1,5 +1,6 @@
 package nl.hva.elections.controllers;
 
+import nl.hva.elections.dtos.LoginResponse;
 import nl.hva.elections.models.User;
 import nl.hva.elections.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class UserController {
      * @return The newly created user, including their generated ID.
      */
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public LoginResponse createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
 }

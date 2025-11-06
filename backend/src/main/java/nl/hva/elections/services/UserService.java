@@ -1,8 +1,12 @@
 package nl.hva.elections.services;
 
+import nl.hva.elections.dtos.LoginResponse; // <-- 1. IMPORT
 import nl.hva.elections.models.User;
 import nl.hva.elections.repositories.UserRepository;
+import nl.hva.elections.security.JwtTokenProvider; // <-- 2. IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken; // <-- 3. IMPORT
+import org.springframework.security.core.Authentication; // <-- 4. IMPORT
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +26,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * Constructor for the UserService.
@@ -31,9 +36,10 @@ public class UserService implements UserDetailsService {
      * @param passwordEncoder The tool to encrypt and check passwords.
      */
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) { // <-- 6. UPDATE CONSTRUCTOR
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider; // <-- 7. VOEG TOE
     }
 
     /**
@@ -43,6 +49,7 @@ public class UserService implements UserDetailsService {
      * @return A UserDetails object (our own User class) that Spring can use.
      * @throws UsernameNotFoundException if we can't find the user in our database.
      */
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
@@ -55,7 +62,7 @@ public class UserService implements UserDetailsService {
      * @param user The user object with the plain-text password.
      * @return The saved user with the encrypted password.
      */
-    public User createUser(User user) {
+    public LoginResponse createUser(User user) {
         // Check if username is already taken
         userRepository.findByUsername(user.getUsername()).ifPresent(u -> {
             throw new IllegalStateException("Username is already taken");
@@ -64,15 +71,23 @@ public class UserService implements UserDetailsService {
         userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
             throw new IllegalStateException("Email is already in use");
         });
+
         // Encrypt the password before storing it.
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // we create a auth object for the saved user
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                savedUser, null, savedUser.getAuthorities()
+        );
+
+        // use the JwtTokenProvider to create a token
+        String token = jwtTokenProvider.createToken(authentication);
+
+        // give the token back to the caller
+        return new LoginResponse(token);
     }
     
-    /**
-     * Gets a list of all users.
-     * @return A List of all users in the database.
-     */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
