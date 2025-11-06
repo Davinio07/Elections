@@ -9,13 +9,9 @@ import nl.hva.elections.xml.model.NationalResult;
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 

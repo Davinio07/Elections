@@ -1,5 +1,6 @@
 package nl.hva.elections.persistence.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -17,6 +18,7 @@ public class Candidate {
     // This is the "owner" of the relationship
     @ManyToOne
     @JoinColumn(name = "party_id")
+    @JsonBackReference
     private Party party;
 
     public Candidate() {}
