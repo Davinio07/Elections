@@ -7,19 +7,19 @@ Dit document beschrijft de functionaliteit en het ontwerp van de **Kandidatenpag
 
 ## Overzicht
 
-De Kandidatenpagina toont een overzicht van alle beschikbare kandidaten per verkiezing.  
+De Kandidatenpagina toont een overzicht van alle beschikbare kandidaten.  
 Gebruikers kunnen eenvoudig filteren op verkiezing, partij en geslacht, en krijgen vervolgens een duidelijk visueel overzicht van de bijbehorende kandidaten.
 
 De pagina bestaat uit twee hoofdonderdelen:
 - **Filtersectie** bovenaan de pagina
-- **Kandidatenoverzicht** in een rasterweergave
+- **Kandidatenoverzicht** in een grid-weergave
 
 ---
 
 ## Filtersectie
 
 De filters vormen het belangrijkste interactie-element van de pagina.  
-Ze helpen gebruikers om snel te navigeren tussen verschillende verkiezingen, partijen en kandidaatgroepen.
+Ze helpen gebruikers om snel te navigeren tussen verschillende partijen en kandidaten.
 
 ### Beschikbare Filters
 
@@ -69,6 +69,6 @@ Deze visuele indeling maakt het makkelijk om snel kandidaten te herkennen en inf
 
 ## Samenvatting
 
-De Kandidatenpagina biedt een **duidelijk, interactief en efficiënt overzicht** van kandidaten per verkiezing.  
+De Kandidatenpagina biedt een **duidelijk, interactief overzicht** van kandidaten.  
 Gebruikers kunnen eenvoudig filteren op partij en geslacht, en met één klik meer informatie bekijken.  
-Het resultaat is een overzichtelijke en moderne interface die politieke data op een toegankelijke manier presenteert.
+Het resultaat is een overzichtelijke en moderne interface die politieke kandidaten op een toegankelijke manier presenteert.
