@@ -24,11 +24,6 @@ const availableGenders = ['male', 'female'];
 const showModal = ref(false);
 const activeCandidate = ref<CandidateData | null>(null);
 
-// --- FILTER FUNCTIONS ---
-function selectParty(id: number | null) {
-  selectedPartyId.value = id;
-}
-
 function selectGender(gender: string | null) {
   selectedGender.value = gender;
 }
@@ -50,11 +45,7 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-function folderFor(): string | undefined {
-  return undefined;
-}
-
-function displayName(c: CandidateData): string {
+function displayName(c: CandidateData): number | string {
   const firstOrInitials = (c.firstName?.trim() || c.initials?.trim() || '').trim();
   const prefix = c.prefix && c.prefix.trim() ? ` ${c.prefix.trim()}` : '';
   const last = c.lastName?.trim() || '';
@@ -78,9 +69,10 @@ function candidateKey(c: CandidateData, i: number): string {
 async function loadParties() {
   try {
     // Fetches parties from the new /parties/db endpoint for use in filters
-    parties.value = await getAllPartiesForFilters();
+    parties.value = await getAllPartiesForFilters(electionId.value);
+    console.log("✅ Loaded parties:", parties.value);
   } catch (e) {
-    console.error("Could not load parties for filters", e);
+    console.error("❌ Could not load parties for filters", e);
   }
 }
 
@@ -94,7 +86,7 @@ async function load() {
     candidates.value = await getCandidates(selectedPartyId.value, selectedGender.value);
 
     if (!candidates.value.length) error.value = 'Geen kandidaten gevonden.';
-  } catch (e) {
+  } catch {
     error.value = 'Fout bij het ophalen van kandidaten.';
   } finally {
     loading.value = false;

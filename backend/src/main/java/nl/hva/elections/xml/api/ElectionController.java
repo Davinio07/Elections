@@ -154,7 +154,7 @@ public class ElectionController {
      */
     @GetMapping("/candidates/db")
     public ResponseEntity<List<Candidate>> getAllCandidatesFromDb(
-            @RequestParam(required = false) Integer partyId,
+            @RequestParam(required = false) Long partyId,
             @RequestParam(required = false) String gender) { // <-- NEW PARAMETERS
         try {
             List<Candidate> candidates;

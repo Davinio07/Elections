@@ -5,9 +5,8 @@ interface JpaCandidate {
   name: string; // Full name (e.g., "Dilan Yeşilgöz")
   residence: string; // Locality (e.g., "Amsterdam")
   gender: string;
-  party: {
-    name: string; // Party name (e.g., "VVD")
-  }
+  partyIdForJson: number | null;   // Mapped from getPartyIdForJson()
+  partyNameForJson: string | null; // Mapped from getPartyNameForJson()
 }
 
 export interface CandidateData { // <-- Export this as the canonical type
@@ -30,10 +29,10 @@ export interface PartyFilterData {
   name: string;
 }
 
-export async function getAllPartiesForFilters(): Promise<PartyFilterData[]> {
+export async function getAllPartiesForFilters(electionId: string): Promise<PartyFilterData[]> {
   try {
     // Calls the new backend endpoint
-    const endpoint = `/elections/parties/db`;
+    const endpoint = `/elections/${electionId}/parties/db`;
     const rawParties = await apiClient<any[]>(endpoint, { method: 'GET' });
 
     // Map the full Party model to just ID and Name
@@ -117,7 +116,8 @@ export async function getCandidates(partyId?: number | null, gender?: string | n
         lastName: lastName,
         locality: c.residence,
         gender: c.gender,
-        listName: c.party?.name,
+        listName: c.partyNameForJson,
+        listId: c.partyIdForJson,
         initials: null,
         prefix: null,
         listNumber: null,
