@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 // JPA/Database models (These are required for the new database endpoint)
 import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.repositories.CandidateRepository;
+import nl.hva.elections.repositories.PartyRepository;
 import nl.hva.elections.persistence.model.Party;
 
 import org.springframework.http.HttpStatus;
@@ -40,13 +41,15 @@ public class ElectionController {
     private final DutchElectionService electionService;
     private final CandidateRepository candidateRepository; // <-- Used for new DB endpoint
     private final dbPartyService dbPartyService;
-    private final List<Region> regions = new ArrayList<>();
+    private final PartyRepository partyRepository;
+    private List<Region> regions = new ArrayList<>();
 
     // Constructor updated to inject CandidateRepository
-    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, dbPartyService dbPartyService) {
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, dbPartyService dbPartyService, PartyRepository partyRepository) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
         this.dbPartyService = dbPartyService;
+        this.partyRepository = partyRepository;
     }
 
     /**
@@ -191,6 +194,17 @@ public class ElectionController {
     }
 
 
+        @GetMapping("/test-election") // Changed path to be more descriptive
+        public ResponseEntity<List<Party>> testForRepo(
+                @RequestParam("id") String electionId) {
+
+            // 3. Call your repository method
+            List<Party> parties = partyRepository.findByElectionId(electionId);
+
+            // 4. Return the result
+            // Spring will automatically convert this List<Party> into JSON
+            return ResponseEntity.ok(parties);
+        }
     /**
      * Get all political parties for a specific election.
      *

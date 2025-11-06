@@ -12,6 +12,12 @@ public class KiesKring {
     private String partyName;
     private int validVotes;
 
+    /**
+     *
+     * @param municipalityName
+     * @param partyName
+     * @param validVotes
+     */
     public KiesKring(String municipalityName, String partyName, int validVotes) {
         this.municipalityName = municipalityName;
         this.partyName = partyName;

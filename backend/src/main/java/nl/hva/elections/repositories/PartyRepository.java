@@ -27,9 +27,6 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
      */
     List<Party> findByElectionId(String electionId);
 
-    // - save(Party party) -> Saves a new party or updates an existing one
-    // - findById(Integer id) -> Finds one party by its ID
-    // - findAll() -> Gets a List<Party> of all parties
-    // - delete(Party party) -> Deletes a party
-    // - count() -> Returns how many parties are in the table
+    Optional<Party> findById(int id);
+    
 }

@@ -8,8 +8,7 @@ import java.util.Optional;
 
 /**
  * Repository interface for User data.
- * By extending JpaRepository, we get a bunch of CRUD (Create, Read, Update, Delete)
- * methods for free, like save(), findById(), findAll(), etc.
+ * methods like save(), findById(), findAll(), etc.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
