@@ -45,7 +45,6 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-
 function displayName(c: CandidateData): number | string {
   const firstOrInitials = (c.firstName?.trim() || c.initials?.trim() || '').trim();
   const prefix = c.prefix && c.prefix.trim() ? ` ${c.prefix.trim()}` : '';
