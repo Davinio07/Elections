@@ -194,17 +194,17 @@ public class ElectionController {
     }
 
 
-        @GetMapping("/test-election") // Changed path to be more descriptive
-        public ResponseEntity<List<Party>> testForRepo(
-                @RequestParam("id") String electionId) {
+    @GetMapping("/test-election") // Changed path to be more descriptive
+    public ResponseEntity<List<Party>> testForRepo(
+            @RequestParam("id") String electionId) {
 
-            // 3. Call your repository method
-            List<Party> parties = partyRepository.findByElectionId(electionId);
+        // 3. Call your repository method
+        List<Party> parties = partyRepository.findByElectionId(electionId);
 
-            // 4. Return the result
-            // Spring will automatically convert this List<Party> into JSON
-            return ResponseEntity.ok(parties);
-        }
+        // 4. Return the result
+        // Spring will automatically convert this List<Party> into JSON
+        return ResponseEntity.ok(parties);
+    }
     /**
      * Get all political parties for a specific election.
      *
