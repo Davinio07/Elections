@@ -1,4 +1,4 @@
-![](Screenshot 2025-11-07 130603.jpg)
+![ss](./images/Screenshot%202025-11-07%20130603.jpg)
 
 
 | Well                                                                                             | Not Well                                                                | New Ideas |
