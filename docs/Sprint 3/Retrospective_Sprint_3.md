@@ -13,11 +13,11 @@
 ```mermaid
 pie
 title Storypoints per Teamlid   
-"Zarko" : 8
-"Baran" : 8
-"Davinio" : 8
-"Matin" : 8
-"Suleyman" : 8
+"Zarko" : 18
+"Baran" : 15
+"Davinio" : 17
+"Matin" : 26
+"Suleyman" : 15
 ```
 
 
@@ -64,6 +64,8 @@ title Storypoints per Teamlid
 **Relevant:** Reduces last-minute stress and improves the quality of deliverables.
 
 **Time-bound:** To be achieved in Sprint 3, evaluated in the Sprint 3 Retrospective.
+
+
 
  
 ## Davinio's reflection
