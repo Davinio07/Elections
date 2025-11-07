@@ -119,7 +119,7 @@ By doing this, I hope to make teamwork easier, keep everyone updated, and help u
 
 ---
 
-# Matin - Sprint Reflection
+## Matin - Sprint Reflection
  
 ## Last Sprint
 Last sprint, my tip was to share blockers earlier so the team can help faster.  
@@ -140,4 +140,17 @@ By the end of the next sprint (in three weeks):
 - I will update my sprint board **after every major progress step**.  
  
 This will make communication clearer and help the team work more smoothly together.
+ 
+---
 
+## Suleyman - Sprint Reflection
+Last sprint, the tip I received was to communicate more consistently. I improved by being more active in the group chat, but I can still do better by committing my code more frequently to show progress throughout the day.  
+ 
+**TOP:** *You deliver your tasks on time and reliably.*  
+I’m happy with this feedback and want to keep that up while improving how I share progress with the team.  
+ 
+**TIP:** *Commit more often to GitLab to make your progress visible.*  
+I agree, frequent commits help the team follow along and make collaboration smoother.  
+ 
+**SMART Learning Goal:**  
+By the end of the next sprint (in three weeks), I will commit to **GitLab at least five times per day** and keep the sprint board updated regularly to maintain transparency and consistent progress.
