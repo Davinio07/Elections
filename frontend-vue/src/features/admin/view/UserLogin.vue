@@ -22,13 +22,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { loginUser } from '../service/auth-api';
 import { ApiError } from '@/services/api-client';
+import { setToken } from '@/services/auth-store';
 
 const username = ref('');
 const password = ref('');
 const loading = ref(false);
 const errorMessage = ref<string | null>(null);
+const router = useRouter();
 
 async function handleLogin() {
   loading.value = true;
@@ -40,9 +43,10 @@ async function handleLogin() {
       password: password.value,
     });
 
-    localStorage.setItem('authToken', response.token);
+    setToken(response.token);
 
-    alert('Login succesvol!');
+    // stuur de gebruiker naar de partijen pagina na succesvolle login
+    router.push('/parties');
 
   } catch (error) {
     if (error instanceof ApiError) {

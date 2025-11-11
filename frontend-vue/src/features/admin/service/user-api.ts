@@ -35,14 +35,22 @@ export interface UserData {
 }
 
 /**
+ * @interface LoginResponse
+ * @description De data die we TERUGKRIJGEN (hetzelfde als van login).
+ */
+interface LoginResponse {
+  token: string;
+}
+
+/**
  * Sends a request to the backend to register a new user.
  * @param {UserData} userData - An object containing the new user's username, email, and password.
- * @returns {Promise<UserData>} A promise that resolves with the new user's data if successful.
+ * @returns {Promise<LoginResponse>} A promise that resolves with the new user's data if successful.
  * @throws {ApiError} Throws a custom ApiError if the registration fails.
  */
-export async function registerUser(userData: UserData): Promise<UserData> {
+export async function registerUser(userData: UserData): Promise<LoginResponse> {
   try {
-    return await apiClient<UserData>('/users', {
+    return await apiClient<LoginResponse>('/users', {
       method: 'POST',
       body: JSON.stringify(userData),
     });

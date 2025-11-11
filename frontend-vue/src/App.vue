@@ -10,8 +10,15 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">Partijen</router-link>
           <router-link to="/kieskring-details">Kieskring Details</router-link>
-          <router-link to="/register">Registreer</router-link>
-          <router-link to="/login">Login</router-link>
+
+          <template v-if="!isLoggedIn">
+            <router-link to="/register">Registreer</router-link>
+            <router-link to="/login">Login</router-link>
+          </template>
+          <template v-else>
+            <a href="#" @click.prevent="handleLogout">Uitloggen</a>
+          </template>
+
         </nav>
       </div>
     </header>
@@ -82,6 +89,7 @@ body {
   padding: 0.5rem 0;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
 
 .main-nav a:hover {
@@ -145,4 +153,14 @@ body {
 }
 </style>
 <script setup lang="ts">
+
+import { useRouter } from 'vue-router';
+import { isLoggedIn, clearToken } from './services/auth-store';
+
+const router = useRouter();
+
+function handleLogout() {
+  clearToken(); // Wis de token uit state en localStorage
+  router.push('/login'); // Stuur gebruiker naar de login pagina
+}
 </script>

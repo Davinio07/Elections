@@ -45,40 +45,36 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getKieskringNames, getResultsForKieskring, type KieskringResult } from '../service/KieskringDetails_api';
+// 1. Import the NEW function and interfaces
+import {
+  getAllKieskringResults,
+  type KieskringDataDto,
+  type KieskringResultDto
+} from '../service/KieskringDetails_api';
 
-interface KieskringData {
-  name: string;
-  results: KieskringResult[];
-}
-
-const kieskringData = ref<KieskringData[]>([]);
+// 2. Use the new interface for your ref
+const kieskringData = ref<KieskringDataDto[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-// Top 5 parties by votes
-const topParties = (results: KieskringResult[]) => {
+// 3. Update topParties to use the new interface
+const topParties = (results: KieskringResultDto[]) => {
   return [...results]
     .sort((a, b) => b.validVotes - a.validVotes)
     .slice(0, 5);
 };
 
-// Calculate percentage for a party
-const partyPercentage = (votes: number, allResults: KieskringResult[]) => {
+// 4. Update partyPercentage to use the new interface
+const partyPercentage = (votes: number, allResults: KieskringResultDto[]) => {
   const totalVotes = allResults.reduce((sum, r) => sum + r.validVotes, 0);
   return ((votes / totalVotes) * 100).toFixed(1);
 };
 
+// 5. SIMPLIFY your onMounted hook
 onMounted(async () => {
   try {
-    const names = await getKieskringNames();
-    const resultsArray = await Promise.all(
-      names.map(async (name) => {
-        const results = await getResultsForKieskring(name);
-        return { name, results };
-      })
-    );
-    kieskringData.value = resultsArray;
+    // Just ONE API call!
+    kieskringData.value = await getAllKieskringResults();
   } catch (err) {
     error.value = 'Fout bij het ophalen van de kieskringgegevens.';
   } finally {

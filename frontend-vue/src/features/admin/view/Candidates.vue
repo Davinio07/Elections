@@ -225,7 +225,6 @@ onBeforeUnmount(() => {
             <li v-if="activeCandidate?.numberOnList"><strong>Plaats op lijst:</strong> {{ activeCandidate?.numberOnList }}</li>
             <li v-if="activeCandidate?.locality"><strong>Woonplaats:</strong> {{ activeCandidate?.locality }}</li>
             <li v-if="activeCandidate?.gender"><strong>Geslacht:</strong> {{ activeCandidate?.gender }}</li>
-            <li v-if="activeCandidate?.id"><strong>ID:</strong> {{ activeCandidate?.id }}</li>
           </ul>
         </div>
 

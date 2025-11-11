@@ -194,17 +194,17 @@ public class ElectionController {
     }
 
 
-        @GetMapping("/test-election") // Changed path to be more descriptive
-        public ResponseEntity<List<Party>> testForRepo(
-                @RequestParam("id") String electionId) {
+    @GetMapping("/test-election") // Changed path to be more descriptive
+    public ResponseEntity<List<Party>> testForRepo(
+            @RequestParam("id") String electionId) {
 
-            // 3. Call your repository method
-            List<Party> parties = partyRepository.findByElectionId(electionId);
+        // 3. Call your repository method
+        List<Party> parties = partyRepository.findByElectionId(electionId);
 
-            // 4. Return the result
-            // Spring will automatically convert this List<Party> into JSON
-            return ResponseEntity.ok(parties);
-        }
+        // 4. Return the result
+        // Spring will automatically convert this List<Party> into JSON
+        return ResponseEntity.ok(parties);
+    }
     /**
      * Get all political parties for a specific election.
      *
@@ -371,4 +371,60 @@ public class ElectionController {
         Map<String, Integer> seats = electionService.calculateSeats(results, 150);
         return ResponseEntity.ok(seats);
     }
+    // Inside your ElectionController.java
+
+// ... (other methods) ...
+
+    /**
+     * Gets ALL municipality results in one single call.
+     * This avoids the N+1 problem on the frontend.
+     */
+    @GetMapping("/municipalities/all-results")
+    public ResponseEntity<List<KieskringDataDto>> getAllMunicipalityResults() {
+        try {
+            // 1. Load the XML data ONCE
+            logger.info("Loading all election data for combined results...");
+            Election election = electionService.loadAllElectionData();
+
+            // 2. Get the list of all municipality names
+            List<String> municipalityNames = electionService.getMunicipalityNames(election);
+
+            // 3. This will be our final list
+            List<KieskringDataDto> allKieskringData = new ArrayList<>();
+
+            // 4. Loop through the names ON THE SERVER
+            for (String name : municipalityNames) {
+
+                // 5. Get results for one municipality
+                //    This method MUST use the 'election' object we already loaded,
+                //    so it doesn't re-parse the XML!
+                List<KiesKring> resultsForMuni = electionService.getResultsForMunicipality(election, name);
+
+                // 6. Convert the results to our simple DTO
+                //    (I am assuming 'KiesKring' has getPartyName() and getValidVotes())
+                List<KieskringResultDto> partyResults = resultsForMuni.stream()
+                        .map(kieskring -> new KieskringResultDto(
+                                kieskring.getPartyName(), // You might need to adjust this
+                                kieskring.getValidVotes() // You might need to adjust this
+                        ))
+                        .toList();
+
+                // 7. Add the combined data to our main list
+                allKieskringData.add(new KieskringDataDto(name, partyResults));
+            }
+
+            logger.info("Successfully combined all {} municipality results.", allKieskringData.size());
+            return ResponseEntity.ok(allKieskringData);
+
+        } catch (Exception e) {
+            logger.error("Error fetching all municipality results: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    // You can use "record" as a simple way to create these DTOs
+// This matches your frontend's "KieskringResult"
+    public record KieskringResultDto(String partyName, int validVotes) {}
+
+    // This matches your frontend's "KieskringData"
+    public record KieskringDataDto(String name, java.util.List<KieskringResultDto> results) {}
 }
