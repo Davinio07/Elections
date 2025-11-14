@@ -15,6 +15,7 @@ public class DutchRegionTransformer implements RegionTransformer {
 
     @Override
     public void registerRegion(Map<String, String> electionData) {
+        System.out.println("Region data keys received: " + electionData.keySet());
         String id = electionData.get("Region-RegionNumber");
         String name = electionData.getOrDefault("RegionName", "");
         String category = electionData.get("Region-RegionCategory");
@@ -25,7 +26,7 @@ public class DutchRegionTransformer implements RegionTransformer {
         election.addRegion(region);
 
         // Debug output
-        System.out.println("Registered region: " + region);
+        System.out.println("--> GEREGISTREERDE REGIO: ID=" + id + ", Naam=" + name + ", Categorie=" + category);
     }
 
 }
