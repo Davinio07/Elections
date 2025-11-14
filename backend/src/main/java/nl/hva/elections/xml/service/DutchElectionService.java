@@ -13,6 +13,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -82,7 +84,17 @@ public class DutchElectionService {
             throw new IOException("Resource folder not found in classpath: " + folderName);
         }
 
-        electionParser.parseResults(electionId, resourcePath);
+        Files.walk(Paths.get(resourcePath))
+                .filter(Files::isRegularFile)
+                .filter(p -> p.toString().endsWith(".xml"))
+                .forEach(p -> {
+                    try {
+                        electionParser.parseResults(electionId, p.toString());
+                    } catch (Exception e) {
+                        logger.warn("Failed to parse XML file {}: {}", p, e.getMessage());
+                    }
+                });
+        logger.info("AFTER PARSE: municipalityResults = {}", election.getMunicipalityResults().size());
         logger.debug("Finished parsing for {}", electionId);
         return election;
     }
