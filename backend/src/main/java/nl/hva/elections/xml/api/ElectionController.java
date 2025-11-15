@@ -127,74 +127,7 @@ public class ElectionController {
     // --- Einde DB Endpoints ---
 
 
-    @GetMapping("{electionId}/parties")
-    public ResponseEntity<List<PoliticalParty>> getPoliticalParties(@PathVariable String electionId) {
-        try {
-            logger.info("Fetching political parties for election: {}", electionId);
-            List<PoliticalParty> parties = electionService.getPoliticalParties(electionId);
-            logger.debug("Total parties: {}\n", parties.size());
-            return ResponseEntity.ok(parties);
-        } catch (Exception e) {
-            logger.error("Error fetching parties for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
 
-    @GetMapping("{electionId}/parties/search")
-    public ResponseEntity<PoliticalParty> findPartyByName(
-            @PathVariable String electionId,
-            @RequestParam String partyName) {
-        try {
-            logger.info("Searching for party '{}' in election '{}'", partyName, electionId);
-            // Haal de gecachte data op
-            Election election = electionService.getElectionData(electionId);
-
-            PoliticalParty foundParty = election.getPoliticalParties().stream()
-                    .filter(party -> party.getRegisteredAppellation()
-                            .toLowerCase()
-                            .contains(partyName.toLowerCase()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (foundParty != null) {
-                logger.info("Found party: {}", foundParty.getRegisteredAppellation());
-                return ResponseEntity.ok(foundParty);
-            } else {
-                logger.warn("Party not found: {}", partyName);
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            logger.error("Error searching for party '{}' in election '{}'. {}", partyName, electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    @GetMapping("{electionId}/parties/count")
-    public ResponseEntity<Integer> getPartyCount(@PathVariable String electionId) {
-        try {
-            logger.info("Counting parties for election: {}", electionId);
-            int count = electionService.getPoliticalParties(electionId).size();
-            logger.info("Total parties for {}: {}", electionId, count);
-            return ResponseEntity.ok(count);
-        } catch (Exception e) {
-            logger.error("Error counting parties for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    @GetMapping("{electionId}/parties/names")
-    public ResponseEntity<List<String>> getPartyNames(@PathVariable String electionId) {
-        try {
-            logger.info("Fetching party names for election: {}", electionId);
-            List<String> partyNames = electionService.getPoliticalParties(electionId).stream()
-                    .map(PoliticalParty::getRegisteredAppellation)
-                    .toList();
-            return ResponseEntity.ok(partyNames);
-        } catch (Exception e) {
-            logger.error("Error fetching party names for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
 
     /**
      * Haalt alle gemeentenamen op voor de STANDAARD verkiezing.
