@@ -1,9 +1,7 @@
 package nl.hva.elections.xml.api;
 
-import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.PoliticalParty;
-import nl.hva.elections.xml.model.Region;
-import nl.hva.elections.xml.model.KiesKring;
+import nl.hva.elections.repositories.ProvinceRepository;
+import nl.hva.elections.xml.model.*;
 
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.slf4j.Logger;
@@ -12,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.repositories.CandidateRepository;
 import nl.hva.elections.repositories.PartyRepository;
-import nl.hva.elections.xml.model.Party;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +25,13 @@ public class ElectionController {
     private final DutchElectionService electionService;
     private final CandidateRepository candidateRepository;
     private final PartyRepository partyRepository;
+    private final ProvinceRepository provinceRepository;
 
-    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository) {
+    public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository,  ProvinceRepository provinceRepository) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
         this.partyRepository = partyRepository;
+        this.provinceRepository = provinceRepository;
     }
 
     /**
@@ -225,6 +224,21 @@ public class ElectionController {
             return ResponseEntity.ok(results);
         } catch (Exception e) {
             logger.error("Error fetching municipality results: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/Getprovince")
+    public ResponseEntity<List<Province>> getAllProvinces() {
+        try {
+            logger.info("Fetching all provinces");
+            List<Province> provinces = provinceRepository.findAll();
+
+            // it will correctly return an empty JSON array [].
+            return ResponseEntity.ok(provinces);
+
+        } catch (Exception e) {
+            logger.error("Error fetching provinces", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
