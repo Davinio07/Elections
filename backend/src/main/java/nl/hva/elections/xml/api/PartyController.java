@@ -1,8 +1,7 @@
 package nl.hva.elections.xml.api;
 
-import nl.hva.elections.xml.model.PoliticalParty;
-import nl.hva.elections.xml.service.PartyService;
-import nl.hva.elections.exception.ElectionNotFoundException;
+import nl.hva.elections.services.dbPartyService;
+import nl.hva.elections.xml.model.Party;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controller responsible for serving all data related to Political Parties
- * from the XML cache.
+ * Controller responsible for serving all data related to Political Parties.
+ * Refactored to fetch data from the database via dbPartyService.
  */
 @RestController
 @RequestMapping("/api/parties")
@@ -21,37 +20,37 @@ public class PartyController {
 
     private static final Logger logger = LoggerFactory.getLogger(PartyController.class);
 
-    private final PartyService partyService;
+    private final dbPartyService partyService;
 
     /**
-     * Constructs a new PartyController with the necessary PartyService.
+     * Constructs a new PartyController with the database service.
      *
-     * @param partyService The service used to retrieve party data.
+     * @param partyService The service used to retrieve party data from the DB.
      */
-    public PartyController(PartyService partyService) {
+    public PartyController(dbPartyService partyService) {
         this.partyService = partyService;
     }
 
     /**
-     * Retrieves all political parties for a specific election.
+     * Retrieves all political parties for a specific election from the database.
      * <p>
      * Endpoint: {@code GET /api/parties/{electionId}}
      *
      * @param electionId The unique identifier for the election.
-     * @return A {@link ResponseEntity} containing a list of {@link PoliticalParty} objects.
-     * Returns {@link HttpStatus#OK} (200) with the list of parties if found.
-     * Returns {@link HttpStatus#NOT_FOUND} (404) if the election ID is invalid.
-     * Returns {@link HttpStatus#INTERNAL_SERVER_ERROR} (500) for unexpected server errors.
+     * @return A {@link ResponseEntity} containing a list of {@link Party} entities.
      */
     @GetMapping("/{electionId}")
-    public ResponseEntity<List<PoliticalParty>> getPoliticalParties(@PathVariable String electionId) {
+    public ResponseEntity<List<Party>> getPoliticalParties(@PathVariable String electionId) {
         try {
-            List<PoliticalParty> parties = partyService.getPoliticalParties(electionId);
-            logger.debug("Total parties: {}\n", parties.size());
+            List<Party> parties = partyService.getPartiesByElection(electionId);
+
+            if (parties.isEmpty()) {
+                logger.warn("No parties found in database for electionId: {}", electionId);
+                return ResponseEntity.notFound().build();
+            }
+
+            logger.debug("Total parties fetched from DB: {}\n", parties.size());
             return ResponseEntity.ok(parties);
-        } catch (ElectionNotFoundException e) {
-            logger.warn("No election data found for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             logger.error("Internal server error fetching parties for electionId: {}. {}", electionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -65,28 +64,22 @@ public class PartyController {
      *
      * @param electionId The unique identifier for the election.
      * @param partyName  The name of the party to find (passed as a request parameter).
-     * @return A {@link ResponseEntity} containing the matching {@link PoliticalParty}.
-     * Returns {@link HttpStatus#OK} (200) with the party if found.
-     * Returns {@link HttpStatus#NOT_FOUND} (404) if the party or election is not found.
-     * Returns {@link HttpStatus#INTERNAL_SERVER_ERROR} (500) for unexpected server errors.
+     * @return A {@link ResponseEntity} containing the matching {@link Party}.
      */
     @GetMapping("/{electionId}/search")
-    public ResponseEntity<PoliticalParty> findPartyByName(
+    public ResponseEntity<Party> findPartyByName(
             @PathVariable String electionId,
             @RequestParam String partyName) {
         try {
             return partyService.findPartyByName(electionId, partyName)
                     .map(party -> {
-                        logger.info("Found party: {}", party.getRegisteredAppellation());
+                        logger.info("Found party in DB: {}", party.getName());
                         return ResponseEntity.ok(party);
                     })
                     .orElseGet(() -> {
-                        logger.warn("Party not found: {}", partyName);
+                        logger.warn("Party not found in DB: {}", partyName);
                         return ResponseEntity.notFound().build();
                     });
-        } catch (ElectionNotFoundException e) {
-            logger.warn("No election data found for electionId: {} when searching for party: {}. {}", electionId, partyName, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             logger.error("Error searching for party '{}' in election '{}'. {}", partyName, electionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -99,19 +92,13 @@ public class PartyController {
      * Endpoint: {@code GET /api/parties/{electionId}/count}
      *
      * @param electionId The unique identifier for the election.
-     * @return A {@link ResponseEntity} containing the total count of parties as an {@link Integer}.
-     * Returns {@link HttpStatus#OK} (200) with the count.
-     * Returns {@link HttpStatus#NOT_FOUND} (404) if the election ID is invalid.
-     * Returns {@link HttpStatus#INTERNAL_SERVER_ERROR} (500) for unexpected server errors.
+     * @return A {@link ResponseEntity} containing the total count.
      */
     @GetMapping("/{electionId}/count")
     public ResponseEntity<Integer> getPartyCount(@PathVariable String electionId) {
         try {
-            int count = partyService.getPartyCount(electionId);
-            return ResponseEntity.ok(count);
-        } catch (ElectionNotFoundException e) {
-            logger.warn("No election data found for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            List<Party> parties = partyService.getPartiesByElection(electionId);
+            return ResponseEntity.ok(parties.size());
         } catch (Exception e) {
             logger.error("Error counting parties for electionId: {}. {}", electionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -124,19 +111,15 @@ public class PartyController {
      * Endpoint: {@code GET /api/parties/{electionId}/names}
      *
      * @param electionId The unique identifier for the election.
-     * @return A {@link ResponseEntity} containing a {@link List} of party names ({@link String}).
-     * Returns {@link HttpStatus#OK} (200) with the list of names.
-     * Returns {@link HttpStatus#NOT_FOUND} (404) if the election ID is invalid.
-     * Returns {@link HttpStatus#INTERNAL_SERVER_ERROR} (500) for unexpected server errors.
+     * @return A {@link ResponseEntity} containing a {@link List} of party names.
      */
     @GetMapping("/{electionId}/names")
     public ResponseEntity<List<String>> getPartyNames(@PathVariable String electionId) {
         try {
-            List<String> partyNames = partyService.getPartyNames(electionId);
+            List<String> partyNames = partyService.getPartiesByElection(electionId).stream()
+                    .map(Party::getName)
+                    .toList();
             return ResponseEntity.ok(partyNames);
-        } catch (ElectionNotFoundException e) {
-            logger.warn("No election data found for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             logger.error("Error fetching party names for electionId: {}. {}", electionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
