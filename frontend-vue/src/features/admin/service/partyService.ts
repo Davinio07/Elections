@@ -4,7 +4,6 @@
 export interface PoliticalParty {
   /** The officially registered name of the party. */
   name: string;
-
 }
 
 /**
@@ -55,14 +54,47 @@ export const partyColors: Record<string, string> = {
 };
 
 /**
+ * A mapping of official party names to their logo image URLs.
+ * Ensure these images exist in your public/logos folder.
+ */
+export const partyLogos: Record<string, string> = {
+  'VVD': '/logos/vvd.png',
+  'D66': '/logos/d66.png',
+  'PVV (Partij voor de Vrijheid)': '/logos/pvv.png',
+  'GROENLINKS / Partij van de Arbeid (PvdA)': '/logos/gl-pvda.png',
+  'CDA': '/logos/cda.png',
+  'SP (Socialistische Partij)': '/logos/sp.png',
+  'Forum voor Democratie': '/logos/fvd.png',
+  'Partij voor de Dieren': '/logos/pvdd.png',
+  'ChristenUnie': '/logos/cu.png',
+  'Volt': '/logos/volt.png',
+  'JA21': '/logos/ja21.png',
+  'Staatkundig Gereformeerde Partij (SGP)': '/logos/sgp.png',
+  'DENK': '/logos/denk.png',
+  '50PLUS': '/logos/50plus.png',
+  'BBB': '/logos/bbb.png',
+  'BIJ1': '/logos/bij1.png',
+  'Nieuw Sociaal Contract': '/logos/nsc.png',
+  // Add other specific mappings here
+};
+
+/**
  * Retrieves the hex color code for a given party name.
  *
  * @param {string} partyName - The registered appellation of the party.
  * @returns {string} The corresponding hex color code or a default gray if not found.
  */
 export const getPartyColor = (partyName: string): string => {
-
   return partyColors[partyName] || '#6B7280'; // Default gray if not found
+};
+
+/**
+ * Retrieves the logo URL for a given party name.
+ * @param {string} partyName - The registered name of the party.
+ * @returns {string | null} The URL of the logo, or null if not found.
+ */
+export const getPartyLogo = (partyName: string): string | null => {
+  return partyLogos[partyName] || null;
 };
 
 /**
@@ -123,4 +155,3 @@ export const partyService = {
     return fetchFromAPI<NationalResult[]>(`/${electionId}/national`);
   }
 };
-
