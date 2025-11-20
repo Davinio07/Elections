@@ -75,7 +75,15 @@ export const partyLogos: Record<string, string> = {
   'BBB': '/logos/bbb.png',
   'BIJ1': '/logos/bij1.png',
   'Nieuw Sociaal Contract': '/logos/nsc.png',
-  // Add other specific mappings here
+  'BVNL / Groep Van Haga': '/logos/bvnl.png',
+  'Piratenpartij - De Groenen': '/logos/piratenpartij.png',
+  'Splinter': '/logos/splinter.png',
+  'Samen voor Nederland': '/logos/samenvoornederland.png',
+  'LP (Libertaire Partij)': '/logos/lp.png',
+  'LEF - Voor de Nieuwe Generatie': '/logos/lef.png',
+  'Nederland met een PLAN': '/logos/plan.png',
+  'PartijvdSport': '/logos/pvds.png',
+  'Politieke Partij voor Basisinkomen': '/logos/basisinkomen.png',
 };
 
 /**
