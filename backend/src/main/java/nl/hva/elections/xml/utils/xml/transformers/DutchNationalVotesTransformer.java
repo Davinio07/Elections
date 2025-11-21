@@ -1,8 +1,11 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
+import nl.hva.elections.repositories.PartyRepository;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.model.Party;
 import nl.hva.elections.xml.utils.xml.VotesTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -11,15 +14,19 @@ import java.util.Map;
  * <b>This class needs heavy modification!</b>
  */
 public class DutchNationalVotesTransformer implements VotesTransformer {
+    private static final Logger log = LoggerFactory.getLogger(DutchNationalVotesTransformer.class);
+
     private final Election election;
+    private final PartyRepository partyRepository;
 
     /**
      * Creates a new transformer for handling the votes at the national level. It expects an instance of
      * Election that can be used for storing the results.
      * @param election the election in which the votes wil be stored.
      */
-    public DutchNationalVotesTransformer(Election election) {
+    public DutchNationalVotesTransformer(Election election, PartyRepository partyRepository) {
         this.election = election;
+        this.partyRepository = partyRepository;
     }
 
     /**
@@ -38,11 +45,30 @@ public class DutchNationalVotesTransformer implements VotesTransformer {
 
         int totalVotes = votesString != null ? Integer.parseInt(votesString) : 0;
 
-        Party result = new Party(partyName, totalVotes);
-        election.addNationalResult(result);
+        // Election ID comes from the Election object
+        String electionId = election.getId();
 
-        // System.out.printf("%s party votes: %s%n", aggregated ? "National" : "Constituency", electionData);
+        // 1. Lookup the party (correct repository method)
+        Party party = partyRepository
+                .findByNameAndElectionId(partyName, electionId)
+                .orElseGet(() -> {
+                    log.info("Party '{}' not found for election '{}'. Creating new entity.", partyName, electionId);
+                    Party p = new Party();
+                    p.setName(partyName);
+                    p.setElectionId(electionId);
+                    return partyRepository.save(p);
+                });
+
+        // 2. Update the vote count
+        party.setVotes(totalVotes);
+
+        // 3. Persist changes
+        partyRepository.save(party);
+
+        // 4. Link the party to the in-memory Election object
+        election.addNationalResult(party);
     }
+
 
     /**
      * Registers candidate-level vote information.

@@ -1,6 +1,7 @@
 package nl.hva.elections.xml.service;
 
 import jakarta.annotation.PostConstruct; // Belangrijke import
+import nl.hva.elections.repositories.PartyRepository;
 import nl.hva.elections.xml.model.*;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.DutchElectionParser;
@@ -37,6 +38,11 @@ public class DutchElectionService {
 
     // De cache waar alle geparste data in komt
     private final Map<String, Election> electionCache = new ConcurrentHashMap<>();
+    private final PartyRepository partyRepository;
+
+    public DutchElectionService(PartyRepository partyRepository) {
+        this.partyRepository = partyRepository;
+    }
 
     /**
      * Deze methode wordt automatisch aangeroepen nadat de service is gemaakt.
@@ -63,7 +69,7 @@ public class DutchElectionService {
     /**
      * Private helper-methode die de daadwerkelijke XML-parsing uitvoert.
      */
-    private Election parseXmlData(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+    private Election parseXmlData(String electionId, String folderName) throws IOException {
         logger.info("Parsing files for electionId: {} from folder: {}", electionId, folderName);
 
         Election election = new Election(electionId);
@@ -73,7 +79,7 @@ public class DutchElectionService {
                 new DutchCandidateTransformer(election),
                 new DutchRegionTransformer(election),
                 new DutchResultTransformer(election),
-                new DutchNationalVotesTransformer(election),
+                new DutchNationalVotesTransformer(election, partyRepository),
                 new DutchConstituencyVotesTransformer(election),
                 new DutchKiesKringenTransformer(election)
         );
