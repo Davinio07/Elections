@@ -10,6 +10,7 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">Partijen</router-link>
           <router-link to="/kieskring-details">Kieskringen</router-link>
+          <router-link to="/province">province</router-link>
 
           <template v-if="!isLoggedIn">
             <router-link to="/register">Registreer</router-link>

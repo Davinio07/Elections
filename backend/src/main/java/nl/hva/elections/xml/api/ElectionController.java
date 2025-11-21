@@ -1,10 +1,6 @@
 package nl.hva.elections.xml.api;
 
-import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.PoliticalParty;
-import nl.hva.elections.xml.model.Region;
-import nl.hva.elections.xml.model.KiesKring;
-
+import nl.hva.elections.xml.model.*;
 import nl.hva.elections.xml.service.DutchElectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.repositories.CandidateRepository;
 import nl.hva.elections.repositories.PartyRepository;
-import nl.hva.elections.xml.model.Party;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +24,7 @@ public class ElectionController {
     private final CandidateRepository candidateRepository;
     private final PartyRepository partyRepository;
 
+    // Removed ProvinceRepository and KieskringRepository from constructor
     public ElectionController(DutchElectionService electionService, CandidateRepository candidateRepository, PartyRepository partyRepository) {
         this.electionService = electionService;
         this.candidateRepository = candidateRepository;
@@ -37,7 +33,6 @@ public class ElectionController {
 
     /**
      * Haalt de "standaard" (TK2023) verkiezingsdata op.
-     * Is nu een snelle cache-lookup.
      */
     @GetMapping("/results")
     public ResponseEntity<Election> getElectionResults() {
@@ -46,9 +41,6 @@ public class ElectionController {
         return ResponseEntity.ok(election);
     }
 
-    /**
-     * Haalt een specifieke verkiezing op uit de cache.
-     */
     @PostMapping("{electionId}")
     public Election readResults(@PathVariable String electionId, @RequestParam(required = false) String folderName) {
         logger.info("Reading results for electionId: {}", electionId);
@@ -59,7 +51,6 @@ public class ElectionController {
     public ResponseEntity<List<Region>> getRegions(@PathVariable String electionId) {
         try {
             logger.info("Fetching regions for election: {}", electionId);
-            // Geen parsing meer, haalt direct op uit de service
             List<Region> regions = electionService.getRegions(electionId);
             return ResponseEntity.ok(regions);
         } catch (Exception e) {
@@ -68,17 +59,7 @@ public class ElectionController {
         }
     }
 
-    @GetMapping("{electionId}/regions/kieskringen")
-    public ResponseEntity<List<Region>> getKieskringen(@PathVariable String electionId) {
-        try {
-            logger.info("Fetching kieskringen for election: {}", electionId);
-            List<Region> kieskringen = electionService.getKieskringen(electionId);
-            return ResponseEntity.ok(kieskringen);
-        } catch (Exception e) {
-            logger.error("Error fetching kieskringen for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
+    // MOVED: getKieskringen -> KieskringController
 
     @GetMapping("{electionId}/regions/gemeenten")
     public ResponseEntity<List<Region>> getGemeenten(@PathVariable String electionId) {
@@ -92,7 +73,7 @@ public class ElectionController {
         }
     }
 
-    // --- DB Endpoints (deze waren al in orde) ---
+    // --- DB Endpoints ---
 
     @GetMapping("/candidates/db")
     public ResponseEntity<List<Candidate>> getAllCandidatesFromDb(
@@ -109,8 +90,6 @@ public class ElectionController {
             } else {
                 candidates = candidateRepository.findAll();
             }
-            System.out.printf("Fetched %d candidates from DB with filters (partyId: %s, gender: %s).\n",
-                    candidates.size(), partyId, gender);
             return ResponseEntity.ok(candidates);
         } catch (Exception e) {
             e.printStackTrace();
@@ -126,18 +105,79 @@ public class ElectionController {
 
     // --- Einde DB Endpoints ---
 
+    @GetMapping("{electionId}/parties")
+    public ResponseEntity<List<PoliticalParty>> getPoliticalParties(@PathVariable String electionId) {
+        try {
+            logger.info("Fetching political parties for election: {}", electionId);
+            List<PoliticalParty> parties = electionService.getPoliticalParties(electionId);
+            return ResponseEntity.ok(parties);
+        } catch (Exception e) {
+            logger.error("Error fetching parties for electionId: {}. {}", electionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
+    @GetMapping("{electionId}/parties/search")
+    public ResponseEntity<PoliticalParty> findPartyByName(
+            @PathVariable String electionId,
+            @RequestParam String partyName) {
+        try {
+            logger.info("Searching for party '{}' in election '{}'", partyName, electionId);
+            Election election = electionService.getElectionData(electionId);
 
+            PoliticalParty foundParty = election.getPoliticalParties().stream()
+                    .filter(party -> party.getRegisteredAppellation()
+                            .toLowerCase()
+                            .contains(partyName.toLowerCase()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (foundParty != null) {
+                return ResponseEntity.ok(foundParty);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("Error searching for party '{}' in election '{}'. {}", partyName, electionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("{electionId}/parties/count")
+    public ResponseEntity<Integer> getPartyCount(@PathVariable String electionId) {
+        try {
+            logger.info("Counting parties for election: {}", electionId);
+            int count = electionService.getPoliticalParties(electionId).size();
+            return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            logger.error("Error counting parties for electionId: {}. {}", electionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("{electionId}/parties/names")
+    public ResponseEntity<List<String>> getPartyNames(@PathVariable String electionId) {
+        try {
+            logger.info("Fetching party names for election: {}", electionId);
+            List<String> partyNames = electionService.getPoliticalParties(electionId).stream()
+                    .map(PoliticalParty::getRegisteredAppellation)
+                    .toList();
+            return ResponseEntity.ok(partyNames);
+        } catch (Exception e) {
+            logger.error("Error fetching party names for electionId: {}. {}", electionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
     /**
-     * Haalt alle gemeentenamen op voor de STANDAARD verkiezing.
+     * NOTE: This returns MUNICIPALITY names despite the URL name.
+     * Kept here because it functionally belongs to municipality/election data.
      */
-    @GetMapping("/municipalities/names")
-    public ResponseEntity<List<String>> getMunicipalityNames() {
+    @GetMapping("/kieskirng/names")
+    public ResponseEntity<List<String>> getKieskringNames() {
         try {
             logger.info("Fetching all municipality names for default election.");
-            // We gebruiken de standaard (bv. TK2023)
-            List<String> names = electionService.getMunicipalityNames(electionService.loadAllElectionData().getId());
+            List<String> names = electionService.getKiekringName(electionService.loadAllElectionData().getId());
             return ResponseEntity.ok(names);
         } catch (Exception e) {
             logger.error("Error fetching municipality names: {}", e.getMessage(), e);
@@ -145,14 +185,12 @@ public class ElectionController {
         }
     }
 
-    /**
-     * Haalt resultaten op voor een specifieke gemeente (voor de STANDAARD verkiezing).
-     */
+    // MOVED: getKieskringNamesOnly -> KieskringController
+
     @GetMapping("/municipalities/{municipalityName}")
     public ResponseEntity<List<KiesKring>> getMunicipalityResultsByName(@PathVariable String municipalityName) {
         try {
             logger.info("Fetching results for municipality: {}", municipalityName);
-            // We gebruiken de standaard (bv. TK2023)
             String defaultElectionId = electionService.loadAllElectionData().getId();
             List<KiesKring> results = electionService.getResultsForMunicipality(defaultElectionId, municipalityName);
             return ResponseEntity.ok(results);
@@ -162,30 +200,20 @@ public class ElectionController {
         }
     }
 
-    /**
-     * Haalt ALLE gemeenteresultaten op (voor de STANDAARD verkiezing).
-     * Deze methode was al geoptimaliseerd, maar gebruikt nu de snelle cache-lookup.
-     */
+    // MOVED: getAllProvinces -> ProvinceController
+
     @GetMapping("/municipalities/all-results")
     public ResponseEntity<KieskringDataDto[]> getAllMunicipalityResults() {
         try {
-            // 1. Haal de (nu gecachte) data op
             logger.info("Loading default election data for combined results...");
             Election election = electionService.loadAllElectionData();
-            String electionId = election.getId(); // bv. "TK2023"
+            String electionId = election.getId();
 
-            // 2. Haal de lijst met namen op (gebruikt ook de cache)
-            List<String> municipalityNames = electionService.getMunicipalityNames(electionId);
-
+            List<String> municipalityNames = electionService.getKiekringName(electionId);
             List<KieskringDataDto> allKieskringData = new ArrayList<>();
 
-            // 4. Loop door de namen
             for (String name : municipalityNames) {
-
-                // 5. Haal resultaten per gemeente op (gebruikt ook de cache)
                 List<KiesKring> resultsForMuni = electionService.getResultsForMunicipality(electionId, name);
-
-                // 6. Converteer naar DTO
                 List<KieskringResultDto> partyResults = resultsForMuni.stream()
                         .map(kieskring -> new KieskringResultDto(
                                 kieskring.getPartyName(),
@@ -195,9 +223,7 @@ public class ElectionController {
 
                 allKieskringData.add(new KieskringDataDto(name, partyResults));
             }
-
-            logger.info("Successfully combined all {} municipality results.", allKieskringData.size());
-            return ResponseEntity.ok(allKieskringData.toArray(new KieskringDataDto[0])); // Converteer naar Array
+            return ResponseEntity.ok(allKieskringData.toArray(new KieskringDataDto[0]));
 
         } catch (Exception e) {
             logger.error("Error fetching all municipality results: {}", e.getMessage(), e);
@@ -205,7 +231,6 @@ public class ElectionController {
         }
     }
 
-    // DTO records (kunnen hier blijven of in een eigen bestand)
     public record KieskringResultDto(String partyName, int validVotes) {}
     public record KieskringDataDto(String name, java.util.List<KieskringResultDto> results) {}
 }

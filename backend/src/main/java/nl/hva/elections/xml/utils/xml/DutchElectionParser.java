@@ -122,7 +122,6 @@ public class DutchElectionParser {
         for (Path electionFile : files) {
             // Replaced the System.out.printf with a logger.
             // This is cleaner and gives us timestamps and log levels for free.
-            logger.info("Processing file: {}", electionFile);
             try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(electionFile.toString()), 64 * 1024)) {
                 SAXParserFactory factory = SAXParserFactory.newInstance();
                 factory.setNamespaceAware(true);
@@ -130,7 +129,6 @@ public class DutchElectionParser {
                 emlHandler.setFileName(electionFile.toString());
                 parser.parse(bis, emlHandler);
             }
-            logger.info("Successfully processed file: {}", electionFile);
         }
     }
 }

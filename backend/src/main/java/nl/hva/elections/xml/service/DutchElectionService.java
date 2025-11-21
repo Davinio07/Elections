@@ -94,7 +94,7 @@ public class DutchElectionService {
                         logger.warn("Failed to parse XML file {}: {}", p, e.getMessage());
                     }
                 });
-        logger.info("AFTER PARSE: municipalityResults = {}", election.getMunicipalityResults().size());
+        logger.info("AFTER PARSE: municipalityResults = {}", election.getKieskringResults().size());
         logger.debug("Finished parsing for {}", electionId);
         return election;
     }
@@ -158,8 +158,8 @@ public class DutchElectionService {
         return getElectionData(electionId).getPoliticalParties();
     }
 
-    public List<String> getMunicipalityNames(String electionId) {
-        return getElectionData(electionId).getMunicipalityResults().stream()
+    public List<String> getKiekringName(String electionId) {
+        return getElectionData(electionId).getKieskringResults().stream()
                 .map(KiesKring::getMunicipalityName)
                 .distinct()
                 .sorted()
@@ -170,7 +170,7 @@ public class DutchElectionService {
         Election election = getElectionData(electionId);
 
         List<KiesKring> foundResults = new ArrayList<>();
-        for (KiesKring result : election.getMunicipalityResults()) {
+        for (KiesKring result : election.getKieskringResults()) {
             if (result.getMunicipalityName().equalsIgnoreCase(municipalityName)) {
                 foundResults.add(result);
             }
