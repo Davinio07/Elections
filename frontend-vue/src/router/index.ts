@@ -8,6 +8,7 @@ import CandidateList from '@/features/admin/view/Candidates.vue';
 import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElectionResults.vue';
 import Registration from '@/features/admin/view/UserRegistration.vue';
 import UserLogin from '@/features/admin/view/UserLogin.vue';
+import Province from "@/features/admin/view/Province.vue";
 
 const routes = [
   {
@@ -34,6 +35,11 @@ const routes = [
     path: '/kieskring-details',
     name: 'KieskringDetails',
     component: KieskringDetails,
+  },
+  {
+    path: '/province',
+    name: 'Province',
+    component: Province,
   },
   {
     path: '/parties',
