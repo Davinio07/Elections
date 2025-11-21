@@ -1,19 +1,50 @@
 package nl.hva.elections.persistence.model;
 
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "GEMEENTE")
 public class Gemeente {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "gemeente_id")
+    private Integer id;
+
+    @Column(name = "name", unique = true)
     private String name;
-    private Integer gemeente_id;
-    private Integer kieskring_id;
-    private Integer province_id;
 
-    public Gemeente(String name, Integer gemeente_id, Integer kieskring_id, Integer province_id) {
-        this.name = name;
-        this.gemeente_id = gemeente_id;
-        this.kieskring_id = kieskring_id;
-        this.province_id = province_id;
+    // Relationship to Kieskring
+    @ManyToOne
+    @JoinColumn(name = "kieskring_id")
+    @JsonBackReference
+    private Kieskring kieskring;
+
+    // Relationship to Province (can be inferred from Kieskring, but useful to have)
+    @ManyToOne
+    @JoinColumn(name = "province_id")
+    @JsonBackReference
+    private Province province;
+
+    public Gemeente() {
     }
+
+    public Gemeente(String name) {
+        this.name = name;
+    }
+
+    // --- Getters and Setters ---
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public Kieskring getKieskring() { return kieskring; }
+    public void setKieskring(Kieskring kieskring) { this.kieskring = kieskring; }
+
+    public Province getProvince() { return province; }
+    public void setProvince(Province province) { this.province = province; }
 }
-
-

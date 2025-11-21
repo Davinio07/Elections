@@ -1,36 +1,22 @@
 package nl.hva.elections.repositories;
 
 import nl.hva.elections.persistence.model.Gemeente;
-import nl.hva.elections.persistence.model.Kieskring;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query; // <--- Import this
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Spring Data JPA repository for the Kieskring entity.
- * The primary key is of type Integer.
- */
 @Repository
-public interface GemeenteRepository extends JpaRepository<Kieskring, Integer> {
+public interface GemeenteRepository extends JpaRepository<Gemeente, Integer> {
 
-    /**
-     * Checks if a Kieskring with the given name already exists.
-     * Used by the DataInitializer.
-     *
-     * @return true if an entry exists, false otherwise
-     */
-    List<Kieskring> findAll();
     Optional<Gemeente> findByName(String name);
 
-    /**
-     * Finds all Kieskring entities and orders them by name ascending.
-     *
-     * @return a sorted list of Kieskring objects
-     */
     List<Gemeente> findAllByOrderByNameAsc();
 
-    // Note: findAll(), findById(), save(), etc. are
-    // already included from JpaRepository.
+    // --- NEW METHOD ---
+    // Finds all municipalities belonging to a specific kieskring ID
+    @Query("SELECT g FROM Gemeente g WHERE g.kieskring.kieskring_id = :kieskringId")
+    List<Gemeente> findByKieskringId(Integer kieskringId);
 }

@@ -1,5 +1,6 @@
 package nl.hva.elections.persistence.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference; // <--- Import this
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -22,59 +23,32 @@ public class Kieskring {
 
     // --- RELATIONSHIP ---
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_id") // This creates the foreign key column
-    @XmlTransient // Prevents XML circular reference issues
+    @JoinColumn(name = "province_id")
+    @XmlTransient
+    @JsonBackReference // <--- ADD THIS ANNOTATION
     private Province province;
     // --- END RELATIONSHIP ---
 
-    /**
-     * JPA requires a no-argument constructor.
-     */
     public Kieskring() {
     }
 
-    /**
-     * Constructor used for seeding the data.
-     * @param name The name of the kieskring
-     */
     public Kieskring(String name) {
         this.name = name;
     }
 
-    // --- GETTERS AND SETTERS (INCLUDING THE MISSING ONES) ---
+    // ... Getters and Setters ...
 
-    public Integer getKieskring_id() {
-        return kieskring_id;
-    }
+    public Integer getKieskring_id() { return kieskring_id; }
+    public void setKieskring_id(Integer kieskring_id) { this.kieskring_id = kieskring_id; }
 
-    public void setKieskring_id(Integer kieskring_id) {
-        this.kieskring_id = kieskring_id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Province getProvince() {
-        return province;
-    }
-
-    public void setProvince(Province province) {
-        this.province = province;
-    }
-
-    // --- END GETTERS AND SETTERS ---
+    public Province getProvince() { return province; }
+    public void setProvince(Province province) { this.province = province; }
 
     @Override
     public String toString() {
-        // IMPORTANT: Do not include 'province' in toString() to avoid infinite loops
-        return "Kieskring{" +
-                "kieskring_id=" + kieskring_id +
-                ", name='" + name + '\'' +
-                '}';
+        return "Kieskring{kieskring_id=" + kieskring_id + ", name='" + name + '\'' + '}';
     }
 }

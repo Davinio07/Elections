@@ -1,31 +1,41 @@
 import apiClient from '@/services/api-client';
 
-// --- TypeScript Interface Definitions ---
-// (Replaces the JSDoc comments)
+export interface GemeenteDto {
+  id: number;
+  name: string;
+}
 
 export interface KieskringDto {
   kieskring_id: number;
   name: string;
+  // We extend this to hold the children
+  gemeentes?: GemeenteDto[];
 }
 
 export interface ProvinceDto {
   province_id: number;
   name: string;
-  kieskringen: KieskringDto[];
+  kieskringen?: KieskringDto[];
+  isLoadingChildren?: boolean;
 }
 
-// --- API Service Function ---
+/**
+ * Fetches the list of all provinces.
+ */
+export async function getProvinces(): Promise<ProvinceDto[]> {
+  return apiClient<ProvinceDto[]>('/provinces');
+}
 
 /**
- * Fetches all provinces and their nested kieskringen from the database API.
- * This follows the pattern of your KieskringDetails_api.ts.
- *
- * @returns {Promise<ProvinceDto[]>} A promise that resolves to the list of provinces.
+ * Fetches the kieskringen for a specific province ID.
  */
-export async function getProvincesWithKieskringen(): Promise<ProvinceDto[]> {
-  const endpoint = '/elections/Getprovince';
+export async function getKieskringenForProvince(provinceId: number): Promise<KieskringDto[]> {
+  return apiClient<KieskringDto[]>(`/provinces/${provinceId}/kieskringen`);
+}
 
-  // The apiClient handles the fetch, parsing, and error handling.
-  // We specify the expected return type for type-hinting.
-  return apiClient<ProvinceDto[]>(endpoint);
+/**
+ * Fetches the gemeentes for a specific kieskring ID.
+ */
+export async function getGemeentesForKieskring(kieskringId: number): Promise<GemeenteDto[]> {
+  return apiClient<GemeenteDto[]>(`/kieskring/${kieskringId}/gemeentes`);
 }

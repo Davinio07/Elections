@@ -8,13 +8,11 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "GEMEENTE")
 @XmlRootElement(name = "Gemeente")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Gemeente {
+public class GemeenteXML {
 
     @Id // primary key
     @Column(name = "gemeente_id")
@@ -35,10 +33,10 @@ public class Gemeente {
     /**
      * JPA requires a no-argument constructor. (dont forget vro)
      */
-    public Gemeente() {
+    public GemeenteXML() {
     }
 
-    public Gemeente(String name, Integer gemeente_id, Integer kieskring_id, Integer province_id) {
+    public GemeenteXML(String name, Integer gemeente_id, Integer kieskring_id, Integer province_id) {
         this.name = name;
         this.gemeente_id = gemeente_id;
         this.kieskring_id = kieskring_id;

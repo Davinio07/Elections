@@ -9,7 +9,7 @@ public class Election {
     private final List<Region> regions = new ArrayList<>();
     private final List<Party> nationalResults = new ArrayList<>();
     private final List<PoliticalParty> politicalParties = new ArrayList<>();
-    private final List<Gemeente> GemeenteResults = new ArrayList<>();
+    private final List<GemeenteXML> gemeenteXMLResults = new ArrayList<>();
 
     // START OF FIX: Add a List for MunicipalityResult objects
     private final List<KiesKring> municipalityResults = new ArrayList<KiesKring>();
@@ -39,8 +39,8 @@ public class Election {
         candidates.add(candidate);
     }
 
-    public List<Gemeente> getGemeenteResults() {
-        return GemeenteResults;
+    public List<GemeenteXML> getGemeenteResults() {
+        return gemeenteXMLResults;
     }
 
     /**
