@@ -80,14 +80,23 @@
                       <span class="font-medium text-gray-800">{{ kieskring.name }}</span>
                     </div>
 
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                      class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                      :class="{ 'rotate-180 text-blue-500': kieskring.isOpen }"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
+                    <div class="flex items-center gap-2">
+                      <button
+                        @click.stop="goToResults(kieskring.name)"
+                        class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span></span> Kieskring results
+                      </button>
+
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                        class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                        :class="{ 'rotate-180 text-blue-500': kieskring.isOpen }"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </div>
                   </div>
 
                   <transition
@@ -98,11 +107,9 @@
                     @after-leave="endTransition"
                   >
                     <div v-if="kieskring.isOpen" class="bg-blue-50/50 border-t border-gray-100 p-4">
-
                       <div v-if="kieskring.isLoadingGemeentes" class="text-xs text-center text-gray-500 py-2">
                         Gemeenten laden...
                       </div>
-
                       <div v-else-if="kieskring.gemeentes && kieskring.gemeentes.length > 0">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">
                           {{ kieskring.gemeentes.length }} Gemeenten:
@@ -117,7 +124,6 @@
                           </span>
                         </div>
                       </div>
-
                       <p v-else class="text-xs text-gray-500 italic text-center">
                         Geen gemeenten gevonden.
                       </p>
@@ -139,6 +145,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; // Import useRouter
 import {
   getProvinces,
   getKieskringenForProvince,
@@ -148,7 +155,9 @@ import {
   type GemeenteDto
 } from "@/features/admin/service/ProvinceService";
 
-// Extend interfaces for UI state (isOpen, loading)
+const router = useRouter(); // Initialize router
+
+// ... (Interfaces and State remain the same) ...
 interface KieskringUI extends KieskringDto {
   isOpen: boolean;
   isLoadingGemeentes?: boolean;
@@ -164,6 +173,17 @@ const provinces = ref<ProvinceUI[]>([]);
 const isLoading = ref<boolean>(true);
 const error = ref<Error | null>(null);
 
+// --- NEW FUNCTION: Navigate to results ---
+function goToResults(kieskringName: string) {
+  // Navigate to the details page with the name as a query parameter
+  router.push({
+    path: '/kieskring-details',
+    query: { name: kieskringName }
+  });
+}
+
+// ... (The rest of your toggle functions and animations remain exactly the same) ...
+
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -177,15 +197,12 @@ onMounted(async () => {
   }
 });
 
-// --- Toggle Province ---
 async function toggleProvince(province: ProvinceUI) {
   province.isOpen = !province.isOpen;
-
   if (province.isOpen && !province.kieskringen) {
     try {
       province.isLoadingChildren = true;
       const results = await getKieskringenForProvince(province.province_id);
-      // Map data to UI model
       province.kieskringen = results.map(k => ({ ...k, isOpen: false }));
     } catch (err) {
       console.error(`Failed to load kieskringen for ${province.name}`, err);
@@ -195,10 +212,8 @@ async function toggleProvince(province: ProvinceUI) {
   }
 }
 
-// --- Toggle Kieskring (Fetch Gemeentes) ---
 async function toggleKieskring(kieskring: KieskringUI) {
   kieskring.isOpen = !kieskring.isOpen;
-
   if (kieskring.isOpen && !kieskring.gemeentes) {
     try {
       kieskring.isLoadingGemeentes = true;
@@ -212,7 +227,6 @@ async function toggleKieskring(kieskring: KieskringUI) {
   }
 }
 
-// --- Animations & Colors ---
 const startTransition = (el: Element) => {
   const element = el as HTMLElement;
   element.style.height = '0';
