@@ -9,6 +9,7 @@ import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElect
 import Registration from '@/features/admin/view/UserRegistration.vue';
 import UserLogin from '@/features/admin/view/UserLogin.vue';
 import Province from "@/features/admin/view/Province.vue";
+import ChatPage from '@/features/admin/view/ChatPage.vue';
 
 const routes = [
   {
@@ -40,6 +41,12 @@ const routes = [
     path: '/province',
     name: 'Province',
     component: Province,
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: ChatPage,
+    meta: { requiresAuth: true }
   },
   {
     path: '/parties',

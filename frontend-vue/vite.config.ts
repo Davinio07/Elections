@@ -10,6 +10,10 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  // FIX: Voeg de globale definitie toe die sockjs-client nodig heeft
+  define: {
+    global: 'window',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

@@ -81,8 +81,15 @@ public class SecurityConfig {
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
+
+                registry.addMapping("/ws/**") // WebSocket endpoint
+                        .allowedOrigins("http://localhost:5173", "http://localhost:5176")
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
 }
+
 
