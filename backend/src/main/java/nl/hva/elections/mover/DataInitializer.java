@@ -1,173 +1,231 @@
 package nl.hva.elections.mover;
 
 import nl.hva.elections.persistence.model.Candidate;
-import nl.hva.elections.xml.model.Party;
-import nl.hva.elections.repositories.CandidateRepository;
-import nl.hva.elections.repositories.PartyRepository;
-import nl.hva.elections.xml.service.NationalResultService;
+import nl.hva.elections.persistence.model.Gemeente;
+import nl.hva.elections.persistence.model.Kieskring;
+import nl.hva.elections.repositories.*;
 import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.xml.model.KiesKring; // XML Model
+import nl.hva.elections.xml.model.Party;     // XML/JPA Model (Dual use)
+import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.service.DutchElectionService;
+import nl.hva.elections.xml.service.NationalResultService;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import java.util.List;
-import java.util.Map;
-
-/**
- * Initializes the database with election data from XML files upon application startup.
- * This {@link CommandLineRunner} implementation checks if the database is empty.
- * If it is, it loads, parses, and processes data for a predefined list of elections.
- * <p>
- * This process includes:
- * 1. Parsing the XML data (results, candidates) for each election year.
- * 2. Calculating the seat distribution (using D'Hondt) and vote percentages.
- * 3. Persisting the calculated {@link Party} data to the database.
- * 4. Persisting the {@link Candidate} data, linking it to the correct party and election.
- */
 @Component
+@Order(2)
 public class DataInitializer implements CommandLineRunner {
 
     private final DutchElectionService xmlService;
     private final NationalResultService nationalResultService;
     private final PartyRepository partyRepository;
     private final CandidateRepository candidateRepository;
+    private final KieskringRepository kieskringRepository;
+    private final ProvinceRepository provinceRepository;
+    private final GemeenteRepository gemeenteRepository;
 
-    /**
-     * A predefined list of election identifiers (folder names) to load.
-     */
-    private static final List<String> electionList = List.of("TK2023", "TK2021");
+    private static final List<String> ELECTION_LIST = List.of("TK2023", "TK2021");
+    private static final int TOTAL_SEATS = 150;
 
-    /**
-     * The total number of seats to be allocated in the election (e.g., 150 for TK).
-     */
-    private static final int totalSeats = 150;
-
-    /**
-     * Constructs a new DataInitializer with required service and repositories.
-     *
-     * @param xmlService          The service for XML data retrieval.
-     * @param partyRepository     The repository for party data.
-     * @param candidateRepository The repository for candidate data.
-     */
-    public DataInitializer(DutchElectionService xmlService, PartyRepository partyRepository, CandidateRepository candidateRepository, NationalResultService nationalResultService) {
+    public DataInitializer(DutchElectionService xmlService,
+                           PartyRepository partyRepository,
+                           CandidateRepository candidateRepository,
+                           NationalResultService nationalResultService,
+                           GemeenteRepository gemeenteRepository,
+                           KieskringRepository kieskringRepository,
+                           ProvinceRepository provinceRepository) {
         this.xmlService = xmlService;
         this.partyRepository = partyRepository;
         this.candidateRepository = candidateRepository;
         this.nationalResultService = nationalResultService;
+        this.kieskringRepository = kieskringRepository;
+        this.gemeenteRepository = gemeenteRepository;
+        this.provinceRepository = provinceRepository;
     }
 
-    /**
-     * Executes the data initialization logic when the application starts.
-     *
-     * @param args Command line arguments (not used).
-     * @throws Exception if a critical error occurs during data loading, stopping the application.
-     */
     @Override
     public void run(String... args) throws Exception {
-
-        // Check if data already exists to prevent re-initialization
-        if (partyRepository.count() > 0 || candidateRepository.count() > 0) {
-            System.out.println("Database already contains data. Skipping data load.");
+        if (provinceRepository.count() == 0) {
+            System.err.println("CRITICAL WARNING: Province table is empty! Run DataSeeder first.");
             return;
         }
 
-        System.out.println("Database is empty. Loading data from XML for " + electionList.size() + " elections...");
-        for (String electionId : electionList) {
-            System.out.println("--- Loading data for: " + electionId + " ---");
+        System.out.println("--- Starting Data Sync (Geography + Results) ---");
 
-            // Load all XML data for this specific election
+        for (String electionId : ELECTION_LIST) {
             Election electionData = xmlService.getElectionData(electionId);
             if (electionData == null) {
-                System.err.println("CRITICAL: No cached data found for " + electionId + ". Skipping.");
+                System.err.println("No data found for " + electionId);
                 continue;
             }
 
-            // --- 1. Process and Save Parties ---
-            List<Party> rawResults = electionData.getNationalResults();
-            if (rawResults == null || rawResults.isEmpty()) {
-                System.err.println("No national results found for " + electionId + ". Skipping party load.");
-            } else {
-                // Step 1: Calculate seat distribution (D'Hondt)
-                Map<String, Integer> calculatedSeatsMap = nationalResultService.calculateSeats(rawResults, totalSeats);
+            System.out.println("Processing election: " + electionId);
 
-                // Step 2: Calculate total votes for percentage calculation
-                double totalVotes = rawResults.stream()
-                        .mapToDouble(Party::getVotes)
-                        .sum();
+            // ------------------------------------------------------------------
+            // 1. SYNC KIESKRINGEN (Constituencies)
+            // ------------------------------------------------------------------
+            Map<String, String> kieskringXmlIdToNameMap = new HashMap<>();
+            List<Region> regions = electionData.getRegions();
 
-                // Step 3: Iterate, combine calculated data, and save Party entities
-                for (Party rawResult : rawResults) {
-                    String partyName = rawResult.getName();
-                    int votes = rawResult.getVotes();
+            List<Region> kieskringRegions = regions.stream()
+                    .filter(r -> "KIESKRING".equalsIgnoreCase(r.getCategory()))
+                    .toList();
 
-                    // Retrieve calculated values
-                    int calculatedSeats = calculatedSeatsMap.getOrDefault(partyName, 0);
-                    double calculatedPercentage = (totalVotes > 0) ? ((double) votes / totalVotes) * 100.0 : 0.0;
+            for (Region r : kieskringRegions) {
+                kieskringXmlIdToNameMap.put(r.getId(), r.getName());
 
-                    // Create and persist the complete Party entity
+                Kieskring kieskring = kieskringRepository.findByName(r.getName())
+                        .orElse(new Kieskring(r.getName()));
+
+                int provinceId = getProvinceIdByName(r.getName());
+                if (provinceId > 0) {
+                    provinceRepository.findById(provinceId).ifPresent(kieskring::setProvince);
+                }
+                kieskringRepository.save(kieskring);
+            }
+
+            // ------------------------------------------------------------------
+            // 2. SYNC GEMEENTEN (Municipalities)
+            // ------------------------------------------------------------------
+            if (gemeenteRepository.count() == 0) {
+                System.out.println("Syncing Gemeenten...");
+                List<Region> gemeenteRegions = regions.stream()
+                        .filter(r -> "GEMEENTE".equalsIgnoreCase(r.getCategory()))
+                        .toList();
+
+                for (Region r : gemeenteRegions) {
+                    if (gemeenteRepository.findByName(r.getName()).isPresent()) continue;
+
+                    Gemeente gemeente = new Gemeente(r.getName());
+                    String parentName = kieskringXmlIdToNameMap.get(r.getSuperiorRegionNumber());
+
+                    if (parentName != null) {
+                        kieskringRepository.findByName(parentName).ifPresent(k -> {
+                            gemeente.setKieskring(k);
+                            gemeente.setProvince(k.getProvince());
+                        });
+                    }
+                    gemeenteRepository.save(gemeente);
+                }
+            }
+
+            // ------------------------------------------------------------------
+            // 3. SYNC PARTIES & RESULTS
+            // ------------------------------------------------------------------
+            // Only run this if parties don't exist yet for this election
+            if (partyRepository.findByElectionId(electionId).isEmpty()) {
+                System.out.println("Syncing Parties & Results for " + electionId + "...");
+
+                List<Party> nationalResults = electionData.getNationalResults();
+                List<KiesKring> municipalityResults = electionData.getKieskringResults();
+                Map<String, Integer> aggregatedVotes = new HashMap<>();
+
+                // Determine best source for votes
+                boolean useNationalResultsDirectly = false;
+                if (nationalResults != null && !nationalResults.isEmpty()) {
+                    long distinctNames = nationalResults.stream().map(Party::getName).distinct().count();
+                    if (distinctNames == nationalResults.size()) useNationalResultsDirectly = true;
+                }
+
+                if (useNationalResultsDirectly) {
+                    aggregatedVotes = nationalResults.stream()
+                            .collect(Collectors.toMap(Party::getName, Party::getVotes, Integer::sum));
+                } else if (municipalityResults != null && !municipalityResults.isEmpty()) {
+                    aggregatedVotes = municipalityResults.stream()
+                            .collect(Collectors.toMap(KiesKring::getPartyName, KiesKring::getValidVotes, Integer::sum));
+                } else {
+                    aggregatedVotes = (nationalResults == null) ? new HashMap<>() :
+                            nationalResults.stream().collect(Collectors.toMap(Party::getName, Party::getVotes, Integer::sum));
+                }
+
+                if (aggregatedVotes.isEmpty()) {
+                    System.out.println("No votes found for " + electionId);
+                    continue;
+                }
+
+                // Calculate Seats
+                List<Party> partyListForCalc = aggregatedVotes.entrySet().stream()
+                        .map(e -> { Party p = new Party(); p.setName(e.getKey()); p.setVotes(e.getValue()); return p; })
+                        .collect(Collectors.toList());
+
+                Map<String, Integer> seatsMap = nationalResultService.calculateSeats(partyListForCalc, TOTAL_SEATS);
+                double totalVotes = partyListForCalc.stream().mapToDouble(Party::getVotes).sum();
+
+                // Persist Parties
+                for (Map.Entry<String, Integer> entry : aggregatedVotes.entrySet()) {
+                    String partyName = entry.getKey();
+                    int votes = entry.getValue();
+                    int seats = seatsMap.getOrDefault(partyName, 0);
+                    double percentage = (totalVotes > 0) ? ((double) votes / totalVotes) * 100.0 : 0.0;
+
                     Party jpaParty = new Party();
                     jpaParty.setElectionId(electionId);
                     jpaParty.setName(partyName);
                     jpaParty.setVotes(votes);
-                    jpaParty.setSeats(calculatedSeats);
-                    jpaParty.setPercentage(calculatedPercentage);
-
+                    jpaParty.setSeats(seats);
+                    jpaParty.setPercentage(percentage);
                     partyRepository.save(jpaParty);
                 }
-                System.out.println("Saved " + rawResults.size() + " parties for " + electionId + " with calculated seats/percentages.");
+            } else {
+                System.out.println("Parties already exist for " + electionId + ". Skipping.");
             }
 
-
-            // 2. Save Candidates
+            // ------------------------------------------------------------------
+            // 4. SYNC CANDIDATES
+            // ------------------------------------------------------------------
             if (candidateRepository.count() == 0) {
-                System.out.println("Loading candidate data from XML...");
-
-                final AtomicInteger candidatesSaved = new AtomicInteger(0);
+                System.out.println("Syncing Candidates for " + electionId + "...");
+                AtomicInteger candidatesSaved = new AtomicInteger(0);
 
                 for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
-
                     String partyName = xmlCandidate.getPartyName();
+                    if (partyName == null || partyName.isBlank()) continue;
 
-                    if (partyName == null || partyName.isBlank()) {
-                        System.err.println("Skipping candidate " + xmlCandidate.getId() + " because party name is missing or empty.");
-                        continue;
-                    }
+                    String cleanName = partyName.trim();
+                    String fullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
 
-                    String cleanedPartyName = partyName.trim();
-
-                    // --- 1. DETERMINE CANDIDATE'S FULL NAME (as saved in DB) ---
-                    String candidateFullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
-                    // -------------------------------------------------------------
-
-                    // Find the JPA Party entity by name using PartyRepository
-                    partyRepository.findByNameAndElectionId(cleanedPartyName, electionId).ifPresentOrElse(jpaParty -> {
-
-                        // --- 2. CHECK FOR DUPLICATES BEFORE SAVING ---
-                        if (candidateRepository.existsByNameAndPartyId(candidateFullName, jpaParty.getId())) {
-                            System.out.println("SKIPPING DUPLICATE: Candidate '" + candidateFullName + "' already exists for party " + jpaParty.getName());
-                            return; // Skip to the next iteration
+                    partyRepository.findByNameAndElectionId(cleanName, electionId).ifPresent(party -> {
+                        if (!candidateRepository.existsByNameAndPartyId(fullName, party.getId())) {
+                            Candidate c = new Candidate();
+                            c.setName(fullName);
+                            c.setResidence(xmlCandidate.getLocality());
+                            c.setGender(xmlCandidate.getGender());
+                            c.setParty(party);
+                            candidateRepository.save(c);
+                            candidatesSaved.incrementAndGet();
                         }
-                        // ---------------------------------------------
-
-                        // 3. Save Candidate (Only if no duplicate found)
-                        Candidate newCandidateEntity = new Candidate();
-                        newCandidateEntity.setName(candidateFullName); // Use the full name for the final entity
-                        newCandidateEntity.setResidence(xmlCandidate.getLocality());
-                        newCandidateEntity.setGender(xmlCandidate.getGender());
-                        newCandidateEntity.setParty(jpaParty);
-
-                        candidateRepository.save(newCandidateEntity);
-
-                        candidatesSaved.incrementAndGet();
-
-                    }, () -> {
-                        System.err.println("Lookup failed! No Party found in DB with name: [" + cleanedPartyName + "]");
                     });
                 }
-                System.out.println("Finished loading candidate data. Total candidates saved: " + candidatesSaved.get());
+                System.out.println("Saved " + candidatesSaved.get() + " candidates.");
             }
         }
+
+        System.out.println("Data sync complete.");
+    }
+
+    // Helper for Province IDs
+    private int getProvinceIdByName(String name) {
+        if (name == null) return -1;
+        return switch (name.trim()) {
+            case "Groningen" -> 1;
+            case "Leeuwarden" -> 2;
+            case "Assen" -> 3;
+            case "Zwolle" -> 4;
+            case "Lelystad" -> 5;
+            case "Nijmegen", "Arnhem" -> 6;
+            case "Utrecht" -> 7;
+            case "Amsterdam", "Haarlem", "Den Helder" -> 8;
+            case "'s-Gravenhage", "Rotterdam", "Dordrecht", "Leiden" -> 9;
+            case "Middelburg" -> 10;
+            case "Tilburg", "'s-Hertogenbosch" -> 11;
+            case "Maastricht", "Bonaire" -> 12;
+            default -> -1;
+        };
     }
 }

@@ -34,16 +34,19 @@ public class NationalResultController {
      * Retrieves the raw national results (votes) from the cached XML data.
      */
     @GetMapping("/{electionId}/national") // Becomes: /api/nationalResult/{electionId}/national
-    public ResponseEntity<List<Party>> getNationalResults(@PathVariable String electionId) {
-        try {
-            logger.info("Fetching national results for election: {}", electionId);
-            List<Party> results = nationalResultService.getNationalResults(electionId);
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            logger.error("Error fetching national results for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<List<Party>> getNationalResults(
+            @PathVariable String electionId) {
+
+        List<Party> parties =
+                dbPartyService.getPartiesByElection(electionId);
+
+        if (parties.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+
+        return ResponseEntity.ok(parties);
     }
+
 
     /**
      * Calculates and returns the seat distribution based on national results.

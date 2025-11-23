@@ -52,7 +52,8 @@ public class NationalResultService {
     public Map<String, Integer> calculateSeats(List<Party> results, int totalSeats) {
         Map<String, Integer> seats = new HashMap<>();
         Map<String, Integer> voteCounts = results.stream()
-                .collect(Collectors.toMap(Party::getName, Party::getVotes));
+                .collect(Collectors.toMap(Party::getName, Party::getVotes, Integer::sum));
+
 
         for (String party : voteCounts.keySet()) {
             seats.put(party, 0); // initialize seats

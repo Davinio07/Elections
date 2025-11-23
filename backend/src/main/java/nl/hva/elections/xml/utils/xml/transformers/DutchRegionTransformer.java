@@ -20,12 +20,18 @@ public class DutchRegionTransformer implements RegionTransformer {
         String category = electionData.get("Region-RegionCategory");
         String superiorCategory = electionData.get("Region-SuperiorRegionCategory");
 
-        Region region = new Region(id, name, category, superiorCategory);
+        // --- FIX START: Prioritize the direct XML Tag over the Attribute ---
+        // 1. Try to get the direct tag value (e.g. <SuperiorRegionNumber>3</...>)
+        String superiorRegionNumber = electionData.get("SuperiorRegionNumber");
 
+        // 2. If that is null, ONLY THEN check the attribute (Region-SuperiorRegionNumber)
+        // This prevents us from accidentally grabbing the Parent's attribute value.
+        if (superiorRegionNumber == null) {
+            superiorRegionNumber = electionData.get("Region-SuperiorRegionNumber");
+        }
+        // --- FIX END ---
+
+        Region region = new Region(id, name, category, superiorCategory, superiorRegionNumber);
         election.addRegion(region);
-
-        // Debug output
-        System.out.println("Registered region: " + region);
     }
-
 }
