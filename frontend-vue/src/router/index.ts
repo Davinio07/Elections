@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '@/features/admin/view/HomeView.vue';
 import AdminDashboard from '@/features/admin/view/AdminDashboard.vue';
 import ScaledElectionResults from "@/features/admin/view/ScaledElectionResults.vue";
 import KieskringDetails from "@/features/admin/view/KieskringDetails.vue";
@@ -12,6 +13,11 @@ import Province from "@/features/admin/view/Province.vue";
 import ChatPage from '@/features/admin/view/ChatPage.vue';
 
 const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeView,
+  },
   {
     path: '/register',
     name: 'Registration',
