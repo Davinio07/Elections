@@ -8,6 +8,7 @@ import CandidateList from '@/features/admin/view/Candidates.vue';
 import MunicipalityElectionResults from '@/features/admin/view/MunicipalityElectionResults.vue';
 import Registration from '@/features/admin/view/UserRegistration.vue';
 import UserLogin from '@/features/admin/view/UserLogin.vue';
+import ChatPage from '@/features/admin/view/ChatPage.vue';
 
 const routes = [
   {
@@ -50,10 +51,16 @@ const routes = [
     name: 'Candidates',
     component: CandidateList
   },
-    {
+  {
     path: '/municipality-results',
     name: 'MunicipalityElectionResults',
     component: MunicipalityElectionResults,
+  },
+  {
+    path: '/chat', // <-- NIEUWE ROUTE
+    name: 'Chat',
+    component: ChatPage,
+    meta: { requiresAuth: true } // Optioneel: zorg dat login vereist is
   },
 ];
 

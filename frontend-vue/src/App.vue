@@ -10,6 +10,7 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">Partijen</router-link>
           <router-link to="/kieskring-details">Kieskring Details</router-link>
+          <router-link to="/chat" class="text-gray-700 font-medium hover:text-blue-600 transition" active-class="text-blue-600 border-b-2 border-blue-600 pb-0.5">Chat</router-link>
 
           <template v-if="!isLoggedIn">
             <router-link to="/register">Registreer</router-link>
