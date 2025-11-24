@@ -1,58 +1,54 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
-import nl.hva.elections.xml.model.Candidate;
+import nl.hva.elections.persistence.model.Candidate;
 import nl.hva.elections.xml.model.Election;
 import nl.hva.elections.xml.utils.xml.CandidateTransformer;
-
 import java.util.Map;
 
-/**
- * Just prints to content of electionData to the standard output.>br/>
- * <b>This class needs heavy modification!</b>
- */
 public class DutchCandidateTransformer implements CandidateTransformer {
     private final Election election;
 
-    /**
-     * Creates a new transformer for handling the candidate lists. It expects an instance of Election that can
-     * be used for storing the candidates lists.
-     * @param election the election in which the candidate lists wil be stored.
-     */
     public DutchCandidateTransformer(Election election) {
         this.election = election;
     }
 
     @Override
     public void registerCandidate(Map<String, String> electionData) {
-        // Prefer CandidateIdentifier if present; fall back to ContestIdentifier
+        // 1. Extract all data into variables first
         String id = electionData.getOrDefault("CandidateIdentifier",
                 electionData.getOrDefault("ContestIdentifier", ""));
 
-        Candidate candidate = new Candidate(id);
-        candidate.setFirstName(electionData.get("FirstName"));
-        candidate.setLastName(electionData.get("LastName"));
-        candidate.setGender(electionData.get("Gender"));
-        candidate.setLocality(electionData.get("LocalityName"));
+        String firstName = electionData.get("FirstName");
+        String lastName = electionData.get("LastName");
+        String gender = electionData.get("Gender");
+        String locality = electionData.get("LocalityName");
 
-        // --- FIX: Check for both RegisteredAppellation and RegisteredName ---
+        // Party Name Logic
         String partyName = electionData.get("RegisteredAppellation");
         if (partyName == null || partyName.isBlank()) {
-            // Fallback to the other potential tag for party name
             partyName = electionData.get("RegisteredName");
         }
-        // -------------------------------------------------------------------
 
-        // Diagnostic output (keep this to ensure data is found now)
+        // 2. Use the NEW constructor
+        // We pass all variables at once. The constructor handles combining First+Last name.
+        Candidate candidate = new Candidate(
+                id,
+                firstName,
+                lastName,
+                gender,
+                locality,
+                partyName
+        );
+
+        // 3. Log and Add
         if (partyName == null || partyName.isBlank()) {
-            System.err.println("ERROR: Missing RegisteredAppellation/RegisteredName for candidate " + id + ".");
-        } else {
-            System.out.println("Found Party Name for candidate " + id + ": [" + partyName + "]");
+            System.err.println("ERROR: Missing Party Name for candidate " + id);
         }
 
-        candidate.setPartyName(partyName);
         election.addCandidate(candidate);
 
-        System.out.println("Registered candidate: " + candidate.getId());
+        // Note: candidate.getId() will be null here because the DB hasn't run yet.
+        // Use getXmlId() to see the ID from the file.
+        System.out.println("Registered candidate: " + candidate.getXmlId());
     }
-
 }
