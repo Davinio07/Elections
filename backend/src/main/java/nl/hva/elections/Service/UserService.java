@@ -1,7 +1,7 @@
-package nl.hva.elections.services;
+package nl.hva.elections.service;
 
 import nl.hva.elections.dtos.LoginResponse; // <-- 1. IMPORT
-import nl.hva.elections.models.User;
+import nl.hva.elections.persistence.model.User;
 import nl.hva.elections.repositories.UserRepository;
 import nl.hva.elections.security.JwtTokenProvider; // <-- 2. IMPORT
 import org.springframework.beans.factory.annotation.Autowired;

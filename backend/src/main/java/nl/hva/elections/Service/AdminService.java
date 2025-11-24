@@ -1,12 +1,11 @@
 // Bestand: elections/admin/AdminService.java
-package nl.hva.elections.admin;
+package nl.hva.elections.service;
 
 import nl.hva.elections.repositories.CandidateRepository;
 import nl.hva.elections.repositories.PartyRepository;
 import nl.hva.elections.repositories.UserRepository;
-import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.Party;
-import nl.hva.elections.xml.service.DutchElectionService;
+import nl.hva.elections.persistence.model.Election;
+import nl.hva.elections.persistence.model.Party;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

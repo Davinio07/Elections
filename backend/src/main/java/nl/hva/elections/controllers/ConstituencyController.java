@@ -1,11 +1,11 @@
-package nl.hva.elections.xml.api;
+package nl.hva.elections.controllers;
 
 import nl.hva.elections.persistence.model.Gemeente;
 import nl.hva.elections.persistence.model.Kieskring;
 import nl.hva.elections.repositories.GemeenteRepository;
 import nl.hva.elections.repositories.KieskringRepository;
-import nl.hva.elections.xml.model.Region;
-import nl.hva.elections.xml.service.DutchElectionService;
+import nl.hva.elections.persistence.model.Region;
+import nl.hva.elections.service.DutchElectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

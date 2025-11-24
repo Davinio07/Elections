@@ -1,4 +1,4 @@
-package nl.hva.elections.xml.api;
+package nl.hva.elections.controllers;
 
 import nl.hva.elections.persistence.model.Kieskring;
 import nl.hva.elections.persistence.model.Province;

@@ -2,7 +2,6 @@ package nl.hva.elections.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import nl.hva.elections.xml.model.Party;
 
 @Entity
 @Table(name = "candidates")

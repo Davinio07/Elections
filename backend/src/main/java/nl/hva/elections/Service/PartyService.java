@@ -1,8 +1,8 @@
-package nl.hva.elections.xml.service;
+package nl.hva.elections.service;
 
 import nl.hva.elections.exception.ElectionNotFoundException;
-import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.PoliticalParty;
+import nl.hva.elections.persistence.model.Election;
+import nl.hva.elections.persistence.model.PoliticalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

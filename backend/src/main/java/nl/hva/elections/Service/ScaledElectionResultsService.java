@@ -1,4 +1,4 @@
-package nl.hva.elections.Service;
+package nl.hva.elections.service;
 
 import org.springframework.stereotype.Service;
 

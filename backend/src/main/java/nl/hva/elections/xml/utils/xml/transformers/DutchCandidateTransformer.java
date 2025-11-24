@@ -1,7 +1,7 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
 import nl.hva.elections.persistence.model.Candidate;
-import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.persistence.model.Election;
 import nl.hva.elections.xml.utils.xml.CandidateTransformer;
 import java.util.Map;
 

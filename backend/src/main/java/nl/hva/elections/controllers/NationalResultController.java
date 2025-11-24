@@ -1,8 +1,8 @@
-package nl.hva.elections.xml.api;
+package nl.hva.elections.controllers;
 
-import nl.hva.elections.xml.model.Party;
-import nl.hva.elections.services.dbPartyService;
-import nl.hva.elections.xml.service.NationalResultService;
+import nl.hva.elections.persistence.model.Party;
+import nl.hva.elections.service.dbPartyService;
+import nl.hva.elections.service.NationalResultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

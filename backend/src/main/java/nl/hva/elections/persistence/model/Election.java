@@ -1,6 +1,4 @@
-package nl.hva.elections.xml.model;
-
-import nl.hva.elections.persistence.model.Candidate;
+package nl.hva.elections.persistence.model;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,9 @@
-package nl.hva.elections.xml.model;
+package nl.hva.elections.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.*;
-import nl.hva.elections.persistence.model.Candidate;
 
 import java.util.List;
 

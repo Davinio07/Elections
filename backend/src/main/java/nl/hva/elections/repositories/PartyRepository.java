@@ -1,6 +1,6 @@
 package nl.hva.elections.repositories;
 
-import nl.hva.elections.xml.model.Party;
+import nl.hva.elections.persistence.model.Party;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

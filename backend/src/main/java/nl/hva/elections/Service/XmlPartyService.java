@@ -1,6 +1,6 @@
-package nl.hva.elections.xml.service;
+package nl.hva.elections.service;
 
-import nl.hva.elections.xml.model.Party;
+import nl.hva.elections.persistence.model.Party;
 import nl.hva.elections.xml.utils.xml.transformers.PartyTransformer;
 import java.util.List;
 import org.springframework.stereotype.Service;

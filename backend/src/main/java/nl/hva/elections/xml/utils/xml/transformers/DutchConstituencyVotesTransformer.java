@@ -1,6 +1,6 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
-import nl.hva.elections.xml.model.Election;
+import nl.hva.elections.persistence.model.Election;
 import nl.hva.elections.xml.utils.xml.VotesTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
