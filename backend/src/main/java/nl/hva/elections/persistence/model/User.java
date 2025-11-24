@@ -1,4 +1,4 @@
-package nl.hva.elections.models;
+package nl.hva.elections.persistence.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
