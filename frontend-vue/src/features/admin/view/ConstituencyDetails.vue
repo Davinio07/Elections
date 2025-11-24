@@ -21,22 +21,22 @@
     <p v-if="loading" class="text-gray-500">Resultaten worden geladen...</p>
     <div v-if="error" class="text-red-600 font-semibold bg-red-50 p-4 rounded">{{ error }}</div>
 
-    <div v-if="!loading && kieskringData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-if="!loading && constituencyData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
-        v-for="(kieskring, index) in kieskringData"
+        v-for="(constituency, index) in constituencyData"
         :key="index"
         class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition-shadow duration-200 border border-gray-100"
       >
         <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
-          <h2 class="text-lg font-bold text-gray-800">{{ kieskring.name }}</h2>
+          <h2 class="text-lg font-bold text-gray-800">{{ constituency.name }}</h2>
           <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
-            {{ kieskring.results.reduce((sum, r) => sum + r.validVotes, 0).toLocaleString() }} stemmen
+            {{ formatVotes(constituency.results) }} stemmen
           </span>
         </div>
 
         <div class="space-y-3">
           <div
-            v-for="(result, rIndex) in topParties(kieskring.results)"
+            v-for="(result, rIndex) in topParties(constituency.results)"
             :key="rIndex"
             class="flex justify-between items-center"
           >
@@ -48,14 +48,14 @@
             </div>
             <div class="text-right">
               <div class="text-sm font-bold text-gray-900">{{ result.validVotes.toLocaleString() }}</div>
-              <div class="text-xs text-gray-500">{{ partyPercentage(result.validVotes, kieskring.results) }}%</div>
+              <div class="text-xs text-gray-500">{{ partyPercentage(result.validVotes, constituency.results) }}%</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-else-if="!loading && kieskringData.length === 0" class="text-center py-10 text-gray-500">
+    <div v-else-if="!loading && constituencyData.length === 0" class="text-center py-10 text-gray-500">
       Geen kieskring gevonden met de naam "{{ filterName }}".
       <br>
       <span class="text-xs text-gray-400">(Check de console F12 voor beschikbare namen)</span>
@@ -67,26 +67,30 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
-  getAllKieskringResults,
-  type KieskringDataDto,
-  type KieskringResultDto
-} from '../service/KieskringDetails_api';
+  getAllConstituencyResults,
+  type ConstituencyDataDto,
+  type ConstituencyResultDto
+} from '../service/ConstituencyDetails_api';
 
 const route = useRoute();
 const router = useRouter();
 
-const allKieskringData = ref<KieskringDataDto[]>([]);
-const kieskringData = ref<KieskringDataDto[]>([]);
+const allConstituencyData = ref<ConstituencyDataDto[]>([]);
+const constituencyData = ref<ConstituencyDataDto[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const filterName = ref<string>('');
 
-// Helpers
-const topParties = (results: KieskringResultDto[]) => {
+// Helper to sum votes
+const formatVotes = (results: ConstituencyResultDto[]) => {
+    return results.reduce((sum, r) => sum + r.validVotes, 0).toLocaleString();
+}
+
+const topParties = (results: ConstituencyResultDto[]) => {
   return [...results].sort((a, b) => b.validVotes - a.validVotes).slice(0, 5);
 };
 
-const partyPercentage = (votes: number, allResults: KieskringResultDto[]) => {
+const partyPercentage = (votes: number, allResults: ConstituencyResultDto[]) => {
   const totalVotes = allResults.reduce((sum, r) => sum + r.validVotes, 0);
   return totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
 };
@@ -94,7 +98,7 @@ const partyPercentage = (votes: number, allResults: KieskringResultDto[]) => {
 // Clear filter function
 const clearFilter = () => {
   filterName.value = '';
-  kieskringData.value = allKieskringData.value;
+  constituencyData.value = allConstituencyData.value;
   router.replace({ query: {} });
 };
 
@@ -102,29 +106,26 @@ const clearFilter = () => {
 function applyFilter() {
   if (filterName.value) {
     const search = filterName.value.toLowerCase().trim();
-
-    console.log(`🔍 Filteren op: "${search}"`);
-
-    kieskringData.value = allKieskringData.value.filter(k => {
+    constituencyData.value = allConstituencyData.value.filter(k => {
       const dataName = k.name.toLowerCase().trim();
       // Check op exacte match OF of de een in de ander zit (bijv "Kieskring Amsterdam" vs "Amsterdam")
       return dataName === search || dataName.includes(search) || search.includes(dataName);
     });
 
-    if (kieskringData.value.length === 0) {
-      console.warn("⚠️ Geen match gevonden! Beschikbare namen in data:", allKieskringData.value.map(k => k.name));
+    if (constituencyData.value.length === 0) {
+      console.warn("⚠️ Geen match gevonden! Beschikbare namen in data:", allConstituencyData.value.map(k => k.name));
     }
   } else {
-    kieskringData.value = allKieskringData.value;
+    constituencyData.value = allConstituencyData.value;
   }
 }
 
-// Fetch Data
 onMounted(async () => {
   try {
     loading.value = true;
-    const data = await getAllKieskringResults();
-    allKieskringData.value = data;
+    // Calling the new service function
+    const data = await getAllConstituencyResults();
+    allConstituencyData.value = data;
 
     console.log(`✅ ${data.length} resultaten geladen.`);
 
@@ -132,7 +133,7 @@ onMounted(async () => {
       filterName.value = route.query.name as string;
       applyFilter();
     } else {
-      kieskringData.value = data;
+      constituencyData.value = data;
     }
   } catch (err) {
     error.value = 'Fout bij het ophalen van de kieskringgegevens.';

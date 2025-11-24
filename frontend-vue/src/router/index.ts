@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/features/admin/view/HomeView.vue';
 import AdminDashboard from '@/features/admin/view/AdminDashboard.vue';
 import ScaledElectionResults from "@/features/admin/view/ScaledElectionResults.vue";
-import KieskringDetails from "@/features/admin/view/KieskringDetails.vue";
+import KieskringDetails from "@/features/admin/view/ConstituencyDetails.vue";
 import PartiesView from '@/features/admin/view/PartiesView.vue';
 import NationalElectionResults from "@/features/admin/view/NationalElectionResults.vue";
 import CandidateList from '@/features/admin/view/Candidates.vue';

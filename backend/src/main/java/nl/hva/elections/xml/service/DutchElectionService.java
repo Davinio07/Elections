@@ -75,7 +75,7 @@ public class DutchElectionService {
                 new DutchConstituencyVotesTransformer(election),
                 new DutchMunicipalityTransformer(election)
         );
-
+            logger.debug("Parsing XML files for {}", electionId);
         String resourcePath = PathUtils.getResourcePath("/%s".formatted(folderName));
         if (resourcePath == null) {
             logger.error("Resource folder not found in classpath: {}", folderName);
@@ -120,11 +120,7 @@ public class DutchElectionService {
         return getElectionData(DEFAULT_ELECTION_ID);
     }
 
-    /**
-     * Reads results (retrieves from cache).
-     */
     public Election readResults(String electionId, String folderName) {
-        logger.debug("Request received for 'readResults' for {}. Retrieving from cache...", electionId);
         return getElectionData(electionId);
     }
 
@@ -132,10 +128,15 @@ public class DutchElectionService {
         return getElectionData(electionId).getRegions();
     }
 
-    public List<Region> getKieskringen(String electionId) {
+    public List<Region> getConstituencies(String electionId) {
         return getElectionData(electionId).getRegions().stream()
                 .filter(r -> "KIESKRING".equals(r.getCategory()))
                 .collect(Collectors.toList());
+    }
+
+    // Used by Controller for "Kieskringen" endpoint that actually returns regions
+    public List<Region> getKieskringen(String electionId) {
+        return getConstituencies(electionId);
     }
 
     public List<Region> getGemeenten(String electionId) {
@@ -148,41 +149,94 @@ public class DutchElectionService {
         return getElectionData(electionId).getPoliticalParties();
     }
 
-    public List<String> getKiekringName(String electionId) {
-        return getElectionData(electionId).getKieskringResults().stream()
-                .map(KiesKring::getMunicipalityName)
+    /**
+     * Returns a list of unique municipality names found in the results.
+     */
+    public List<String> getMunicipalityNames(String electionId) {
+        return getElectionData(electionId).getMunicipalityResults().stream()
+                .map(MunicipalityResult::getMunicipalityName)
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Gets and aggregates the results for a specific municipality.
-     * I updated this to fix the issue where multiple entries per party were returned.
-     */
-    public List<KiesKring> getResultsForMunicipality(String electionId, String municipalityName) {
+
+    public List<MunicipalityResult> getResultsForMunicipality(String electionId, String municipalityName) {
         Election election = getElectionData(electionId);
 
         // 1. Filter for the requested municipality
-        List<KiesKring> rawResults = election.getKieskringResults().stream()
+        List<MunicipalityResult> rawResults = election.getMunicipalityResults().stream()
                 .filter(r -> r.getMunicipalityName().equalsIgnoreCase(municipalityName))
                 .toList();
-
-        if (rawResults.isEmpty()) {
-            return new ArrayList<>();
-        }
 
         // 2. Aggregate the votes per party (Summing the integers)
         Map<String, Integer> aggregatedData = rawResults.stream()
                 .collect(Collectors.groupingBy(
-                        KiesKring::getPartyName,
-                        Collectors.summingInt(KiesKring::getValidVotes)
+                        MunicipalityResult::getPartyName,
+                        Collectors.summingInt(MunicipalityResult::getValidVotes)
                 ));
 
         // 3. Convert back to list and sort by votes
         return aggregatedData.entrySet().stream()
-                .map(entry -> new KiesKring(municipalityName, entry.getKey(), entry.getValue()))
-                .sorted(Comparator.comparing(KiesKring::getValidVotes).reversed())
+                .map(entry -> new MunicipalityResult(municipalityName, entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(MunicipalityResult::getValidVotes).reversed())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Calculates aggregation for Constituencies (Kieskringen).
+     */
+    public List<ConstituencyResultDto> getAggregatedConstituencyResults(String electionId) {
+        Election election = getElectionData(electionId);
+        List<Region> allRegions = election.getRegions();
+        List<MunicipalityResult> allVotes = election.getMunicipalityResults();
+
+        // 1. Map Municipality Name -> Constituency Name (Parent)
+        Map<String, String> muniToConstituencyMap = new HashMap<>();
+        
+        // Find mapping: Municipality Region -> SuperiorRegionNumber -> Constituency Region -> Name
+        Map<String, Region> regionById = allRegions.stream()
+                .collect(Collectors.toMap(Region::getId, r -> r, (r1, r2) -> r1));
+
+        for (Region r : allRegions) {
+            if ("GEMEENTE".equals(r.getCategory()) && r.getSuperiorRegionNumber() != null) {
+                Region parent = regionById.get(r.getSuperiorRegionNumber());
+                if (parent != null && "KIESKRING".equals(parent.getCategory())) {
+                    muniToConstituencyMap.put(r.getName(), parent.getName());
+                }
+            }
+        }
+
+        // 2. Aggregate votes by Constituency -> Party
+        // Map<ConstituencyName, Map<PartyName, Votes>>
+        Map<String, Map<String, Integer>> constituencyTotals = new HashMap<>();
+
+        for (MunicipalityResult vote : allVotes) {
+            String constituencyName = muniToConstituencyMap.get(vote.getMunicipalityName());
+            if (constituencyName == null) continue; // Skip if no parent constituency found
+
+            constituencyTotals.putIfAbsent(constituencyName, new HashMap<>());
+            Map<String, Integer> partyMap = constituencyTotals.get(constituencyName);
+            partyMap.merge(vote.getPartyName(), vote.getValidVotes(), Integer::sum);
+        }
+
+        // 3. Convert to DTOs
+        List<ConstituencyResultDto> resultDtos = new ArrayList<>();
+        for (var entry : constituencyTotals.entrySet()) {
+            List<PartyResultDto> partyResults = entry.getValue().entrySet().stream()
+                    .map(e -> new PartyResultDto(e.getKey(), e.getValue()))
+                    .sorted(Comparator.comparingInt(PartyResultDto::validVotes).reversed())
+                    .toList();
+            
+            resultDtos.add(new ConstituencyResultDto(entry.getKey(), partyResults));
+        }
+        
+        // Sort constituencies alphabetically
+        resultDtos.sort(Comparator.comparing(ConstituencyResultDto::name));
+        return resultDtos;
+    }
+    
+    // Simple DTO records for the service response
+    public record PartyResultDto(String partyName, int validVotes) {}
+    public record ConstituencyResultDto(String name, List<PartyResultDto> results) {}
 }

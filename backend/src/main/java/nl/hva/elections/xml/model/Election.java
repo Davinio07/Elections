@@ -9,11 +9,9 @@ public class Election {
     private final List<Region> regions = new ArrayList<>();
     private final List<Party> nationalResults = new ArrayList<>();
     private final List<PoliticalParty> politicalParties = new ArrayList<>();
-    private final List<GemeenteXML> gemeenteXMLResults = new ArrayList<>();
 
-    // START OF FIX: Add a List for MunicipalityResult objects
-    private final List<KiesKring> municipalityResults = new ArrayList<KiesKring>();
-    // END OF FIX
+    // We renamed this list to strictly reflect that it holds municipality results.
+    private final List<MunicipalityResult> municipalityResults = new ArrayList<>();
 
     public Election(String id) {
         this.id = id;
@@ -37,10 +35,6 @@ public class Election {
 
     public void addCandidate(Candidate candidate) {
         candidates.add(candidate);
-    }
-
-    public List<GemeenteXML> getGemeenteResults() {
-        return gemeenteXMLResults;
     }
 
     /**
@@ -71,12 +65,12 @@ public class Election {
         }
     }
 
-    public void addMunicipalityResult(KiesKring result) {
+    // We updated the method signature to accept our new MunicipalityResult class
+    public void addMunicipalityResult(MunicipalityResult result) {
         this.municipalityResults.add(result);
     }
 
-
-    public List<KiesKring> getKieskringResults() {
+    public List<MunicipalityResult> getMunicipalityResults() {
         return municipalityResults;
     }
 }
