@@ -3,28 +3,21 @@ package nl.hva.elections.xml.model;
 import java.util.Objects;
 
 /**
- * This class holds the voting results for one party in one municipality.
- * It's a simple object to store and pass data.
+ * We renamed this class from 'KiesKring' to 'MunicipalityResult'.
+ * It strictly holds the voting results for one party in one municipality.
+ * This resolves the confusion where 'KiesKring' objects were holding municipality data.
  */
-public class KiesKring {
+public class MunicipalityResult {
 
     private String municipalityName;
     private String partyName;
     private int validVotes;
 
-    /**
-     *
-     * @param municipalityName
-     * @param partyName
-     * @param validVotes
-     */
-    public KiesKring(String municipalityName, String partyName, int validVotes) {
+    public MunicipalityResult(String municipalityName, String partyName, int validVotes) {
         this.municipalityName = municipalityName;
         this.partyName = partyName;
         this.validVotes = validVotes;
     }
-
-    // Getters and setters for the data fields
 
     public String getMunicipalityName() {
         return municipalityName;

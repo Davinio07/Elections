@@ -1,7 +1,7 @@
 package nl.hva.elections.xml.utils.xml.transformers;
 
 import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.KiesKring;
+import nl.hva.elections.xml.model.MunicipalityResult;
 import nl.hva.elections.xml.utils.xml.VotesTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * This transformer handles the results per Municipality (Gemeente).
- * It reads the data from the "ReportingUnit" sections in the XML.
+ * Handles exclusively the processing of Municipality (ReportingUnit) votes.
+ * Creates MunicipalityResult objects for the Election model.
  */
 public class DutchMunicipalityTransformer implements VotesTransformer {
     
@@ -23,8 +23,7 @@ public class DutchMunicipalityTransformer implements VotesTransformer {
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
-        // IMPORTANT: We only want the non-aggregated data here (the municipalities).
-        // The aggregated data (constituency totals) is handled by the ConstituencyTransformer.
+        // We SKIP aggregated data here. That is for the ConstituencyTransformer.
         if (aggregated) {
             return;
         }
@@ -36,9 +35,7 @@ public class DutchMunicipalityTransformer implements VotesTransformer {
 
             if (municipalityName != null && partyName != null && votesString != null) {
                 int validVotes = Integer.parseInt(votesString);
-
-                // We reuse the KiesKring model to store municipality results for now.
-                KiesKring result = new KiesKring(municipalityName, partyName, validVotes);
+                MunicipalityResult result = new MunicipalityResult(municipalityName, partyName, validVotes);
                 election.addMunicipalityResult(result);
             }
         } catch (NumberFormatException e) {
@@ -48,11 +45,11 @@ public class DutchMunicipalityTransformer implements VotesTransformer {
 
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
-        // We do not need candidate results per municipality for this feature.
+        // Not needed for this feature
     }
 
     @Override
     public void registerMetadata(boolean aggregated, Map<String, String> electionData) {
-        // Not needed.
+        // Not needed
     }
 }

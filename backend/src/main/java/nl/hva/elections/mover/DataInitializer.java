@@ -5,8 +5,8 @@ import nl.hva.elections.persistence.model.Gemeente;
 import nl.hva.elections.persistence.model.Kieskring;
 import nl.hva.elections.repositories.*;
 import nl.hva.elections.xml.model.Election;
-import nl.hva.elections.xml.model.KiesKring; // XML Model
-import nl.hva.elections.xml.model.Party;     // XML/JPA Model (Dual use)
+import nl.hva.elections.xml.model.MunicipalityResult;
+import nl.hva.elections.xml.model.Party;
 import nl.hva.elections.xml.model.Region;
 import nl.hva.elections.xml.service.DutchElectionService;
 import nl.hva.elections.xml.service.NationalResultService;
@@ -123,10 +123,9 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("Syncing Parties & Results for " + electionId + "...");
 
                 List<Party> nationalResults = electionData.getNationalResults();
-                List<KiesKring> municipalityResults = electionData.getKieskringResults();
+                List<MunicipalityResult> municipalityResults = electionData.getMunicipalityResults();
                 Map<String, Integer> aggregatedVotes = new HashMap<>();
 
-                // Determine best source for votes
                 boolean useNationalResultsDirectly = false;
                 if (nationalResults != null && !nationalResults.isEmpty()) {
                     long distinctNames = nationalResults.stream().map(Party::getName).distinct().count();
@@ -138,7 +137,7 @@ public class DataInitializer implements CommandLineRunner {
                             .collect(Collectors.toMap(Party::getName, Party::getVotes, Integer::sum));
                 } else if (municipalityResults != null && !municipalityResults.isEmpty()) {
                     aggregatedVotes = municipalityResults.stream()
-                            .collect(Collectors.toMap(KiesKring::getPartyName, KiesKring::getValidVotes, Integer::sum));
+                            .collect(Collectors.toMap(MunicipalityResult::getPartyName, MunicipalityResult::getValidVotes, Integer::sum));
                 } else {
                     aggregatedVotes = (nationalResults == null) ? new HashMap<>() :
                             nationalResults.stream().collect(Collectors.toMap(Party::getName, Party::getVotes, Integer::sum));

@@ -13,10 +13,19 @@ import LevelSelector from '../components/LevelSelector.vue';
 
 // --- API Imports for the 5 Levels ---
 import { getMunicipalityNames, getResultsForMunicipality } from '../service/MunicipalityElectionResults_api';
-import { getAllKieskringResults } from '../service/KieskringDetails_api';
+import { getAllConstituencyResults, type ConstituencyDataDto } from '../service/ConstituencyDetails_api';
 import { getProvinces } from '../service/ScaledElectionResults_api';
 
-// --- Component State ---
+// --- Interfaces for Typing ---
+interface ProvinceItem {
+  name: string;
+}
+
+// Extend PoliticalParty for sorting if needed (seats are dynamic)
+interface SortableParty extends PoliticalParty {
+  nationalSeats?: number;
+}
+
 const route = useRoute();
 const parties = ref<PoliticalParty[]>([]);
 const currentResults = ref<NationalResult[]>([]);
@@ -71,11 +80,13 @@ const prepareLevelData = async (level: string) => {
     if (level === 'Gemeentes') {
       subItems.value = await getMunicipalityNames();
     } else if (level === 'Kieskringen') {
-      const data = await getAllKieskringResults();
-      subItems.value = data.map(k => k.name);
+      const data = await getAllConstituencyResults();
+      // Typed: k is ConstituencyDataDto
+      subItems.value = data.map((k: ConstituencyDataDto) => k.name);
     } else if (level === 'Provincies') {
       const data = await getProvinces('TK2023');
-      subItems.value = data.map((p: any) => p.name);
+      // Typed: p is implicitly any from service, so we define ProvinceItem
+      subItems.value = data.map((p: ProvinceItem) => p.name);
     } else if (level === 'Stembussen') {
       subItems.value = ['Stembureau A', 'Stembureau B']; // Mock
     }
@@ -84,7 +95,6 @@ const prepareLevelData = async (level: string) => {
   } finally {
     subItemLoading.value = false;
 
-    // --- NEW: Robust matching logic for auto-selection ---
     if (pendingSubItem.value && subItems.value.length > 0) {
       const target = pendingSubItem.value.trim().toLowerCase();
 
@@ -118,9 +128,11 @@ const loadResultsForInstance = async (instanceName: string | null) => {
       const results = await getResultsForMunicipality(instanceName);
       currentResults.value = results.map(r => ({ name: r.partyName, totalVotes: r.validVotes }));
     } else if (selectedLevel.value === 'Kieskringen' && instanceName) {
-      const allData = await getAllKieskringResults();
-      const match = allData.find(k => k.name === instanceName);
+      const allData = await getAllConstituencyResults();
+      // Typed match lookup
+      const match = allData.find((k: ConstituencyDataDto) => k.name === instanceName);
       if (match) {
+        // Typed map: r is implied from ConstituencyResultDto inside ConstituencyDataDto
         currentResults.value = match.results.map(r => ({ name: r.partyName, totalVotes: r.validVotes }));
       }
     }
@@ -165,13 +177,14 @@ const comparisonData = computed(() => {
   const selectedNames = selectedParties.value.map(p => p.name);
   return currentResults.value
     .filter(p => selectedNames.includes(p.name))
-    .map(p => ({ name: p.name, totalVotes: p.totalVotes }));
+    // Added explicit typing to resolve ESLint any error
+    .map((p: NationalResult) => ({ name: p.name, totalVotes: p.totalVotes }));
 });
 
 // --- Search & Sort Logic ---
 
 const displayedParties = computed(() => {
-  let list = [...parties.value];
+  let list = [...parties.value] as SortableParty[];
 
   // 1. Filter
   if (searchQuery.value) {
@@ -180,7 +193,7 @@ const displayedParties = computed(() => {
   }
 
   // 2. Sort
-  return list.sort((a: any, b: any) => {
+  return list.sort((a: SortableParty, b: SortableParty) => {
     if (sortBy.value === 'name-asc') return a.name.localeCompare(b.name);
     if (sortBy.value === 'name-desc') return b.name.localeCompare(a.name);
 
