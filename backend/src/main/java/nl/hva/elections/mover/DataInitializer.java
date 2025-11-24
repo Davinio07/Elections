@@ -176,28 +176,37 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("Parties already exist for " + electionId + ". Skipping.");
             }
 
-            // ------------------------------------------------------------------
+// ------------------------------------------------------------------
             // 4. SYNC CANDIDATES
             // ------------------------------------------------------------------
             if (candidateRepository.count() == 0) {
                 System.out.println("Syncing Candidates for " + electionId + "...");
                 AtomicInteger candidatesSaved = new AtomicInteger(0);
 
-                for (nl.hva.elections.xml.model.Candidate xmlCandidate : electionData.getCandidates()) {
-                    String partyName = xmlCandidate.getPartyName();
+                // FIX 1: Use 'Candidate', not the full 'xml.model...' path.
+                // This uses the import at the top of the file.
+                for (Candidate candidate : electionData.getCandidates()) {
+
+                    // Use the helper getter we added to the model earlier
+                    String partyName = candidate.getTempPartyName();
+
                     if (partyName == null || partyName.isBlank()) continue;
 
                     String cleanName = partyName.trim();
-                    String fullName = (xmlCandidate.getFirstName() + " " + xmlCandidate.getLastName()).trim();
 
+                    // We already have the candidate object with data!
+                    // We just need to attach the Party relationship and save it.
                     partyRepository.findByNameAndElectionId(cleanName, electionId).ifPresent(party -> {
-                        if (!candidateRepository.existsByNameAndPartyId(fullName, party.getId())) {
-                            Candidate c = new Candidate();
-                            c.setName(fullName);
-                            c.setResidence(xmlCandidate.getLocality());
-                            c.setGender(xmlCandidate.getGender());
-                            c.setParty(party);
-                            candidateRepository.save(c);
+
+                        // Check if this specific person + party combo exists in DB
+                        if (!candidateRepository.existsByNameAndPartyId(candidate.getName(), party.getId())) {
+
+                            // FIX 2: Do NOT create 'new Candidate()'.
+                            // The 'candidate' variable is already the object we created in the Transformer.
+                            // Just attach the party and save.
+                            candidate.setParty(party);
+
+                            candidateRepository.save(candidate);
                             candidatesSaved.incrementAndGet();
                         }
                     });
