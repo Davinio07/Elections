@@ -1,48 +1,56 @@
 import apiClient from '@/services/api-client';
 
-export interface MunicipalityResult {
-    municipalityName: string;
-    partyName: string;
-    validVotes: number;
+// We defined explicit interfaces here to match the DTOs from the backend.
+// This keeps our data structured and type-safe.
+export interface MunicipalityResultDto {
+  partyName: string;
+  validVotes: number;
 }
 
-interface Region {
-  id: string | null;
+export interface MunicipalityDataDto {
   name: string;
-  category: string | null;
-  superiorCategory: string | null;
+  results: MunicipalityResultDto[];
 }
 
 /**
- * Gets the election results for a single municipality.
- * @param municipalityName The name of the city you want to get results for.
- * @returns A promise that gives us a list of results.
+ * Gets the election results for a single municipality (Detail page).
+ * @param municipalityName The name of the city.
  */
-export async function getResultsForMunicipality(municipalityName: string): Promise<MunicipalityResult[]> {
-    try {
-        // We use encodeURIComponent to handle names with spaces like "Den Haag"
-        const endpoint = `/elections/municipalities/${encodeURIComponent(municipalityName)}`;
-        const response = await apiClient<MunicipalityResult[]>(endpoint);
-        return response;
-    } catch (error) {
-        // Show an error message if the call fails
-        console.error('API Error when fetching results:', error);
-        throw error;
-    }
+export async function getResultsForMunicipality(municipalityName: string): Promise<MunicipalityResultDto[]> {
+  try {
+    const endpoint = `/elections/municipalities/${encodeURIComponent(municipalityName)}`;
+    return await apiClient<MunicipalityResultDto[]>(endpoint);
+  } catch (error) {
+    console.error('API Error when fetching specific municipality:', error);
+    throw error;
+  }
 }
 
 /**
- * Gets a list of all the municipality names.
- * @returns A promise that gives us an array of names.
+ * Gets ALL municipality results in a single API call (Overview page).
+ * I added this to populate the cards on the main overview efficiently.
+ */
+export async function getAllMunicipalityResults(): Promise<MunicipalityDataDto[]> {
+  try {
+    // This endpoint was enabled in the backend fix feature/municipality-data-loading
+    const endpoint = '/elections/municipalities/all-results';
+    return await apiClient<MunicipalityDataDto[]>(endpoint);
+  } catch (error) {
+    console.error('API Error when fetching all municipality results:', error);
+    throw error;
+  }
+}
+
+/**
+ * Gets just the names (if needed for dropdowns later).
  */
 export async function getMunicipalityNames(): Promise<string[]> {
-    try {
-        const response = await apiClient<Region[]>('/elections/TK2023/regions/gemeenten');
-        const municipalityNames = response.map((item: Region) => item.name);
-        return municipalityNames;
-    } catch (error) {
-        // Show an error message if the call fails
-        console.error('API Error when fetching municipality names:', error);
-        throw error;
-    }
+  try {
+    // Note: The backend endpoint name is a bit weird (/regions/gemeenten), but it works.
+    const response = await apiClient<{ name: string }[]>('/elections/TK2023/regions/gemeenten');
+    return response.map((item) => item.name);
+  } catch (error) {
+    console.error('API Error when fetching municipality names:', error);
+    throw error;
+  }
 }

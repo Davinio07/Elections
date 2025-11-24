@@ -2,7 +2,10 @@
   <div id="app">
     <header class="app-header">
       <div class="header-content">
-        <h1 class="app-title">Verkiezingen TK2023</h1>
+        <router-link to="/" class="logo-link">
+          <h1 class="app-title">Verkiezingen TK2023</h1>
+        </router-link>
+
         <nav class="main-nav">
           <router-link to="/admin">Admin</router-link>
           <router-link to="/municipality-results">Gemeenten</router-link>
@@ -10,6 +13,8 @@
           <router-link to="/candidates">Kandidaten</router-link>
           <router-link to="/parties">Partijen</router-link>
           <router-link to="/kieskring-details">Kieskringen</router-link>
+          <router-link to="/province">province</router-link>
+          <router-link to="/chat" class="text-gray-700 font-medium hover:text-blue-600 transition" active-class="text-blue-600 border-b-2 border-blue-600 pb-0.5">Chat</router-link>
 
           <template v-if="!isLoggedIn">
             <router-link to="/register">Registreer</router-link>
@@ -71,10 +76,23 @@ body {
   height: 64px;
 }
 
+/* Nieuwe style voor de logo link zodat het geen standaard blauwe link wordt */
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.logo-link:hover {
+  opacity: 0.8;
+}
+
 .app-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-color);
+  margin: 0; /* Verwijder standaard margin van h1 */
 }
 
 .main-nav {

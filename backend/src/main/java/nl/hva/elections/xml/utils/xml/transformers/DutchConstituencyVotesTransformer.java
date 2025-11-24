@@ -23,16 +23,16 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer {
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s party votes: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
+        //System.out.printf("%s party votes: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
     }
 
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s candidate votes: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
+        //System.out.printf("%s candidate votes: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
     }
 
     @Override
     public void registerMetadata(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s meta data: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
+        //System.out.printf("%s meta data: %s\n", aggregated ? "Constituency" : "Municipality", electionData);
     }
 }
