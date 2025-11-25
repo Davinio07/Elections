@@ -7,17 +7,19 @@ stages:
 build_app:
   stage: build
   tags:
-    - hva       # <--- The magic key your school requires!
+    - hva
   script:
+    - cd elections                   # <--- Step 1: Go into the project folder
     - mvn clean package -DskipTests
   artifacts:
     paths:
-      - target/*.jar
+      - elections/target/*.jar       # <--- Step 2: Tell GitLab where the JAR actually is
 
 test_app:
   stage: test
   tags:
-    - hva       # <--- Must be added here too
+    - hva
   script:
-    # We force H2 memory database so tests pass without a real Postgres server
+    - cd elections                   # <--- Step 1: Go into the project folder
+    # Step 3: Run tests using H2 database settings
     - mvn test -Dspring.datasource.url=jdbc:h2:mem:testdb -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password=
