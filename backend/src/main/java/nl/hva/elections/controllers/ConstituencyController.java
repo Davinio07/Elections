@@ -59,16 +59,16 @@ public class ConstituencyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    // --- NEW METHOD USING DTO ---
+
     @GetMapping("/db")
     public ResponseEntity<List<KieskringDTO>> getAllConstituenciesFromDB() {
         try {
             logger.info("Fetching all Constituencies as DTOs from database.");
 
-            // 1. Get the raw Entities (Models)
+            // Get the raw Entities (Models)
             List<Kieskring> entities = kieskringRepository.findAllByOrderByNameAsc();
 
-            // 2. Convert Entities to DTOs
+            // Convert Entities to DTOs
             List<KieskringDTO> dtos = entities.stream()
                     .map(k -> new KieskringDTO(
                             k.getKieskring_id(),
