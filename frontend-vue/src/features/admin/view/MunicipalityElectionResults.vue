@@ -57,10 +57,18 @@ const getBarColor = (index: number) => {
   return colors[index] || '#e5e7eb';
 };
 
-// Navigation
+// Navigation: Details Page
 const goToDetail = (name: string) => {
   // Using encodeURIComponent to handle names with spaces safely
   router.push(`/municipality-results/${encodeURIComponent(name)}`);
+};
+
+// Navigation: Parties Page with Municipality pre-selected
+const goToParties = (name: string) => {
+  router.push({
+    path: '/parties',
+    query: { level: 'Gemeentes', name: name }
+  });
 };
 
 // Fetch Data
@@ -118,7 +126,7 @@ onMounted(async () => {
       <div
         v-for="(muni, index) in filteredMunicipalities"
         :key="index"
-        class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition-shadow duration-200 border border-gray-100 cursor-pointer flex flex-col justify-between"
+        class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition-shadow duration-200 border border-gray-100 cursor-pointer flex flex-col justify-between group"
         @click="goToDetail(muni.name)"
       >
         <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
@@ -152,8 +160,19 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="mt-4 text-right">
-            <span class="text-xs text-blue-500 font-medium group-hover:underline">Bekijk details →</span>
+        <div class="mt-4 flex justify-between items-center border-t border-gray-50 pt-3">
+          <button
+            @click.stop="goToParties(muni.name)"
+            class="text-xs font-medium text-green-700 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded transition-colors border border-green-200"
+          >
+            📊 Bekijk Partijen
+          </button>
+          <span class="text-xs text-blue-500 font-medium group-hover:underline flex items-center">
+              Details
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </span>
         </div>
       </div>
     </div>
