@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import * as Stomp from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getJwtToken } from '@/services/auth-helper';
-
 import { jwtDecode } from 'jwt-decode';
+import apiClient from '@/services/api-client'; // Importeer de apiClient
 
 interface ChatMessage {
   sender: string;
@@ -17,8 +17,8 @@ const client = ref<Stomp.Client | null>(null);
 const messageInput = ref('');
 const isConnected = ref(false);
 const error = ref<string | null>(null);
-
 const currentUsername = ref('Anonymous');
+const chatBoxRef = ref<HTMLElement | null>(null); // Ref voor de scrollpositie
 
 const API_HOST = 'http://localhost:8080';
 const WS_ENDPOINT = `/ws`;
@@ -30,14 +30,37 @@ function extractUsername(token: string) {
   try {
     const decoded: any = jwtDecode(token);
     currentUsername.value = decoded.sub || decoded.username || 'Gebruiker';
-    console.log("Authenticated as:", currentUsername.value);
   } catch (e) {
-    console.error("Fout bij decoderen van JWT voor chat:", e);
     currentUsername.value = 'Onbekend';
   }
 }
 
+// NIEUW: Functie om historische berichten op te halen
+async function loadHistory() {
+  try {
+    // Maakt een REST call naar de nieuwe ChatHistoryController
+    const history = await apiClient<ChatMessage[]>('/chat/history');
+    messages.value = history;
+    // Scroll na het laden
+    scrollToBottom();
+  } catch (e) {
+    console.error("Fout bij het laden van chat historie:", e);
+    // Zet de foutmelding op de pagina
+    error.value = 'Kan chatgeschiedenis niet laden. Probeer opnieuw in te loggen.';
+  }
+}
 
+// Zorgt ervoor dat de scrollbalk altijd onderaan staat
+function scrollToBottom() {
+  nextTick(() => {
+    const chatBox = chatBoxRef.value;
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  });
+}
+
+// Functie om verbinding te maken
 const connect = () => {
   const token = getJwtToken();
 
@@ -46,9 +69,7 @@ const connect = () => {
     return;
   }
 
-  // FIX: De token is nodig in de URL voor de backend security filter
   const WEBSOCKET_AUTH_URL = `${API_HOST}${WS_ENDPOINT}?token=${token}`;
-
   extractUsername(token);
 
   const socket = new SockJS(WEBSOCKET_AUTH_URL);
@@ -67,10 +88,14 @@ const connect = () => {
 
   stompClient.onConnect = (frame) => {
     isConnected.value = true;
+    console.log('Connected: ' + frame);
 
+    // Abonneer op het publieke topic
     stompClient.subscribe(SUBSCRIPTION_TOPIC, (message) => {
       const body: ChatMessage = JSON.parse(message.body);
       messages.value.push(body);
+      // Scroll bij elk nieuw live bericht
+      scrollToBottom();
     });
   };
 
@@ -111,6 +136,8 @@ const disconnect = () => {
 };
 
 onMounted(() => {
+  // FIX: Laad eerst de historie, en maak dan de verbinding
+  loadHistory();
   connect();
 });
 
@@ -133,22 +160,22 @@ onBeforeUnmount(() => {
         </span>
     </div>
 
-    <!-- Message Display Area -->
-    <div class="message-area flex-1 bg-white p-4 rounded-lg border border-gray-300 overflow-y-auto space-y-3 mb-4">
+    <!-- Message Display Area (Ref toegevoegd voor scrollen) -->
+    <div ref="chatBoxRef" class="message-area flex-1 bg-white p-4 rounded-lg border border-gray-300 overflow-y-auto space-y-3 mb-4">
       <div
         v-for="(msg, index) in messages"
         :key="index"
         class="message flex"
         :class="{
-                'justify-end': msg.sender === currentUsername, // Berichten van jou naar rechts
-                'justify-start': msg.sender !== currentUsername // Berichten van anderen naar links
+                'justify-end': msg.sender === currentUsername,
+                'justify-start': msg.sender !== currentUsername
             }"
       >
         <div
           class="p-3 rounded-xl max-w-xs sm:max-w-md break-words shadow-sm"
           :class="{
-                    'bg-blue-600 text-white': msg.sender === currentUsername, // Jouw kleur
-                    'bg-gray-200 text-gray-800': msg.sender !== currentUsername // Kleur van anderen
+                    'bg-blue-600 text-white': msg.sender === currentUsername,
+                    'bg-gray-200 text-gray-800': msg.sender !== currentUsername
                 }"
         >
           <div class="flex justify-between items-baseline mb-1">
@@ -185,6 +212,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .chat-page {
+  /* Gebruik h-[90vh] in template voor flex-col hoogte */
 }
 .message-area {
   min-height: 400px;

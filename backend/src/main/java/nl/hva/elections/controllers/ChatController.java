@@ -1,6 +1,7 @@
 package nl.hva.elections.controllers;
 
-import nl.hva.elections.dtos.ChatMessage;
+import nl.hva.elections.dtos.ChatMessageDTO; // DTO voor WebSocket
+import nl.hva.elections.repositories.ChatMessageRepository; // Repository
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -14,25 +15,36 @@ import java.time.format.DateTimeFormatter;
 public class ChatController {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final ChatMessageRepository chatMessageRepository; // Repository
+
+    // Injecteer de nieuwe Repository
+    public ChatController(ChatMessageRepository chatMessageRepository) {
+        this.chatMessageRepository = chatMessageRepository;
+    }
 
     /**
-     * Handles incoming messages sent to /app/chat.send.
-     * The message is then sent to all subscribers of /topic/public.
-     * * @param chatMessage The message content from the client.
-     * @param principal The authenticated user (inferred from the JWT token).
-     * @return The message to be broadcasted.
+     * Handelt inkomende berichten af, slaat ze op in de DB, en zendt ze uit.
      */
     @MessageMapping("/chat.send")
     @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage, Principal principal) {
-        // Principal is null if the user is not authenticated.
+    public ChatMessageDTO sendMessage(@Payload ChatMessageDTO chatMessageDTO, Principal principal) {
         String username = principal != null ? principal.getName() : "Anonymous";
+        LocalDateTime now = LocalDateTime.now();
 
-        // Set server-side data before broadcasting
-        chatMessage.setSender(username);
-        chatMessage.setTimestamp(LocalDateTime.now().format(formatter));
+        // 1. Maak de JPA entiteit aan (gebruik de volledige naam om het DTO/Model conflict te vermijden)
+        nl.hva.elections.models.ChatMessage jpaMessage = new nl.hva.elections.models.ChatMessage();
+        jpaMessage.setSender(username);
+        jpaMessage.setContent(chatMessageDTO.getContent());
+        jpaMessage.setTimestamp(now);
 
-        System.out.println("Message received from " + username + ": " + chatMessage.getContent());
-        return chatMessage;
+        // 2. Sla het bericht op in de database
+        chatMessageRepository.save(jpaMessage);
+
+        // 3. Stuur de DTO met de juiste timestamp terug naar de clients
+        chatMessageDTO.setSender(username);
+        chatMessageDTO.setTimestamp(now.format(formatter));
+
+        System.out.println("Message saved and sent from " + username);
+        return chatMessageDTO;
     }
 }
