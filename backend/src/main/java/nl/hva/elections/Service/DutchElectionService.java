@@ -1,5 +1,8 @@
 package nl.hva.elections.service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import java.util.Arrays;
 import jakarta.annotation.PostConstruct;
 import nl.hva.elections.models.Election;
 import nl.hva.elections.models.MunicipalityResult;
@@ -67,8 +70,7 @@ public class DutchElectionService {
         logger.info("Parsing files for electionId: {} from folder: {}", electionId, folderName);
 
         Election election = new Election(electionId);
-        
-        // We instantiate the parser with all the necessary transformers
+
         DutchElectionParser electionParser = new DutchElectionParser(
                 new DutchDefinitionTransformer(election),
                 new DutchCandidateTransformer(election),
@@ -78,24 +80,20 @@ public class DutchElectionService {
                 new DutchConstituencyVotesTransformer(election),
                 new DutchMunicipalityTransformer(election)
         );
-            logger.debug("Parsing XML files for {}", electionId);
-        String resourcePath = PathUtils.getResourcePath("/%s".formatted(folderName));
-        if (resourcePath == null) {
-            logger.error("Resource folder not found in classpath: {}", folderName);
-            throw new IOException("Resource folder not found in classpath: " + folderName);
+
+        // FIX: Use Spring's ResourceResolver to find files INSIDE the JAR
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        // Find all XML files in the folder (e.g., classpath:TK2023/*.xml)
+        Resource[] resources = resolver.getResources("classpath*:" + folderName + "/*.xml");
+
+        if (resources.length == 0) {
+            logger.error("No XML files found in classpath folder: {}", folderName);
         }
 
-        Files.walk(Paths.get(resourcePath))
-                .filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith(".xml"))
-                .forEach(p -> {
-                    try {
-                        electionParser.parseResults(electionId, p.toString());
-                    } catch (Exception e) {
-                        logger.warn("Failed to parse XML file {}: {}", p, e.getMessage());
-                    }
-                });
-        
+        // Pass the list of resources to the parser
+        electionParser.parseResults(electionId, Arrays.asList(resources));
+
         logger.debug("Finished parsing for {}", electionId);
         return election;
     }

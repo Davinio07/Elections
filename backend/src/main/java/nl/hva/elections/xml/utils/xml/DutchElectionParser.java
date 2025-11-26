@@ -3,7 +3,9 @@ package nl.hva.elections.xml.utils.xml;
 import nl.hva.elections.xml.utils.PathUtils;
 import nl.hva.elections.xml.utils.xml.transformers.CompositeVotesTransformer;
 import nl.hva.elections.xml.utils.xml.transformers.DutchRegionTransformer;
-import nl.hva.elections.xml.utils.xml.transformers.DutchMunicipalityTransformer; // Don't forget this import
+import nl.hva.elections.xml.utils.xml.transformers.DutchMunicipalityTransformer;
+import org.springframework.core.io.Resource;
+import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -28,8 +30,7 @@ import java.util.List;
  * <a href="https://www.baeldung.com/java-visitor-pattern">visitor pattern</a>.<br>
  * <br>
  * The data in the XML files has a more or less hierarchy structure. When a method of the transformer is called, a
- * {@link Map} containing all the information on that level, including the information at the higher levels,
- * is provided. The {@link Map} is specified as: Map&lt;String, String>. It is up to the transformer to convert any
+
  * numerical information from its {@link String} representation into its appropriate datatype.<br>
  * <br>
  * <em>It assumes that filenames have NOT been changed and that the content has not been altered!</em><br>
@@ -84,55 +85,44 @@ public class DutchElectionParser {
      * Currently, it only processes the files containing the 'kieslijsten' and the votes per reporting unit.
      *
      * @param electionId the identifier for the of the files that should be processed, for example <i>TK2023</i>.
-     * @param folderName The name of the folder that contains the files containing the election data.
      * @throws IOException in case something goes wrong while reading the file.
      * @throws XMLStreamException when a file has not the expected format.
      */
-    public void parseResults(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
-        logger.info("Loading election data from folder: {}", folderName);
-
-        // The first call to parseFiles needs to use all seven transformers
-        // to correctly load all the initial data, including regions and candidates.
-        parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId),
-                new EMLHandler(
-                        definitionTransformer,
-                        candidateTransformer,
-                        regionTransformer,
-                        resultTransformer,
-                        nationalVotesTransformer,
-                        constituencyVotesTransformer,
-                        municipalityVotesTransformer 
-                )
+    public void parseResults(String electionId, List<Resource> allResources) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
+        // 1. Structure (Definitions)
+        parseFiles(allResources, "Verkiezingsdefinitie_%s".formatted(electionId),
+                new EMLHandler(definitionTransformer, candidateTransformer, regionTransformer, resultTransformer,
+                        nationalVotesTransformer, constituencyVotesTransformer, municipalityVotesTransformer)
         );
 
         // 2. Candidates
-        parseFiles(folderName, "Kandidatenlijsten_%s".formatted(electionId), new EMLHandler(candidateTransformer));
-        
+        parseFiles(allResources, "Kandidatenlijsten_%s".formatted(electionId), new EMLHandler(candidateTransformer));
+
         // 3. Results (Seats)
-        parseFiles(folderName, "Resultaat_%s".formatted(electionId), new EMLHandler(resultTransformer));
+        parseFiles(allResources, "Resultaat_%s".formatted(electionId), new EMLHandler(resultTransformer));
 
-        // 4. National Total 
-        // We use a Composite to send data to both National and Municipality transformers
+        // 4. National Total
         VotesTransformer nationalComposite = new CompositeVotesTransformer(nationalVotesTransformer, municipalityVotesTransformer);
-        parseFiles(folderName, "Totaaltelling_%s".formatted(electionId), new EMLHandler(nationalComposite));
+        parseFiles(allResources, "Totaaltelling_%s".formatted(electionId), new EMLHandler(nationalComposite));
 
-        // 5. Constituency Files (Kieskringen)
-        // This file contains BOTH aggregated totals (constituency) AND detailed results (municipalities).
-        // We used the Composite transformer to send data to both.
+        // 5. Constituency Files
         VotesTransformer kieskringComposite = new CompositeVotesTransformer(constituencyVotesTransformer, municipalityVotesTransformer);
-        parseFiles(folderName, "Telling_%s_kieskring".formatted(electionId), new EMLHandler(kieskringComposite));
+        parseFiles(allResources, "Telling_%s_kieskring".formatted(electionId), new EMLHandler(kieskringComposite));
     }
 
-    private void parseFiles(String folderName, String fileFilter, EMLHandler emlHandler) throws IOException, ParserConfigurationException, SAXException {
-        List<Path> files = PathUtils.findFilesToScan(folderName, fileFilter);
-        files.sort(Comparator.comparing(Path::getFileName));
-        for (Path electionFile : files) {
-            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(electionFile.toString()), 64 * 1024)) {
+    private void parseFiles(List<Resource> allResources, String filePrefix, EMLHandler emlHandler) throws IOException, ParserConfigurationException, SAXException {
+        // Filter the list to find files matching the prefix (e.g. "Totaaltelling_TK2023")
+        List<Resource> matchingFiles = allResources.stream()
+                .filter(r -> r.getFilename() != null && r.getFilename().startsWith(filePrefix))
+                .toList();
+
+        for (Resource resource : matchingFiles) {
+            try (InputStream is = resource.getInputStream()) { // Use InputStream to read from JAR
                 SAXParserFactory factory = SAXParserFactory.newInstance();
                 factory.setNamespaceAware(true);
                 SAXParser parser = factory.newSAXParser();
-                emlHandler.setFileName(electionFile.toString());
-                parser.parse(bis, emlHandler);
+                emlHandler.setFileName(resource.getFilename());
+                parser.parse(is, emlHandler);
             }
         }
     }
