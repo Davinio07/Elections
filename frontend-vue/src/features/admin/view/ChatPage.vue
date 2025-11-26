@@ -20,7 +20,7 @@ const error = ref<string | null>(null);
 const currentUsername = ref('Anonymous');
 const chatBoxRef = ref<HTMLElement | null>(null); // Ref voor de scrollpositie
 
-const API_HOST = 'http://localhost:8080';
+const API_HOST = 'https://elections-h21b.onrender.com';
 const WS_ENDPOINT = `/ws`;
 const SUBSCRIPTION_TOPIC = '/topic/public';
 const SEND_ENDPOINT = '/app/chat.send';

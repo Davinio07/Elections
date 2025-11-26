@@ -49,8 +49,7 @@ export interface PartyDTO {
  */
 export async function getPartiesFromDb(electionId: string): Promise<PartyDTO[]> {
   // Update localhost to Render URL
-  const url = `https://elections-backend.onrender.com/api/nationalResult/${electionId}/national`;
-
+  const url = `https://elections-h21b.onrender.com/api/nationalResult/${electionId}/national`;
   // ... rest of the function
   logger.info(`Fetching persisted party data for election ID: ${electionId}`);
   logger.debug(`Request URL: ${url}`);

@@ -18,8 +18,8 @@ export interface NationalResult {
 /**
  * The base URL for the elections API.
  */
-const API_BASE_URL = 'https://elections-backend.onrender.com/api/nationalResult';
-/**
+
+const API_BASE_URL = 'https://elections-h21b.onrender.com/api/nationalResult';/**
  * A mapping of official party names to their designated hex color codes.
  * Based on common colors for Dutch political parties.
  */

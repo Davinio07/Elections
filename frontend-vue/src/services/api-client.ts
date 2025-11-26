@@ -1,7 +1,6 @@
 // src/services/api-client.ts
 
-const API_BASE_URL = 'https://elections-backend.onrender.com/api';
-/**
+const API_BASE_URL = 'https://elections-h21b.onrender.com/api';/**
  * @interface ApiErrorResponse
  * @description Describes the structure of a standard error object
  * that our Spring Boot backend sends when something goes wrong.
