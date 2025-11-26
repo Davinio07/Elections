@@ -56,12 +56,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 2. Define your allowed origins explicitly
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:5176",
-                "https://elections-frontend.onrender.com" // <--- Make sure this matches exactly (no trailing slash)
-        ));
+        // ☢️ THE FIX: Use "AllowedOriginPatterns" instead of "AllowedOrigins"
+        // This allows ANY domain ("*") to connect, while still allowing credentials (Cookies/Tokens).
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        // DELETE or COMMENT OUT the old setAllowedOrigins line:
+        // configuration.setAllowedOrigins(List.of(...));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
