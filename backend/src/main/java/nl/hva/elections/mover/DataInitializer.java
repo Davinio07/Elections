@@ -121,7 +121,6 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("Syncing Parties & Results for " + electionId + "...");
 
                 List<Party> nationalResults = electionData.getNationalResults();
-                // List<MunicipalityResult> municipalityResults = electionData.getMunicipalityResults(); // REMOVE IF ALWAYS EMPTY/IGNORED
 
                 Map<String, Integer> aggregatedVotes = new HashMap<>();
 
