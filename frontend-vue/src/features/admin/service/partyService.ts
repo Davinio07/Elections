@@ -189,16 +189,6 @@ function calculateDHondt(results: NationalResult[], totalSeats: number): Record<
  */
 export const partyService = {
   /**
-   * Fetches a list of political parties for a specific election.
-   *
-   * @param {string} electionId - The unique identifier for the election.
-   * @returns {Promise<PoliticalParty[]>} A promise that resolves to an array of PoliticalParty objects.
-   */
-  async getParties(electionId: string): Promise<PoliticalParty[]> {
-    return fetchFromAPI<PoliticalParty[]>(`/${electionId}/parties/db`);
-  },
-
-  /**
    * Fetches the national results (seats, votes, percentage) for all parties in an election.
    *
    * @param {string} electionId - The unique identifier for the election.

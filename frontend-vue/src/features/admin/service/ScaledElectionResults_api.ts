@@ -32,7 +32,7 @@ export interface PartyFilterData {
 export async function getAllPartiesForFilters(electionId: string): Promise<PartyFilterData[]> {
   try {
     // Calls the new backend endpoint
-    const endpoint = `/nationalResult/${electionId}/parties/db`;
+    const endpoint = `/nationalResult/${electionId}/national`;
     const rawParties = await apiClient<any[]>(endpoint, { method: 'GET' });
 
     // Map the full Party model to just ID and Name

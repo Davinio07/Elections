@@ -54,7 +54,7 @@ const loadParties = async () => {
   loading.value = true;
   error.value = false;
   try {
-    parties.value = await partyService.getParties('TK2023');
+    parties.value = await partyService.getNationalResults('TK2023');
   } catch (err) {
     error.value = true;
     console.error('Error loading parties:', err);
