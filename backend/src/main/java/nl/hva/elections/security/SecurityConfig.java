@@ -77,13 +77,13 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173")
+                        .allowedOrigins("http://localhost:5173, https://elections-frontend-71p2.onrender.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
 
                 registry.addMapping("/ws/**") // WebSocket endpoint
-                        .allowedOrigins("http://localhost:5173", "http://localhost:5176")
+                        .allowedOrigins("http://localhost:5173", "http://localhost:5176, https://elections-frontend-71p2.onrender.com")
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
