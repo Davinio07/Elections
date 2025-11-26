@@ -3,13 +3,12 @@ package nl.hva.elections.controllers;
 import nl.hva.elections.dtos.KieskringDTO;
 import nl.hva.elections.models.Gemeente;
 import nl.hva.elections.models.Kieskring;
+import nl.hva.elections.models.Region;
 import nl.hva.elections.repositories.GemeenteRepository;
 import nl.hva.elections.repositories.KieskringRepository;
-import nl.hva.elections.models.Region;
 import nl.hva.elections.service.DutchElectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * Controller responsible for serving Constituency (Kieskring) data.
- * This handles both the STRUCTURE (finding municipalities in a constituency)
- * and the RESULTS (votes aggregated per constituency).
+ * Refactored to use GlobalExceptionHandler for error logging and handling.
  */
 @RestController
 @RequestMapping("/api/constituencies")
@@ -44,63 +42,55 @@ public class ConstituencyController {
 
     /**
      * Gets all constituency (kieskring) names from the Database.
-     * Used for dropdowns or lists.
+     * Exceptions are handled by GlobalExceptionHandler.
      */
     @GetMapping("/names/db")
     public ResponseEntity<List<String>> getConstituencyNamesOnly() {
-        try {
-            logger.info("Fetching all Constituency names from database.");
-            List<String> names = kieskringRepository.findAllByOrderByNameAsc().stream()
-                    .map(Kieskring::getName)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(names);
-        } catch (Exception e) {
-            logger.error("Error fetching Constituency names: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        logger.info("Fetching all Constituency names from database.");
+        List<String> names = kieskringRepository.findAllByOrderByNameAsc().stream()
+                .map(Kieskring::getName)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(names);
     }
 
+    /**
+     * Gets all constituencies from the Database as DTOs.
+     * Exceptions are handled by GlobalExceptionHandler.
+     */
     @GetMapping("/db")
     public ResponseEntity<List<KieskringDTO>> getAllConstituenciesFromDB() {
-        try {
-            logger.info("Fetching all Constituencies as DTOs from database.");
+        logger.info("Fetching all Constituencies as DTOs from database.");
 
-            // Get the raw Entities (Models)
-            List<Kieskring> entities = kieskringRepository.findAllByOrderByNameAsc();
+        // Get the raw Entities (Models)
+        List<Kieskring> entities = kieskringRepository.findAllByOrderByNameAsc();
 
-            // Convert Entities to DTOs
-            List<KieskringDTO> dtos = entities.stream()
-                    .map(k -> new KieskringDTO(
-                            k.getKieskring_id(),
-                            k.getName(),
-                            // Handle null province just in case
-                            k.getProvince() != null ? k.getProvince().getName() : "Unknown"
-                    ))
-                    .collect(Collectors.toList());
+        // Convert Entities to DTOs
+        List<KieskringDTO> dtos = entities.stream()
+                .map(k -> new KieskringDTO(
+                        k.getKieskring_id(),
+                        k.getName(),
+                        // Handle null province just in case
+                        k.getProvince() != null ? k.getProvince().getName() : "Unknown"
+                ))
+                .collect(Collectors.toList());
 
-            // 3. Send the DTOs to the frontend
-            return ResponseEntity.ok(dtos);
-
-        } catch (Exception e) {
-            logger.error("Error fetching Constituency DTOs: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(dtos);
     }
 
     /**
      * Gets constituency (kieskring) regions from the XML service.
+     * Exceptions are handled by GlobalExceptionHandler.
      */
     @GetMapping("/{electionId}")
     public ResponseEntity<List<Region>> getConstituencies(@PathVariable String electionId) {
-        try {
-            logger.info("Fetching constituencies for election: {}", electionId);
-            // Note: electionService.getConstituencies needs to be updated or alias getKieskringen
-            List<Region> constituencies = electionService.getConstituencies(electionId);
-            return ResponseEntity.ok(constituencies);
-        } catch (Exception e) {
-            logger.error("Error fetching constituencies for electionId: {}. {}", electionId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        logger.info("Fetching constituencies for election: {}", electionId);
+        List<Region> constituencies = electionService.getConstituencies(electionId);
+
+        if (constituencies == null || constituencies.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(constituencies);
     }
 
     /**
@@ -109,37 +99,29 @@ public class ConstituencyController {
      */
     @GetMapping("/{id}/municipalities")
     public ResponseEntity<List<Gemeente>> getMunicipalitiesByConstituency(@PathVariable Integer id) {
-        try {
-            logger.info("Fetching municipalities for constituency ID: {}", id);
+        logger.info("Fetching municipalities for constituency ID: {}", id);
 
-            if (!kieskringRepository.existsById(id)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            List<Gemeente> gemeentes = gemeenteRepository.findByKieskringId(id);
-            return ResponseEntity.ok(gemeentes);
-        } catch (Exception e) {
-            logger.error("Error fetching municipalities for constituency {}: {}", id, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        // return 404.
+        if (!kieskringRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
+
+        List<Gemeente> gemeentes = gemeenteRepository.findByKieskringId(id);
+        return ResponseEntity.ok(gemeentes);
     }
 
     /**
      * Returns the aggregated RESULTS for all constituencies.
-     * This calculates the sum of all municipalities belonging to a constituency.
+     * Exceptions are handled by GlobalExceptionHandler.
      */
     @GetMapping("/results")
     public ResponseEntity<List<DutchElectionService.ConstituencyResultDto>> getAllConstituencyResults() {
-        try {
-            logger.info("Calculating and fetching aggregated constituency results.");
-            // We use the default election ID for now
-            List<DutchElectionService.ConstituencyResultDto> results = 
+        logger.info("Calculating and fetching aggregated constituency results.");
+
+        // We use the default election ID for now
+        List<DutchElectionService.ConstituencyResultDto> results =
                 electionService.getAggregatedConstituencyResults("TK2023");
-            
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            logger.error("Error calculating constituency results: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
+        return ResponseEntity.ok(results);
     }
 }

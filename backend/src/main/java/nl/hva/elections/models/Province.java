@@ -24,7 +24,7 @@ public class Province {
 
     // --- RELATIONSHIP ---
     @OneToMany(mappedBy = "province", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore  // <--- CHANGE THIS. Prevents the list from being sent automatically.
+    @JsonIgnore  // Prevents the list from being sent automatically.
     private List<Kieskring> kieskringen = new ArrayList<>();
     // --- END RELATIONSHIP ---
 

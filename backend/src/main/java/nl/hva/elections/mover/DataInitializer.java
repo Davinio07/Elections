@@ -173,7 +173,7 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("Parties already exist for " + electionId + ". Skipping.");
             }
 
-// ------------------------------------------------------------------
+            // ------------------------------------------------------------------
             // 4. SYNC CANDIDATES
             // ------------------------------------------------------------------
             if (candidateRepository.count() == 0) {

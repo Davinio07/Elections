@@ -1,6 +1,6 @@
 package nl.hva.elections.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference; // <--- Import this
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

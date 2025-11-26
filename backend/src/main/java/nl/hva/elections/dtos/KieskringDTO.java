@@ -4,7 +4,6 @@ public class KieskringDTO {
 
     private Integer id;
     private String name;
-
     private String provinceName;
 
     /**
