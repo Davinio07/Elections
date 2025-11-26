@@ -1,4 +1,4 @@
-package nl.hva.elections.service;
+package nl.hva.elections.Service;
 
 import nl.hva.elections.models.Party;
 import org.springframework.stereotype.Service;
@@ -19,14 +19,14 @@ public class NationalResultService {
     /**
      * The service that holds the cached, pre-parsed XML data.
      */
-    private final DutchElectionService electionService;
+    private final nl.hva.elections.service.DutchElectionService electionService;
 
     /**
      * Constructs the service, injecting the XML data cache.
      *
      * @param electionService The service holding all cached Election objects.
      */
-    public NationalResultService(DutchElectionService electionService) {
+    public NationalResultService(nl.hva.elections.service.DutchElectionService electionService) {
         this.electionService = electionService;
     }
 

@@ -68,7 +68,7 @@ function candidateKey(c: CandidateData, i: number): string {
 
 async function loadParties() {
   try {
-    // Fetches parties from the new /parties/db endpoint for use in filters
+    // Fetches parties from the new /national endpoint for use in filters
     parties.value = await getAllPartiesForFilters(electionId.value);
     console.log("✅ Loaded parties:", parties.value);
   } catch (e) {

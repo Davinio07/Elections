@@ -34,7 +34,7 @@ export interface PartyDTO {
 
 /**
  * Fetches the persisted party results (incl. votes, seats) for a given election ID.
- * This function makes a GET request to `/api/nationalResult/{electionId}/parties/db`.
+ * This function makes a GET request to `/api/nationalResult/{electionId}/national`.
  *
  * Returns an array of `PartyDTO`. If the server responds with HTTP 204 (No Content),
  * an empty array is returned.
@@ -48,7 +48,7 @@ export interface PartyDTO {
  * @throws {Error} When a network or unexpected fetch error occurs.
  */
 export async function getPartiesFromDb(electionId: string): Promise<PartyDTO[]> {
-  const url = `http://localhost:8080/api/nationalResult/${electionId}/parties/db`;
+  const url = `http://localhost:8080/api/nationalResult/${electionId}/national`;
   logger.info(`Fetching persisted party data for election ID: ${electionId}`);
   logger.debug(`Request URL: ${url}`);
 

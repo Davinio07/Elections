@@ -138,21 +138,56 @@ async function fetchFromAPI<T>(endpoint: string): Promise<T> {
   }
 }
 
+/**
+ * Helper to calculate D'Hondt distribution.
+ * This pure function contains the core mathematical logic.
+ */
+function calculateDHondt(results: NationalResult[], totalSeats: number): Record<string, number> {
+  const seatCounts: Record<string, number> = {};
+
+  // Initialize seat counts map with 0 for all parties
+  results.forEach(r => seatCounts[r.name] = 0);
+
+  // Initialize active parties (filter out 0 votes to optimize loop)
+  // We maintain a working object to track current seats for quotient calculation
+  const activeParties = results
+    .filter(r => r.totalVotes > 0)
+    .map(r => ({
+      name: r.name,
+      votes: r.totalVotes,
+      seats: 0
+    }));
+
+  // Distribute seats one by one
+  for (let i = 0; i < totalSeats; i++) {
+    let maxQuotient = -1;
+    let winnerIndex = -1;
+
+    for (let j = 0; j < activeParties.length; j++) {
+      const p = activeParties[j];
+      // D'Hondt formula: Votes / (Seats + 1)
+      const quotient = p.votes / (p.seats + 1);
+
+      if (quotient > maxQuotient) {
+        maxQuotient = quotient;
+        winnerIndex = j;
+      }
+    }
+
+    // Assign seat to winner
+    if (winnerIndex !== -1) {
+      activeParties[winnerIndex].seats++;
+      seatCounts[activeParties[winnerIndex].name]++;
+    }
+  }
+
+  return seatCounts;
+}
 
 /**
  * Service object for handling political party data.
  */
 export const partyService = {
-  /**
-   * Fetches a list of political parties for a specific election.
-   *
-   * @param {string} electionId - The unique identifier for the election.
-   * @returns {Promise<PoliticalParty[]>} A promise that resolves to an array of PoliticalParty objects.
-   */
-  async getParties(electionId: string): Promise<PoliticalParty[]> {
-    return fetchFromAPI<PoliticalParty[]>(`/${electionId}/parties/db`);
-  },
-
   /**
    * Fetches the national results (seats, votes, percentage) for all parties in an election.
    *
@@ -161,5 +196,17 @@ export const partyService = {
    */
   async getNationalResults(electionId: string): Promise<NationalResult[]> {
     return fetchFromAPI<NationalResult[]>(`/${electionId}/national`);
+  },
+
+  /**
+   * Calculates seat distribution based on vote results using the D'Hondt method.
+   * Can be used for National, Provincial, or Municipal levels.
+   *
+   * @param {NationalResult[]} results - The list of party results with vote counts.
+   * @param {number} totalSeats - The number of seats to distribute (default 150).
+   * @returns {Record<string, number>} A map of party names to their allocated seats.
+   */
+  calculateSeats(results: NationalResult[], totalSeats: number = 150): Record<string, number> {
+    return calculateDHondt(results, totalSeats);
   }
 };

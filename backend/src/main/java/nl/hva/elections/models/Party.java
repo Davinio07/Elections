@@ -1,11 +1,8 @@
 package nl.hva.elections.models;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.*;
-
-import java.util.List;
 
 @Entity
 @XmlRootElement(name = "Party")
@@ -40,10 +37,6 @@ public class Party {
     @JsonProperty("votePercentage")
     private double percentage;
 
-    @OneToMany(mappedBy = "party", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<Candidate> candidates;
-
     /** Default constructor for JPA and JAXB. */
     public Party() {}
 
@@ -71,9 +64,6 @@ public class Party {
 
     public double getPercentage() { return percentage; }
     public void setPercentage(double percentage) { this.percentage = percentage; }
-
-    public List<Candidate> getCandidates() { return candidates; }
-    public void setCandidates(List<Candidate> candidates) { this.candidates = candidates; }
 
     @Override
     public String toString() {

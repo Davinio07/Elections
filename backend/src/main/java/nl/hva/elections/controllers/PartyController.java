@@ -1,6 +1,6 @@
 package nl.hva.elections.controllers;
 
-import nl.hva.elections.service.dbPartyService;
+import nl.hva.elections.Service.dbPartyService;
 import nl.hva.elections.models.Party;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

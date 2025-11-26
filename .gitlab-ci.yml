@@ -1,6 +1,24 @@
-variables:
-  DEPLOY_MKDOCS: "true"
-  DEPLOY_HIC: "false"
+image: maven:3.8.5-openjdk-17
 
-include:
-  - ".gitlab-ci.mkdocs.yml"
+stages:
+  - build
+  - test
+
+build_app:
+  stage: build
+  tags:
+    - hva
+  script:
+    - cd backend                     # <--- CHANGED: Go into the 'backend' folder
+    - mvn clean package -DskipTests
+  artifacts:
+    paths:
+      - backend/target/*.jar         # <--- CHANGED: Save the JAR from the correct folder
+
+test_app:
+  stage: test
+  tags:
+    - hva
+  script:
+    - cd backend                     # <--- CHANGED: Go into the 'backend' folder
+    - mvn test -Dspring.datasource.url=jdbc:h2:mem:testdb -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password=

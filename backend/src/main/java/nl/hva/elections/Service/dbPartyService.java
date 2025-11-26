@@ -1,4 +1,4 @@
-package nl.hva.elections.service;
+package nl.hva.elections.Service;
 
 import nl.hva.elections.models.Party;
 import nl.hva.elections.repositories.PartyRepository;

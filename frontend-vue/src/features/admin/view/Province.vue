@@ -119,16 +119,18 @@
                       </div>
                       <div v-else-if="kieskring.gemeentes && kieskring.gemeentes.length > 0">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">
-                          {{ kieskring.gemeentes.length }} Gemeenten:
+                          {{ kieskring.gemeentes.length }} Gemeenten: <span class="font-normal text-gray-400 lowercase">(Klik voor partijen)</span>
                         </p>
                         <div class="flex flex-wrap gap-2">
-                          <span
+                          <button
                             v-for="gm in kieskring.gemeentes"
                             :key="gm.id"
-                            class="px-3 py-1 bg-white border border-blue-100 text-blue-900 text-xs rounded-full shadow-sm hover:shadow hover:border-blue-300 transition-all cursor-default select-none"
+                            @click.stop="goToMunicipalityParties(gm.name)"
+                            class="px-3 py-1 bg-white border border-blue-100 text-blue-900 text-xs rounded-full shadow-sm hover:shadow hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all cursor-pointer"
+                            title="Bekijk partijen voor deze gemeente"
                           >
                             {{ gm.name }}
-                          </span>
+                          </button>
                         </div>
                       </div>
                       <p v-else class="text-xs text-gray-500 italic text-center">
@@ -187,11 +189,19 @@ function goToResults(kieskringName: string) {
   });
 }
 
-// NEW: Navigate to parties view with pre-selected kieskring
+// Navigate to parties view with pre-selected kieskring
 function goToParties(kieskringName: string) {
   router.push({
     path: '/parties',
     query: { level: 'Kieskringen', name: kieskringName }
+  });
+}
+
+// Navigate to parties view with pre-selected municipality
+function goToMunicipalityParties(municipalityName: string) {
+  router.push({
+    path: '/parties',
+    query: { level: 'Gemeentes', name: municipalityName }
   });
 }
 

@@ -1,8 +1,8 @@
 package nl.hva.elections.controllers;
 
 import nl.hva.elections.models.Party;
-import nl.hva.elections.service.dbPartyService;
-import nl.hva.elections.service.NationalResultService;
+import nl.hva.elections.Service.dbPartyService;
+import nl.hva.elections.Service.NationalResultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,16 +34,11 @@ public class NationalResultController {
      * Retrieves the raw national results (votes) from the cached XML data.
      */
     @GetMapping("/{electionId}/national") // Becomes: /api/nationalResult/{electionId}/national
-    public ResponseEntity<List<Party>> getNationalResults(
-            @PathVariable String electionId) {
-
-        List<Party> parties =
-                dbPartyService.getPartiesByElection(electionId);
-
+    public ResponseEntity<List<Party>> getNationalResults(@PathVariable String electionId) {
+        List<Party> parties = dbPartyService.getPartiesByElection(electionId);
         if (parties.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(parties);
     }
 
@@ -61,17 +56,5 @@ public class NationalResultController {
             logger.error("Error calculating seats for electionId: {}. {}", electionId, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-    }
-
-    /**
-     * Gets all political parties for an election directly from the database.
-     */
-    @GetMapping("/{electionId}/parties/db") // Becomes: /api/nationalResult/{electionId}/parties/db
-    public ResponseEntity<List<Party>> getPartiesByElection(@PathVariable String electionId) {
-        List<Party> parties = dbPartyService.getPartiesByElection(electionId);
-        if (parties.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(parties);
     }
 }

@@ -1,12 +1,12 @@
 package nl.hva.elections.dtos;
 
-public class ChatMessage {
+public class ChatMessageDTO {
     private String sender;
     private String content;
     private String timestamp; // Set on the server
 
     // Default constructor for Jackson
-    public ChatMessage() {}
+    public ChatMessageDTO() {}
 
     // Getters and Setters
     public String getSender() { return sender; }

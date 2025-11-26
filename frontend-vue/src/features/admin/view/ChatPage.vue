@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import * as Stomp from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getJwtToken } from '@/services/auth-helper';
+import { jwtDecode } from 'jwt-decode';
+import apiClient from '@/services/api-client'; // Importeer de apiClient
 
 interface ChatMessage {
   sender: string;
@@ -15,13 +17,48 @@ const client = ref<Stomp.Client | null>(null);
 const messageInput = ref('');
 const isConnected = ref(false);
 const error = ref<string | null>(null);
-const username = ref('Anon'); // Wordt overschreven door de server/token data
+const currentUsername = ref('Anonymous');
+const chatBoxRef = ref<HTMLElement | null>(null); // Ref voor de scrollpositie
 
-// Let op: Controleer of dit de juiste poort is die uw backend gebruikt (8080)
 const API_HOST = 'http://localhost:8080';
-const WEBSOCKET_URL = `${API_HOST}/ws`;
+const WS_ENDPOINT = `/ws`;
 const SUBSCRIPTION_TOPIC = '/topic/public';
 const SEND_ENDPOINT = '/app/chat.send';
+
+
+function extractUsername(token: string) {
+  try {
+    const decoded: any = jwtDecode(token);
+    currentUsername.value = decoded.sub || decoded.username || 'Gebruiker';
+  } catch (e) {
+    currentUsername.value = 'Onbekend';
+  }
+}
+
+// NIEUW: Functie om historische berichten op te halen
+async function loadHistory() {
+  try {
+    // Maakt een REST call naar de nieuwe ChatHistoryController
+    const history = await apiClient<ChatMessage[]>('/chat/history');
+    messages.value = history;
+    // Scroll na het laden
+    scrollToBottom();
+  } catch (e) {
+    console.error("Fout bij het laden van chat historie:", e);
+    // Zet de foutmelding op de pagina
+    error.value = 'Kan chatgeschiedenis niet laden. Probeer opnieuw in te loggen.';
+  }
+}
+
+// Zorgt ervoor dat de scrollbalk altijd onderaan staat
+function scrollToBottom() {
+  nextTick(() => {
+    const chatBox = chatBoxRef.value;
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  });
+}
 
 // Functie om verbinding te maken
 const connect = () => {
@@ -32,13 +69,14 @@ const connect = () => {
     return;
   }
 
-  // We gebruiken SockJS als fallback voor browsers die geen native WebSockets ondersteunen.
-  const socket = new SockJS(WEBSOCKET_URL);
+  const WEBSOCKET_AUTH_URL = `${API_HOST}${WS_ENDPOINT}?token=${token}`;
+  extractUsername(token);
+
+  const socket = new SockJS(WEBSOCKET_AUTH_URL);
 
   const stompClient = new Stomp.Client({
     webSocketFactory: () => socket,
 
-    // Stuur de JWT token als Authorization header
     connectHeaders: {
       'Authorization': `Bearer ${token}`,
     },
@@ -52,21 +90,17 @@ const connect = () => {
     isConnected.value = true;
     console.log('Connected: ' + frame);
 
-    // De server (ChatController) stelt de Principal in.
-    // We kunnen de gebruikersnaam hier niet betrouwbaar van de server halen in een standaard STOMP connect,
-    // maar de server zal de juiste naam instellen voordat het bericht wordt verstuurd.
-    // Optioneel: u kunt de gebruikersnaam uit de JWT token parsen als u deze wilt tonen.
-
     // Abonneer op het publieke topic
     stompClient.subscribe(SUBSCRIPTION_TOPIC, (message) => {
       const body: ChatMessage = JSON.parse(message.body);
       messages.value.push(body);
+      // Scroll bij elk nieuw live bericht
+      scrollToBottom();
     });
   };
 
   stompClient.onStompError = (frame) => {
     console.error('Broker reported error: ' + frame.headers['message']);
-    console.error('Details: ' + frame.body);
     isConnected.value = false;
     error.value = 'Fout bij verbinding of authenticatie. Probeer opnieuw in te loggen.';
   };
@@ -75,16 +109,13 @@ const connect = () => {
   client.value = stompClient;
 };
 
-// Functie om een bericht te versturen
 const sendMessage = () => {
   if (!client.value || !messageInput.value.trim() || !isConnected.value) {
-    console.warn('Niet verbonden of bericht is leeg.');
     return;
   }
 
   const chatMessage: ChatMessage = {
-    // Sender is leeg, de server stelt de echte gebruikersnaam in
-    sender: username.value,
+    sender: currentUsername.value,
     content: messageInput.value.trim(),
     timestamp: '',
   };
@@ -105,6 +136,8 @@ const disconnect = () => {
 };
 
 onMounted(() => {
+  // FIX: Laad eerst de historie, en maak dan de verbinding
+  loadHistory();
   connect();
 });
 
@@ -114,7 +147,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="chat-page max-w-4xl mx-auto p-4 bg-gray-100 rounded-lg shadow-xl min-h-screen flex flex-col">
+  <div class="chat-page max-w-4xl mx-auto p-4 bg-gray-100 rounded-lg shadow-xl flex flex-col h-[90vh]">
     <h1 class="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">Partij Chatroom</h1>
 
     <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -123,28 +156,36 @@ onBeforeUnmount(() => {
 
     <div class="status mb-4 text-center">
         <span :class="{'text-green-600': isConnected, 'text-red-600': !isConnected}" class="font-medium">
-            Status: {{ isConnected ? `Verbonden` : 'Verbinding mislukt...' }}
+            Status: {{ isConnected ? `Verbonden als ${currentUsername}` : 'Verbinding mislukt...' }}
         </span>
     </div>
 
-    <!-- Message Display Area -->
-    <div class="message-area flex-1 bg-white p-4 rounded-lg border border-gray-300 overflow-y-auto space-y-3 mb-4">
+    <!-- Message Display Area (Ref toegevoegd voor scrollen) -->
+    <div ref="chatBoxRef" class="message-area flex-1 bg-white p-4 rounded-lg border border-gray-300 overflow-y-auto space-y-3 mb-4">
       <div
         v-for="(msg, index) in messages"
         :key="index"
-        class="message p-3 rounded-lg max-w-xs sm:max-w-md break-words"
+        class="message flex"
         :class="{
-                'bg-blue-500 text-white ml-auto': msg.sender === 'Anonymous' ? false : msg.sender === username.value, // Controleert of het jouw bericht is
-                'bg-gray-200 text-gray-800 mr-auto': msg.sender !== username.value
+                'justify-end': msg.sender === currentUsername,
+                'justify-start': msg.sender !== currentUsername
             }"
       >
-        <div class="flex justify-between items-baseline mb-1">
-                <span class="font-bold text-sm" :class="{ 'text-blue-200': msg.sender === username.value }">
-                    {{ msg.sender === username.value ? 'U' : msg.sender }}
-                </span>
-          <span class="text-xs opacity-75 ml-2">{{ msg.timestamp }}</span>
+        <div
+          class="p-3 rounded-xl max-w-xs sm:max-w-md break-words shadow-sm"
+          :class="{
+                    'bg-blue-600 text-white': msg.sender === currentUsername,
+                    'bg-gray-200 text-gray-800': msg.sender !== currentUsername
+                }"
+        >
+          <div class="flex justify-between items-baseline mb-1">
+                    <span class="font-bold text-sm" :class="{ 'text-blue-200': msg.sender === currentUsername }">
+                        {{ msg.sender === currentUsername ? 'U' : msg.sender }}
+                    </span>
+            <span class="text-xs ml-2 opacity-75" :class="{ 'text-blue-200': msg.sender === currentUsername }">{{ msg.timestamp }}</span>
+          </div>
+          <p class="text-base mt-1">{{ msg.content }}</p>
         </div>
-        <p class="text-base">{{ msg.content }}</p>
       </div>
     </div>
 
@@ -171,7 +212,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .chat-page {
-  height: 90vh;
+  /* Gebruik h-[90vh] in template voor flex-col hoogte */
 }
 .message-area {
   min-height: 400px;
