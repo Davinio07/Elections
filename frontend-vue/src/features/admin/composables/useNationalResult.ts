@@ -1,6 +1,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { getPartiesFromDb } from '@/features/admin/service/NationalElectionResults_api'
-import { PARTY_COLORS, getChartOptions } from '@/features/admin/components/NationalResultChart.ts'
+// PARTY_COLORS import removed to use partyService for consistent coloring
+import { getChartOptions } from '@/features/admin/components/NationalResultChart.ts'
+import { getPartyColor } from '@/features/admin/service/partyService' // NEW IMPORT
 
 export function useNationalResult() {
   // --- State ---
@@ -64,12 +66,15 @@ export function useNationalResult() {
     const sorted = [...nationalResults.value].sort((a, b) => b.validVotes - a.validVotes)
     const labels = sorted.map(r => r.partyName)
 
+    // FIX: Map background color using party name for consistency
+    const backgroundColors = labels.map(partyName => getPartyColor(partyName));
+
     return {
       labels,
       datasets: [{
         label: 'Stempercentage',
         data: sorted.map(r => totalVotes > 0 ? parseFloat(((r.validVotes / totalVotes) * 100).toFixed(2)) : 0),
-        backgroundColor: labels.map((_, i) => PARTY_COLORS[i % PARTY_COLORS.length]),
+        backgroundColor: backgroundColors,
         borderColor: '#ffffff',
         borderWidth: 1,
         votesData: sorted.map(r => r.validVotes),

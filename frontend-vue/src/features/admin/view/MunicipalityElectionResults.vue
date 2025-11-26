@@ -6,6 +6,7 @@ import {
   type MunicipalityDataDto,
   type MunicipalityResultDto
 } from '../service/MunicipalityElectionResults_api';
+import { getPartyColor } from '../service/partyService'; // NEW IMPORT
 
 const router = useRouter();
 
@@ -47,15 +48,8 @@ const formatNumber = (num: number) => {
   return new Intl.NumberFormat('nl-NL').format(num);
 };
 
-// Helper: Give the top 3 distinct colors (Gold, Silver, Bronze-ish styles)
-const getBarColor = (index: number) => {
-  const colors = [
-    '#3b82f6', // Blue-500 (Winner)
-    '#9ca3af', // Gray-400 (2nd)
-    '#d1d5db'  // Gray-300 (3rd)
-  ];
-  return colors[index] || '#e5e7eb';
-};
+// REMOVED: getBarColor function, replaced by imported getPartyColor
+// const getBarColor = (index: number) => { ... };
 
 // Navigation: Details Page
 const goToDetail = (name: string) => {
@@ -154,7 +148,7 @@ onMounted(async () => {
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div
                 class="h-2 rounded-full transition-all duration-500"
-                :style="{ width: getPercentage(result.validVotes, muni.results) + '%', backgroundColor: getBarColor(rIndex) }"
+                :style="{ width: getPercentage(result.validVotes, muni.results) + '%', backgroundColor: getPartyColor(result.partyName) }"
               ></div>
             </div>
           </div>

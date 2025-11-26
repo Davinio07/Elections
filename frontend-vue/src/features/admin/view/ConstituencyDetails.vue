@@ -42,7 +42,20 @@
           >
             <div class="flex flex-col">
               <div class="flex items-center space-x-2">
-                <div class="w-2 h-8 rounded-sm bg-blue-500"></div>
+                <div class="mr-1 flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                  <img
+                    v-if="getPartyLogo(result.partyName)"
+                    :src="getPartyLogo(result.partyName)!"
+                    :alt="result.partyName"
+                    class="w-full h-full object-contain"
+                  />
+
+                  <div
+                    v-else
+                    class="w-5 h-5 rounded-full border border-gray-100 shadow-sm"
+                    :style="{ backgroundColor: getPartyColor(result.partyName) }"
+                  ></div>
+                </div>
                 <span class="text-sm font-semibold text-gray-700">{{ result.partyName }}</span>
               </div>
             </div>
@@ -71,6 +84,7 @@ import {
   type ConstituencyDataDto,
   type ConstituencyResultDto
 } from '../service/ConstituencyDetails_api';
+import { getPartyColor, getPartyLogo } from '../service/partyService'; // NEW IMPORT
 
 const route = useRoute();
 const router = useRouter();
@@ -83,7 +97,7 @@ const filterName = ref<string>('');
 
 // Helper to sum votes
 const formatVotes = (results: ConstituencyResultDto[]) => {
-    return results.reduce((sum, r) => sum + r.validVotes, 0).toLocaleString();
+  return results.reduce((sum, r) => sum + r.validVotes, 0).toLocaleString();
 }
 
 const topParties = (results: ConstituencyResultDto[]) => {
