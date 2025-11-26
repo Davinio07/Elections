@@ -1,6 +1,6 @@
 // src/services/api-client.ts
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'https://elections-backend.onrender.com';
 
 /**
  * @interface ApiErrorResponse
