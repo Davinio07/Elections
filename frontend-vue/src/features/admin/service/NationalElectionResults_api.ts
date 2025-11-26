@@ -48,7 +48,10 @@ export interface PartyDTO {
  * @throws {Error} When a network or unexpected fetch error occurs.
  */
 export async function getPartiesFromDb(electionId: string): Promise<PartyDTO[]> {
-  const url = `http://localhost:8080/api/nationalResult/${electionId}/national`;
+  // Update localhost to Render URL
+  const url = `https://elections-backend.onrender.com/api/nationalResult/${electionId}/national`;
+
+  // ... rest of the function
   logger.info(`Fetching persisted party data for election ID: ${electionId}`);
   logger.debug(`Request URL: ${url}`);
 

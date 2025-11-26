@@ -46,8 +46,7 @@ export async function getAllPartiesForFilters(electionId: string): Promise<Party
 
 export async function ScaledElectionResults(): Promise<string> {
   try {
-    const url = 'http://localhost:8080/api/ScaledElectionResults/Result'.trim();
-    const response = await fetch(url, {
+    const url = 'https://elections-backend.onrender.com/api/ScaledElectionResults/Result';    const response = await fetch(url, {
       credentials: "include"
     });
     if (!response.ok) {
@@ -64,8 +63,7 @@ export async function ScaledElectionResults(): Promise<string> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getProvinces(electionId: string): Promise<any[]> {
   try {
-    const url = `http://localhost:8080/api/elections/${electionId}/regions/kieskringen`;
-    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+    const url = `https://elections-backend.onrender.com/api/elections/${electionId}/regions/kieskringen`;    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 

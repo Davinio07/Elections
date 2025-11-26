@@ -1,7 +1,6 @@
 // src/services/api-client.ts
 
-const API_BASE_URL = 'https://elections-backend.onrender.com';
-
+const API_BASE_URL = 'https://elections-backend.onrender.com/api';
 /**
  * @interface ApiErrorResponse
  * @description Describes the structure of a standard error object
