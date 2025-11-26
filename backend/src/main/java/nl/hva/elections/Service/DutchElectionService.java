@@ -1,5 +1,8 @@
 package nl.hva.elections.service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import java.util.Arrays;
 import jakarta.annotation.PostConstruct;
 import nl.hva.elections.models.Election;
 import nl.hva.elections.models.MunicipalityResult;
@@ -63,12 +66,14 @@ public class DutchElectionService {
     /**
      * Parses the XML data using the DutchElectionParser.
      */
+    /**
+     * Parses the XML data using the DutchElectionParser.
+     */
     private Election parseXmlData(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
         logger.info("Parsing files for electionId: {} from folder: {}", electionId, folderName);
 
         Election election = new Election(electionId);
-        
-        // We instantiate the parser with all the necessary transformers
+
         DutchElectionParser electionParser = new DutchElectionParser(
                 new DutchDefinitionTransformer(election),
                 new DutchCandidateTransformer(election),
@@ -78,24 +83,26 @@ public class DutchElectionService {
                 new DutchConstituencyVotesTransformer(election),
                 new DutchMunicipalityTransformer(election)
         );
-            logger.debug("Parsing XML files for {}", electionId);
-        String resourcePath = PathUtils.getResourcePath("/%s".formatted(folderName));
-        if (resourcePath == null) {
-            logger.error("Resource folder not found in classpath: {}", folderName);
-            throw new IOException("Resource folder not found in classpath: " + folderName);
+
+        // FIX: Use Spring's ResourceResolver to find files INSIDE the JAR
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        // The /**/ tells Spring to look recursively in all subfolders
+        String pattern = "classpath*:" + folderName + "/**/*.xml";
+
+        logger.info("Searching for XML files with pattern: {}", pattern);
+        Resource[] resources = resolver.getResources(pattern);
+
+        if (resources.length == 0) {
+            logger.error("No XML files found in classpath for folder: {}", folderName);
+        } else {
+            logger.info("Found {} XML files. Starting parse...", resources.length);
         }
 
-        Files.walk(Paths.get(resourcePath))
-                .filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith(".xml"))
-                .forEach(p -> {
-                    try {
-                        electionParser.parseResults(electionId, p.toString());
-                    } catch (Exception e) {
-                        logger.warn("Failed to parse XML file {}: {}", p, e.getMessage());
-                    }
-                });
-        
+        // Pass the list of resources to the parser
+        // Note: You MUST have updated DutchElectionParser.parseResults to accept List<Resource>!
+        electionParser.parseResults(electionId, Arrays.asList(resources));
+
         logger.debug("Finished parsing for {}", electionId);
         return election;
     }
