@@ -66,6 +66,9 @@ public class DutchElectionService {
     /**
      * Parses the XML data using the DutchElectionParser.
      */
+    /**
+     * Parses the XML data using the DutchElectionParser.
+     */
     private Election parseXmlData(String electionId, String folderName) throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
         logger.info("Parsing files for electionId: {} from folder: {}", electionId, folderName);
 
@@ -84,14 +87,20 @@ public class DutchElectionService {
         // FIX: Use Spring's ResourceResolver to find files INSIDE the JAR
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-        // Find all XML files in the folder (e.g., classpath:TK2023/*.xml)
-        Resource[] resources = resolver.getResources("classpath*:" + folderName + "/*.xml");
+        // The /**/ tells Spring to look recursively in all subfolders
+        String pattern = "classpath*:" + folderName + "/**/*.xml";
+
+        logger.info("Searching for XML files with pattern: {}", pattern);
+        Resource[] resources = resolver.getResources(pattern);
 
         if (resources.length == 0) {
-            logger.error("No XML files found in classpath folder: {}", folderName);
+            logger.error("No XML files found in classpath for folder: {}", folderName);
+        } else {
+            logger.info("Found {} XML files. Starting parse...", resources.length);
         }
 
         // Pass the list of resources to the parser
+        // Note: You MUST have updated DutchElectionParser.parseResults to accept List<Resource>!
         electionParser.parseResults(electionId, Arrays.asList(resources));
 
         logger.debug("Finished parsing for {}", electionId);
@@ -194,7 +203,7 @@ public class DutchElectionService {
 
         // 1. Map Municipality Name -> Constituency Name (Parent)
         Map<String, String> muniToConstituencyMap = new HashMap<>();
-        
+
         // Find mapping: Municipality Region -> SuperiorRegionNumber -> Constituency Region -> Name
         Map<String, Region> regionById = allRegions.stream()
                 .collect(Collectors.toMap(Region::getId, r -> r, (r1, r2) -> r1));
@@ -228,15 +237,15 @@ public class DutchElectionService {
                     .map(e -> new PartyResultDto(e.getKey(), e.getValue()))
                     .sorted(Comparator.comparingInt(PartyResultDto::validVotes).reversed())
                     .toList();
-            
+
             resultDtos.add(new ConstituencyResultDto(entry.getKey(), partyResults));
         }
-        
+
         // Sort constituencies alphabetically
         resultDtos.sort(Comparator.comparing(ConstituencyResultDto::name));
         return resultDtos;
     }
-    
+
     // Simple DTO records for the service response
     public record PartyResultDto(String partyName, int validVotes) {}
     public record ConstituencyResultDto(String name, List<PartyResultDto> results) {}
