@@ -22,14 +22,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
     }
 
+
     /**
      * Registers the STOMP endpoint (the handshake point).
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // The endpoint clients will connect to. Must match your frontend ports.
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:5173", "http://localhost:5176")
-                .withSockJS(); // Enable SockJS for fallback options
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 }
